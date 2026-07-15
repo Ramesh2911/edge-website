@@ -58,7 +58,7 @@ export default function AppRoutes() {
 
                     <Route path="/properties" element={<PropertyList />} />
 
-                    <Route path="/property/:id" element={<PropertyDetails />} />
+                    <Route path="/properties/details/:id" element={<PropertyDetails />} />
 
                 </Route>
 

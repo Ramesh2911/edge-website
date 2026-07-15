@@ -11,65 +11,78 @@ import {
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service";
+import { useAuth } from "../../context/AuthContext";
 
-export default function Sidebar() {
-
-    const navigate = useNavigate();
-
-    const logout = () => {
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        navigate("/login");
-
-    };
-
-    const menus = [
-
+const getMenusForRole = (roleName) => {
+    const role = String(roleName || "").trim().toLowerCase();
+    const baseMenus = [
         {
             title: "Dashboard",
             icon: LayoutDashboard,
             path: "/dashboard"
-        },
+        }
+    ];
 
-        {
-            title: "My Properties",
-            icon: Building2,
-            path: "/my-properties"
-        },
-
-        {
-            title: "Add Property",
-            icon: PlusSquare,
-            path: "/add-property"
-        },
-
+    const buyerMenus = [
         {
             title: "Wishlist",
             icon: Heart,
             path: "/wishlist"
         },
-
         {
-            title: "Buyer Requirement",
+            title: "Requirement",
             icon: FileText,
             path: "/buyer-requirement"
-        },
+        }
+    ];
 
+    const ownerMenus = [
+        {
+            title: "My Properties",
+            icon: Building2,
+            path: "/my-properties"
+        },
+        {
+            title: "Add Property",
+            icon: PlusSquare,
+            path: "/add-property"
+        }
+    ];
+
+    return [
+        ...baseMenus,
+        ...(role === "buyer" ? buyerMenus : ownerMenus),
         {
             title: "Profile",
             icon: User,
             path: "/profile"
         },
-
         {
             title: "Change Password",
             icon: Lock,
             path: "/change-password"
         }
-
     ];
+};
+
+export default function Sidebar() {
+
+    const { user, logout: authLogout } = useAuth();
+    const navigate = useNavigate();
+    const persistedRoleName = user?.role_name || JSON.parse(localStorage.getItem("user") || "{}")?.role_name || localStorage.getItem("role");
+    const menus = getMenusForRole(persistedRoleName);
+
+    const logout = async () => {
+        try {
+            await authService.logout();
+        } catch (error) {
+            console.error("Logout API failed", error);
+        } finally {
+            authLogout();
+            navigate("/login");
+        }
+    };
 
     return (
 

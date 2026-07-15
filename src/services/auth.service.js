@@ -64,8 +64,13 @@ const authService = {
 
         );
 
-    }
+    },
 
-};
+    logout() {
+
+        return api.post("/auth/logout");
+
+    },
+}
 
 export default authService;

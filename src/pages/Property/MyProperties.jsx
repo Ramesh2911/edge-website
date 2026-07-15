@@ -36,7 +36,7 @@ export default function MyProperties() {
             const statsResponse = await propertyService.dashboardStats();
 
             // Extract listings matching the database columns structure
-            let listings = propertiesResponse.data || [];
+            let listings = propertiesResponse.data.data || [];
 
             // 2. Perform frontend filtering to match state filters seamlessly
             if (statusFilter !== 'all') {
@@ -44,7 +44,7 @@ export default function MyProperties() {
                     const status = prop.property_status?.toLowerCase();
                     if (statusFilter === 'publish') return status === 'approved';
                     if (statusFilter === 'pending') return status === 'pending';
-                    if (statusFilter === 'draft') return status === 'rejected'; // fallback draft strategy
+                    if (statusFilter === 'draft') return status === 'rejected';
                     return true;
                 });
             }
@@ -64,7 +64,7 @@ export default function MyProperties() {
             // Handle dashboard analytics hydration maps safely from aggregated backend response
             if (statsResponse.data) {
                 setStats({
-                    total: statsResponse.data.total || 0,
+                    total: statsResponse.data.data.total || 0,
                     approved: statsResponse.data.approved || 0,
                     pending: Math.max(0, (statsResponse.data.total || 0) - (statsResponse.data.approved || 0)),
                     rejected: 0 // structural zero fallback unless extended explicitly
@@ -127,7 +127,7 @@ export default function MyProperties() {
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Supervise, update, upgrade, and audit your listed real estate portfolio holdings.</p>
                         </div>
                         <button
-                            onClick={() => navigate('/properties/add')}
+                            onClick={() => navigate('/add-property')}
                             className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-md hover:shadow-lg"
                         >
                             <Plus className="w-4 h-4" /> Create Listing
@@ -238,12 +238,11 @@ export default function MyProperties() {
                                                     </div>
                                                 </td>
                                                 <td className="p-4 uppercase text-xs font-bold text-slate-500">{prop.property_for}</td>
-                                                <td className="p-4 font-bold text-slate-900 dark:text-white">${Number(prop.price || 0).toLocaleString()}</td>
+                                                <td className="p-4 font-bold text-slate-900 dark:text-white">₹{Number(prop.price || 0).toLocaleString()}</td>
                                                 <td className="p-4">
-                                                    <span className={`text-[10px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full ${
-                                                        prop.property_status === 'Approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
-                                                        prop.property_status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20' : 'bg-rose-50 text-rose-600 dark:bg-rose-950/20'
-                                                    }`}>
+                                                    <span className={`text-[10px] uppercase tracking-widest font-extrabold px-2.5 py-1 rounded-full ${prop.property_status === 'Approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' :
+                                                            prop.property_status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20' : 'bg-rose-50 text-rose-600 dark:bg-rose-950/20'
+                                                        }`}>
                                                         {prop.property_status === 'Approved' ? 'Live' : prop.property_status}
                                                     </span>
                                                 </td>
