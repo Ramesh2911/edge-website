@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Mic,
@@ -10,22 +10,60 @@ import {
   ChevronDown,
   ArrowRight,
 } from "lucide-react";
-import { searchTabs, propertyTypes, quickLinks, heroImage } from "../../data/staticData";
+import { searchTabs, quickLinks, heroImage } from "../../data/staticData";
+import propertyService from "../../services/property.service";
 
 const iconMap = { Building2, MapPin, TrendingUp, Landmark, Megaphone };
 
 export default function Hero() {
   const [activeTab, setActiveTab] = useState("buy");
-  const [propType, setPropType] = useState(propertyTypes[0]);
+  const [categories, setCategories] = useState([]);
+  const [propType, setPropType] = useState("");
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch dynamic categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const res = await propertyService.getCategories();
+        
+        console.log("Categories API Response:", res); // Debug log to check payload structure
+
+        // Handles Axios wrappers (res.data.data) as well as direct responses (res.data or res)
+        let categoryList = [];
+        if (Array.isArray(res?.data?.data)) {
+          categoryList = res.data.data;
+        } else if (Array.isArray(res?.data)) {
+          categoryList = res.data;
+        } else if (Array.isArray(res)) {
+          categoryList = res;
+        }
+
+        setCategories(categoryList);
+
+        // Auto-select the first category if available
+        if (categoryList.length > 0) {
+          setPropType(categoryList[0].category_name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch property categories:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSearch = () => {
     const tabLabel = searchTabs.find((t) => t.id === activeTab)?.label;
     if (!query.trim()) {
-      setMessage(`Showing all "${tabLabel}" listings near you`);
+      setMessage(`Showing all "${tabLabel || "Buy"}" listings near you`);
     } else {
-      setMessage(`Searching "${query}" under ${tabLabel} · ${propType}`);
+      setMessage(`Searching "${query}" under ${tabLabel || "Buy"}${propType ? ` · ${propType}` : ""}`);
     }
     setTimeout(() => setMessage(""), 4000);
   };
@@ -104,43 +142,32 @@ export default function Hero() {
 
         {/* Search card */}
         <div className="mt-10 bg-white rounded-2xl shadow-lift p-3 sm:p-4">
-          <div className="flex gap-1 overflow-x-auto no-scrollbar border-b border-[#1E4C8C]/10 pb-3 mb-3">
-            {searchTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative shrink-0 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id
-                    ? "bg-[#1E4C8C] text-[#8BC53F]"
-                    : "text-slate-600 hover:bg-[#EAF1FB]"
-                  }`}
-              >
-                {tab.label}
-                {tab.badge && (
-                  <span
-                    className={`ml-1.5 text-[9px] px-1.5 py-0.5 rounded-full align-middle ${tab.badge === "Free"
-                        ? "bg-[#7CB93D] text-white"
-                        : "bg-[#E76F51] text-white"
-                      }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative sm:w-52 shrink-0">
               <select
                 value={propType}
                 onChange={(e) => setPropType(e.target.value)}
-                className="w-full appearance-none bg-[#EAF1FB] border border-[#1E4C8C]/10 rounded-xl pl-4 pr-9 py-3.5 text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]"
+                disabled={isLoading}
+                className="w-full appearance-none bg-[#EAF1FB] border border-[#1E4C8C]/10 rounded-xl pl-4 pr-9 py-3.5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#7CB93D] disabled:opacity-50 cursor-pointer"
               >
-                {propertyTypes.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
+                {isLoading ? (
+                  <option value="">Loading categories...</option>
+                ) : (
+                  <>
+                    <option value="" disabled>
+                      Select Property Type
+                    </option>
+                    {categories.map((cat) => (
+                      <option 
+                        key={cat.id} 
+                        value={cat.category_name}
+                        className="text-slate-800 bg-white"
+                      >
+                        {cat.category_name}
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
               <ChevronDown
                 size={16}

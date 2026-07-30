@@ -16,7 +16,7 @@ const propertyService = {
         return api.delete(`/properties/delete/${id}`);
     },
     getProperties(params) {
-        return api.get("/properties", { params });
+        return api.get("/properties/all", { params });
     },
     getPropertyById(id) {
         return api.get(`/properties/details/${id}`);
@@ -78,8 +78,8 @@ const propertyService = {
     makeFeatured(id, isFeatured) {
         return api.patch(`/properties/admin/featured/${id}`, { featured: isFeatured ? 1 : 0 });
     },
-    adminPropertyList(params) {
-        return api.get("/properties/admin/list", { params });
+    propertyList(params) {
+        return api.get("/properties/list", { params });
     }
 };
 
