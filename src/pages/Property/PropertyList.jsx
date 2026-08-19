@@ -4,6 +4,7 @@ import { Grid, List, SlidersHorizontal } from 'lucide-react';
 import SEO from '../../components/Contact/SEO';
 import PropertyFilter from '../../components/property/PropertyFilter';
 import PropertyCard from '../../components/property/PropertyCard';
+import API from '../../services/api';
 
 // Skeleton Component for Content Loading States
 const PropertySkeleton = ({ viewMode }) => (
@@ -34,8 +35,7 @@ const PropertyList = () => {
             try {
                 // Build query payload directly from active URL structural tracking
                 const queryString = searchParams.toString();
-                const response = await fetch(`/api/v1/properties?${queryString}`);
-                const data = await response.json();
+                const { data } = await API.get(`/properties?${queryString}`);
                 setProperties(data.listings || []);
             } catch (error) {
                 console.error("Failed syncing property telemetry pipeline:", error);
@@ -116,7 +116,7 @@ const PropertyList = () => {
                             ) : (
                                 <div className={viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
                                     {properties.map((property) => (
-                                        <PropertyCard key={property._id || property.id} data={property} layoutMode={viewMode} />
+                                        <PropertyCard key={property._id || property.id} property={property} layoutMode={viewMode} />
                                     ))}
                                 </div>
                             )}

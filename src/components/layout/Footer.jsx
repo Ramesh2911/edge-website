@@ -108,12 +108,12 @@ export default function Footer() {
 
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-sm hover:text-[#8BC53F] transition"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}

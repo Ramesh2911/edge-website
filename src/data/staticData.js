@@ -1,10 +1,10 @@
 export const navLinks = [
-  { label: "Buy", href: "#" },
-  { label: "Rent", href: "#" },
-  { label: "New Launch", href: "#" },
-  { label: "Commercial", href: "#" },
-  { label: "Plots & Land", href: "#" },
-  { label: "Projects", href: "#" },
+  { label: "Buy", href: "/properties?purpose=Sale" },
+  { label: "Rent", href: "/properties?purpose=Rent" },
+  { label: "New Launch", href: "/properties?status=New+Launch" },
+  { label: "Commercial", href: "/properties?type=Commercial" },
+  { label: "Plots & Land", href: "/properties?type=Plot" },
+  { label: "Projects", href: "/properties" },
 ];
 
 export const searchTabs = [
@@ -283,8 +283,24 @@ export const dreamHomeImage =
   "https://images.unsplash.com/photo-1758448755856-01d3add0177b?w=900&h=700&fit=crop&auto=format&q=80";
 
 export const footerLinks = {
-  "Quick Links": ["Buy Property", "Rent Property", "New Launch", "Plots & Land", "Post Property"],
-  Company: ["About Us", "Careers", "Our Team", "Media & Press", "Contact"],
-  Resources: ["Price Trends", "Home Loans", "Locality Guide", "Blog", "FAQs"],
-  Support: ["Help Center", "Privacy Policy", "Terms of Service", "Sitemap"],
+  "Quick Links": [
+    { label: "Buy Property", href: "/properties?purpose=Sale" },
+    { label: "Rent Property", href: "/properties?purpose=Rent" },
+    { label: "New Launch", href: "/properties?status=New+Launch" },
+    { label: "Plots & Land", href: "/properties?type=Plot" },
+    { label: "Post Property", href: "/add-property" },
+  ],
+  Company: [
+    { label: "About Us", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ],
+  Resources: [
+    { label: "Price Trends", href: "/properties" },
+    { label: "Blog", href: "/properties" },
+  ],
+  Support: [
+    { label: "Help Center", href: "/contact" },
+    { label: "Privacy Policy", href: "/about" },
+    { label: "Terms of Service", href: "/about" },
+  ],
 };

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import propertyService from '../../services/property.service';
 
 export default function Wishlist() {
     const navigate = useNavigate();
@@ -29,9 +30,7 @@ export default function Wishlist() {
     const fetchSavedWishlist = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/v1/buyer/wishlist');
-            if (!response.ok) throw new Error('Could not pull saved user assets.');
-            const data = await response.json();
+            const { data } = await propertyService.getWishlist();
             setItems(data.wishlist || []);
         } catch (err) {
             // High-fidelity fallback mock array configuration for direct execution
@@ -47,7 +46,7 @@ export default function Wishlist() {
 
     const removeItem = async (id, title) => {
         try {
-            const response = await fetch(`/api/v1/buyer/wishlist/remove/${id}`, { method: 'DELETE' });
+            await propertyService.removeWishlist(id);
             // Remove element locally for immediate interface snap feedback
             setItems(prev => prev.filter(item => item.id !== id));
             setCompareList(prev => prev.filter(item => item.id !== id));
@@ -138,7 +137,7 @@ export default function Wishlist() {
 
                             <input
                                 type="number"
-                                placeholder="Max Price ($)"
+                                placeholder="Max Price (₹)"
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(e.target.value)}
                                 className="text-sm p-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl w-32 outline-none"
@@ -189,7 +188,7 @@ export default function Wishlist() {
                                                 <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{item.title}</h3>
                                                 <p className="text-xs text-slate-400 mt-0.5 font-medium">{item.city} Structure Portfolio</p>
                                                 <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-2.5">
-                                                    ${item.price.toLocaleString()}
+                                                    ₹{item.price.toLocaleString()}
                                                     {item.purpose === 'rent' && <span className="text-xs font-normal text-slate-400">/mo</span>}
                                                 </div>
                                             </div>
@@ -215,7 +214,7 @@ export default function Wishlist() {
                                         <div className="min-w-0">
                                             <h3 className="font-bold text-slate-900 dark:text-white truncate">{item.title}</h3>
                                             <p className="text-xs text-slate-400 font-medium">{item.city} • <span className="uppercase font-bold text-[10px] tracking-wider text-slate-500">For {item.purpose}</span></p>
-                                            <div className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1">${item.price.toLocaleString()}</div>
+                                            <div className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1">₹{item.price.toLocaleString()}</div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-0 pt-3 sm:pt-0">

@@ -251,7 +251,7 @@ export default function RecentProperty({
 
                                                     <Link
 
-                                                        to={`/property/${item.id}`}
+                                                        to={`/properties/details/${item.id}`}
 
                                                         className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white transition"
 

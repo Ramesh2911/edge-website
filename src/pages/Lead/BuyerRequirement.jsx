@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import leadService from '../../services/lead.service';
 
 const AMENITIES_PRESETS = ['Pool', 'Gym', 'Garage', '24/7 Security', 'Elevator', 'Private Garden', 'EV Charger'];
 
@@ -34,9 +35,7 @@ export default function BuyerRequirement() {
     const fetchRequirements = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/v1/buyer/requirements');
-            if (!response.ok) throw new Error('Failed to synchronize user requirement streams.');
-            const data = await response.json();
+            const { data } = await leadService.getBuyerRequirements();
             setRequirements(data.requirements || []);
             setStats(data.stats || { total: 0, open: 0, fulfilled: 0 });
         } catch (err) {
@@ -70,16 +69,11 @@ export default function BuyerRequirement() {
     const onSubmitPipeline = async (data) => {
         setIsSubmitting(true);
         try {
-            const endpoint = editingId ? `/api/v1/buyer/requirements/edit/${editingId}` : '/api/v1/buyer/requirements/create';
-            const method = editingId ? 'PUT' : 'POST';
-
-            const response = await fetch(endpoint, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) throw new Error('API server rejected metric parameters.');
+            if (editingId) {
+                await leadService.updateBuyerRequirement(editingId, data);
+            } else {
+                await leadService.createBuyerRequirement(data);
+            }
 
             toast.success(editingId ? 'Requirement criteria updated.' : 'New blueprint requirement deployed live!');
             setIsModalOpen(false);
@@ -94,7 +88,7 @@ export default function BuyerRequirement() {
     const handleDeleteRequest = async (id) => {
         if (!window.confirm('Are you sure you want to delete this specific tracking requirement parameters?')) return;
         try {
-            await fetch(`/api/v1/buyer/requirements/delete/${id}`, { method: 'DELETE' });
+            await leadService.deleteBuyerRequirement(id);
             toast.success('Requirement removed from platform index.');
             fetchRequirements();
         } catch (err) {
@@ -170,7 +164,7 @@ export default function BuyerRequirement() {
                                         <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-50 dark:border-slate-700/50 text-xs">
                                             <div className="space-y-1">
                                                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1"><DollarSign className="w-3 h-3 text-indigo-500" /> Budget Bracket</span>
-                                                <p className="font-bold text-slate-800 dark:text-slate-200">${req.minBudget?.toLocaleString()} - ${req.maxBudget?.toLocaleString()}</p>
+                                                <p className="font-bold text-slate-800 dark:text-slate-200">₹{req.minBudget?.toLocaleString()} - ₹{req.maxBudget?.toLocaleString()}</p>
                                             </div>
                                             <div className="space-y-1">
                                                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1"><MapPin className="w-3 h-3 text-indigo-500" /> Preferred Zone</span>
@@ -233,11 +227,11 @@ export default function BuyerRequirement() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Min Budget ($) *</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Min Budget (₹) *</label>
                                     <input type="number" {...register('minBudget', { required: true })} className="w-full text-sm p-3 bg-slate-50 dark:bg-slate-900 dark:text-white border dark:border-slate-700 rounded-xl outline-none" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Max Budget ($) *</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Max Budget (₹) *</label>
                                     <input type="number" {...register('maxBudget', { required: true })} className="w-full text-sm p-3 bg-slate-50 dark:bg-slate-900 dark:text-white border dark:border-slate-700 rounded-xl outline-none" />
                                 </div>
                             </div>

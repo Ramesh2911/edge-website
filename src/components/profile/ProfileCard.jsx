@@ -82,7 +82,7 @@ export default function ProfileCard({
 
                             <Link
 
-                                to="/update-profile"
+                                to="/profile"
 
                                 className="
                                     mt-6

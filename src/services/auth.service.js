@@ -66,6 +66,24 @@ const authService = {
 
     },
 
+    requestOtp(data) {
+
+        return api.post("/auth/forgot-password", data);
+
+    },
+
+    verifyOtp(data) {
+
+        return api.post("/auth/verify-otp", data);
+
+    },
+
+    resetPassword(data) {
+
+        return api.post("/auth/reset-password", data);
+
+    },
+
     logout() {
 
         return api.post("/auth/logout");

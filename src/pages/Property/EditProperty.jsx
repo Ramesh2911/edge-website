@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { Loader2, Save, UploadCloud, Building, MapPin, Sparkles, Globe, Trash2, RotateCcw } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import API from '../../services/api';
+import propertyService from '../../services/property.service';
 
 const AMENITIES_PRESETS = ['Pool', 'Gym', 'Garage', '24/7 Security', 'Elevator', 'Private Garden', 'EV Charger', 'Furnished'];
 
@@ -24,9 +26,8 @@ export default function EditProperty() {
     useEffect(() => {
         const fetchPropertyData = async () => {
             try {
-                const response = await fetch(`/api/v1/properties/${id}`);
-                if (!response.ok) throw new Error('Listing structural records could not be resolved.');
-                const data = await response.json();
+                const { data } = await API.get(`/properties/details/${id}`);
+                if (!data) throw new Error('Listing structural records could not be resolved.');
 
                 const listing = data.listing;
 
@@ -93,13 +94,7 @@ export default function EditProperty() {
                 newImages: newImgPreviews
             };
 
-            const response = await fetch(`/api/v1/properties/edit/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(consolidatedPayload),
-            });
-
-            if (!response.ok) throw new Error('API patch sequence rejected changes.');
+            await propertyService.updateProperty(id, consolidatedPayload);
 
             toast.success('Asset modification parameters executed successfully!');
             setTimeout(() => navigate(`/properties/${id}`), 1000);
@@ -203,7 +198,7 @@ export default function EditProperty() {
                                     {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Evaluation Price ($) *</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Evaluation Price (₹) *</label>
                                     <input type="number" {...register('price', { required: 'Pricing value mandatory' })} className="w-full text-sm p-3 bg-slate-50 dark:bg-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
                                     {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price.message}</p>}
                                 </div>

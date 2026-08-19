@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import profileService from '../../services/profile.service';
 
 // Folder-mapped absolute imports matching your exact workspace layout
 import ProfileCard from '../../components/profile/ProfileCard';
@@ -22,9 +23,7 @@ export default function Profile() {
         const fetchUserProfile = async () => {
             setLoading(true);
             try {
-                const response = await fetch('/api/v1/profile/me');
-                if (!response.ok) throw new Error('Could not pull session credentials.');
-                const data = await response.json();
+                const { data } = await profileService.getProfile();
                 setProfileData(data.profile);
             } catch (err) {
                 // High-fidelity fallback mock reflecting a production Developer / Broker deployment schema

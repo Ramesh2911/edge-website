@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import propertyService from '../../services/property.service';
+import API from '../../services/api';
 
 export default function Interested() {
     const navigate = useNavigate();
@@ -38,9 +40,7 @@ export default function Interested() {
                 sort: sortKey
             });
 
-            const response = await fetch(`/api/v1/buyer/interested?${queryParams.toString()}`);
-            if (!response.ok) throw new Error('Could not pull active asset connections.');
-            const data = await response.json();
+            const { data } = await propertyService.getInterestedProperty();
 
             setLeads(data.leads || []);
             setStats(data.stats || { total: 0, contacted: 0, closed: 0 });
@@ -59,7 +59,7 @@ export default function Interested() {
 
     const removeExpressionOfInterest = async (leadId, title) => {
         try {
-            const response = await fetch(`/api/v1/buyer/interested/remove/${leadId}`, { method: 'DELETE' });
+            await API.delete(`/buyer/interested/remove/${leadId}`);
             setLeads(prev => prev.filter(l => l.id !== leadId));
             toast.success(`Interaction record for "${title}" deleted.`);
         } catch (err) {
@@ -73,11 +73,7 @@ export default function Interested() {
 
         setIsScheduling(true);
         try {
-            const response = await fetch(`/api/v1/buyer/schedule-visit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId: scheduleModal.propertyId, targetDate: visitDate })
-            });
+            await API.post('/buyer/schedule-visit', { propertyId: scheduleModal.propertyId, targetDate: visitDate });
 
             toast.success(`Site tour ticket requested for ${visitDate}. Broker notified.`);
             setScheduleModal({ isOpen: false, propertyId: null, propertyTitle: '' });
@@ -193,7 +189,7 @@ export default function Interested() {
                                     <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                                         <div>
                                             <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{lead.title}</h3>
-                                            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-2">${lead.price.toLocaleString()}</div>
+                                            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-2">₹{lead.price.toLocaleString()}</div>
 
                                             {/* Broker Meta-Identity Block */}
                                             <div className="mt-4 pt-4 border-t dark:border-slate-700/60 space-y-1">
@@ -222,7 +218,7 @@ export default function Interested() {
                                         <div className="min-w-0">
                                             <h3 className="font-bold text-slate-900 dark:text-white truncate">{lead.title}</h3>
                                             <p className="text-xs text-slate-400 font-medium">Representative Liaison: <span className="text-slate-700 dark:text-slate-300 font-bold">{lead.broker.name}</span></p>
-                                            <div className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1">${lead.price.toLocaleString()}</div>
+                                            <div className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1">₹{lead.price.toLocaleString()}</div>
                                         </div>
                                     </div>
 

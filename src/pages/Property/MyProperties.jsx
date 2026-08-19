@@ -272,7 +272,7 @@ export default function MyProperties() {
                                         <div>
                                             <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{prop.property_title}</h3>
                                             <p className="text-xs text-slate-400 mt-1">{prop.address || `${prop.city || 'City'}, ${prop.state || 'State'}`}</p>
-                                            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-3">${Number(prop.price || 0).toLocaleString()}</div>
+                                            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-3">₹{Number(prop.price || 0).toLocaleString()}</div>
                                         </div>
                                         <div className="flex justify-end gap-1 pt-3 border-t border-slate-100 dark:border-slate-700">
                                             <button onClick={() => navigate(`/properties/edit/${prop.id}`)} className="p-2 text-slate-400 hover:text-amber-500 transition"><Edit3 className="w-4 h-4" /></button>

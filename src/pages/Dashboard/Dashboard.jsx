@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Plus, Loader2, ArrowUpRight, MessageSquare, Clock, ShieldAlert } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
+import dashboardService from '../../services/dashboard.service';
 
 // Folder-mapped components matching your exact workspace layout
 import DashboardStats from '../../components/dashboard/DashboardStats';
@@ -41,9 +42,7 @@ export default function Dashboard() {
         const fetchDashboardTelemetry = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`/api/v1/dashboard/analytics?role=${user.role}`);
-                if (!response.ok) throw new Error('Failed to synchronize server analytical nodes.');
-                const data = await response.json();
+                const { data } = await dashboardService.getAnalytics(user.role);
                 setDashboardData(data);
             } catch (err) {
                 // High-fidelity fallback mocks to render effortlessly if endpoints aren't live yet

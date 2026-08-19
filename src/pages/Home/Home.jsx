@@ -10,6 +10,7 @@ import Testimonials from "../../components/home/Testimonials";
 import StatsCTA from "../../components/home/StatsCTA";
 import Partners from "../../components/home/Partners";
 import BlogSection from "../../components/home/Blog";
+import LeadPopup from "../../components/common/LeadPopup";
 
 export default function Home() {
     return (
@@ -26,6 +27,7 @@ export default function Home() {
             <StatsCTA />
             <Partners />
             <BlogSection />
+            <LeadPopup />
         </>
     );
 }

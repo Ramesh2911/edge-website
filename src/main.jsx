@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 
 import App from "./App";
 
@@ -15,11 +16,15 @@ ReactDOM.createRoot(
 
     <React.StrictMode>
 
-        <AuthProvider>
+        <HelmetProvider>
 
-            <App />
+            <AuthProvider>
 
-        </AuthProvider>
+                <App />
+
+            </AuthProvider>
+
+        </HelmetProvider>
 
     </React.StrictMode>
 

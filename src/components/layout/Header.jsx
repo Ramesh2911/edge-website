@@ -36,7 +36,7 @@ export default function Header() {
 
         <div className="hidden lg:flex items-center gap-4">
           <a
-            href="#"
+            href="/add-property"
             className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
           >
             List Property
@@ -69,7 +69,7 @@ export default function Header() {
           <a href="#" className="text-slate-600 text-[15px] py-1">Projects</a>
           <div className="flex items-center gap-3 pt-2">
             <a
-              href="#"
+              href="/add-property"
               className="flex items-center gap-1.5 text-xs font-semibold text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
             >
               List Property

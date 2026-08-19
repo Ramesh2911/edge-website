@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   Search,
   Mic,
@@ -16,12 +18,14 @@ import propertyService from "../../services/property.service";
 const iconMap = { Building2, MapPin, TrendingUp, Landmark, Megaphone };
 
 export default function Hero() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("buy");
   const [categories, setCategories] = useState([]);
   const [propType, setPropType] = useState("");
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isListening, setIsListening] = useState(false);
 
   // Fetch dynamic categories
   useEffect(() => {
@@ -59,13 +63,36 @@ export default function Hero() {
   }, []);
 
   const handleSearch = () => {
-    const tabLabel = searchTabs.find((t) => t.id === activeTab)?.label;
     if (!query.trim()) {
-      setMessage(`Showing all "${tabLabel || "Buy"}" listings near you`);
+      navigate("/properties");
     } else {
-      setMessage(`Searching "${query}" under ${tabLabel || "Buy"}${propType ? ` · ${propType}` : ""}`);
+      navigate(`/properties?keyword=${encodeURIComponent(query)}`);
     }
-    setTimeout(() => setMessage(""), 4000);
+  };
+
+  const handleVoiceSearch = () => {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      toast.error("Voice search is not supported in your browser");
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      navigate(`/properties?keyword=${encodeURIComponent(transcript)}`);
+    };
+
+    recognition.start();
   };
 
   return (
@@ -185,8 +212,14 @@ export default function Hero() {
                 className="w-full bg-[#EAF1FB] border border-[#1E4C8C]/10 rounded-xl pl-11 pr-11 py-3.5 text-sm text-[#1E4C8C] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]"
               />
               <button
+                type="button"
                 aria-label="Voice search"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#6FA82C]"
+                onClick={handleVoiceSearch}
+                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
+                  isListening
+                    ? "text-red-500 animate-pulse"
+                    : "text-slate-500 hover:text-[#6FA82C]"
+                }`}
               >
                 <Mic size={18} />
               </button>
