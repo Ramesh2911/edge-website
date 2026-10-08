@@ -1,10 +1,20 @@
+import slideModernApartment from "../assets/Modern Apartment Complex Under Blue Skies.png";
+import slideZeroBrokerage from "../assets/Exclusive Zero Brokerage Deals.png";
+import slideConstruction from "../assets/Construction Site at Blue Hour.png";
+
 export const navLinks = [
-  { label: "Buy", href: "/properties?purpose=Sale" },
-  { label: "Rent", href: "/properties?purpose=Rent" },
-  { label: "New Launch", href: "/properties?status=New+Launch" },
-  { label: "Commercial", href: "/properties?type=Commercial" },
-  { label: "Plots & Land", href: "/properties?type=Plot" },
-  { label: "Projects", href: "/properties" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Properties", href: "/properties" },
+  {
+    label: "Service",
+    children: [
+      { label: "Commercial", href: "/properties?type=Commercial" },
+      { label: "Land", href: "/properties?type=Plot" },
+      { label: "Investment", href: "/properties?service=Investment" },
+      { label: "IL & W", href: "/properties?service=ILW" },
+    ],
+  },
 ];
 
 export const searchTabs = [
@@ -235,6 +245,50 @@ export const testimonials = [
 
 export const partners = ["DLF", "LODHA", "GODREJ", "SOBHA", "BRIGADE", "MAHINDRA"];
 
+const logoFiles = import.meta.glob("../assets/*.{png,jpg,jpeg,webp,svg}", {
+  eager: true,
+  import: "default",
+});
+
+const findLogo = (keywords) => {
+  for (const [path, url] of Object.entries(logoFiles)) {
+    const name = path.toLowerCase();
+    if (keywords.some((k) => name.includes(k))) return url;
+  }
+  return null;
+};
+
+export const partnerDevelopers = [
+  {
+    name: "Srijan Realty",
+    initials: "SR",
+    color: "bg-[#1E4C8C] text-[#8BC53F]",
+    logo: findLogo(["srijan"]),
+    desc: "Srijan Realty Pvt. Ltd. is a fast-growing real estate company engaged in construction of several real estate projects across India.",
+  },
+  {
+    name: "Oswal Group",
+    initials: "OG",
+    color: "bg-[#EAF6DE] text-[#6FA82C]",
+    logo: findLogo(["oswal"]),
+    desc: "Oswal Group is a renowned and admired brand which has moved from strength to strength over the past three decades.",
+  },
+  {
+    name: "Primarc",
+    initials: "P",
+    color: "bg-[#EAF1FB] text-[#1E4C8C]",
+    logo: findLogo(["primarc"]),
+    desc: "Since inception, Primarc Group has aimed to be a customer centric organization with the highest levels of transparency and quality.",
+  },
+  {
+    name: "Jupiter Developer",
+    initials: "JD",
+    color: "bg-[#153964] text-white",
+    logo: findLogo(["jupiter"]),
+    desc: "Jupiter Developers have offered luxury, comfort, and happiness. All our apartments are spacious and the complexes we design offer a premium lifestyle.",
+  },
+];
+
 export const blogPosts = [
   {
     id: 1,
@@ -272,6 +326,13 @@ export const blogPosts = [
     gradient: "from-rose-200 to-red-100",
     image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=480&h=320&q=80", // Premium luxury villa exterior
   },
+];
+
+// Hero slider banners (src/assets)
+export const heroSlides = [
+  { id: "slide-1", image: slideModernApartment },
+  { id: "slide-2", image: slideZeroBrokerage },
+  { id: "slide-3", image: slideConstruction },
 ];
 
 // Hero background — modern luxury home exterior at dusk

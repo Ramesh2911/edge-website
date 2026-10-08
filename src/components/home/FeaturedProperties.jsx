@@ -58,7 +58,7 @@ export default function FeaturedProperties() {
 
   const scroll = (dir) => {
     if (!trackRef.current) return;
-    trackRef.current.scrollBy({ left: dir * 360, behavior: "smooth" });
+    trackRef.current.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
 
   const toggleLike = (id) => {
@@ -70,17 +70,18 @@ export default function FeaturedProperties() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-16 sm:py-20">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
-            Featured Properties
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
-            Handpicked Properties for You
-          </h2>
-        </div>
-        <a href="/properties" className="text-sm font-semibold text-[#6FA82C] hover:underline">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-10 sm:pb-14">
+      <div className="text-center max-w-2xl mx-auto">
+        <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+          Featured Properties
+        </span>
+        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
+          Handpicked Properties for You
+        </h2>
+        <a
+          href="/properties"
+          className="inline-block text-sm font-semibold text-[#6FA82C] hover:underline mt-3"
+        >
           View All Properties →
         </a>
       </div>
@@ -149,14 +150,14 @@ export default function FeaturedProperties() {
             return (
               <div
                 key={p.id}
-                className="shrink-0 w-[300px] bg-white rounded-2xl border border-[#1E4C8C]/10 overflow-hidden shadow-card hover:shadow-lift transition-shadow"
+                className="group shrink-0 w-[260px] bg-white rounded-2xl border border-[#1E4C8C]/10 overflow-hidden shadow-card hover:shadow-lift hover:-translate-y-1.5 transition-all duration-300"
               >
-                <div className="relative h-44 bg-slate-100 overflow-hidden">
+                <div className="relative h-36 bg-slate-100 overflow-hidden">
                   <img
                     src={imageSrc}
                     alt={title}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
                       e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80";
                     }}
@@ -166,7 +167,7 @@ export default function FeaturedProperties() {
                   </span>
                   <button
                     onClick={() => toggleLike(p.id)}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm"
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm scale-90 opacity-90 group-hover:scale-100 group-hover:opacity-100 transition-all"
                     aria-label="Save to wishlist"
                   >
                     <Heart
@@ -176,28 +177,36 @@ export default function FeaturedProperties() {
                   </button>
                 </div>
 
-                <div className="p-4">
-                  <h3 className="font-display text-lg text-[#1E4C8C] font-medium truncate" title={title}>
-                    {title}
-                  </h3>
-                  <p className="text-slate-500 text-xs mt-1 truncate">{location}</p>
-                  <p className="font-display text-xl text-[#6FA82C] font-semibold mt-2">{formattedPrice}</p>
-
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-3">
-                    <BedDouble size={13} /> {bedsLabel}
+                <div className="p-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-display text-base text-[#1E4C8C] font-medium truncate" title={title}>
+                        {title}
+                      </h3>
+                      <p className="text-slate-500 text-[11px] mt-0.5 truncate">{location}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="font-display text-lg text-[#6FA82C] font-semibold leading-tight">
+                        {formattedPrice}
+                      </p>
+                      <p className="flex items-center justify-end gap-1.5 text-[11px] text-slate-600 mt-1">
+                        <BedDouble size={12} /> {bedsLabel}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-2 border-t border-[#1E4C8C]/10 pt-3">
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2 border-t border-[#1E4C8C]/10 pt-1.5">
                     <span className="flex items-center gap-1.5">
-                      <Ruler size={13} /> {areaLabel}
+                      <Ruler size={12} /> {areaLabel}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <CalendarCheck size={13} /> {possessionLabel}
+                      <CalendarCheck size={12} /> {possessionLabel}
                     </span>
                   </div>
 
-                  <a 
+                  <a
                     href={`/properties/details/${p.id}`}
-                    className="block text-center w-full mt-4 border border-[#7CB93D] text-[#6FA82C] hover:bg-[#7CB93D] hover:text-white transition-colors font-semibold text-sm rounded-xl py-2.5"
+                    className="block text-center w-full mt-2.5 border border-[#7CB93D] text-[#6FA82C] hover:bg-[#7CB93D] hover:text-white transition-colors font-semibold text-sm rounded-xl py-2"
                   >
                     View Details
                   </a>

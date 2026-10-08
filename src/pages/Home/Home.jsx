@@ -3,7 +3,6 @@ import ExploreMore from "../../components/home/ExploreMore";
 import FeaturedProperties from "../../components/home/FeaturedProperties";
 import TrustBadges from "../../components/home/TrustBadges";
 import PopularLocalities from "../../components/home/PopularLocalities";
-import StatsMap from "../../components/home/StatsMap";
 import DreamHomeCTA from "../../components/home/DreamHomeCTA";
 import WhyChooseUs from "../../components/home/WhyChooseUs";
 import Testimonials from "../../components/home/Testimonials";
@@ -20,7 +19,6 @@ export default function Home() {
             <FeaturedProperties />
             <TrustBadges />
             <PopularLocalities />
-            <StatsMap />
             <DreamHomeCTA />
             <WhyChooseUs />
             <Testimonials />

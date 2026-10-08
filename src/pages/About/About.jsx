@@ -11,7 +11,7 @@ import {
 
 export default function About() {
   return (
-    <main className="min-h-screen bg-white text-slate-900 antialiased">
+    <main className="min-h-screen bg-[#FBF7EF] text-slate-900 antialiased">
       <AboutSEO />
       <HeroBanner />
       <CompanyOverview />

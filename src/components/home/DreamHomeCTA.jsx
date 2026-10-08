@@ -3,7 +3,7 @@ import { dreamHomeImage } from "../../data/staticData";
 
 export default function DreamHomeCTA() {
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-16 sm:py-20">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-2 sm:pt-3 pb-10 sm:pb-14">
       <div className="bg-gradient-to-br from-[#153964] to-[#1E4C8C] rounded-3xl overflow-hidden grid sm:grid-cols-[1fr_1.1fr] shadow-xl shadow-[#153964]/20">
         <div className="p-8 sm:p-10 flex flex-col justify-center">
           <h2 className="font-display text-3xl sm:text-4xl text-[#F7FAFC] font-medium leading-tight">

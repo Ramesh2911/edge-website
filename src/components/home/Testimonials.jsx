@@ -7,33 +7,31 @@ export default function Testimonials() {
   const scroll = (dir) => trackRef.current?.scrollBy({ left: dir * 340, behavior: "smooth" });
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-16 sm:py-20">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
-            Happy Customers
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
-            What Our Customers Say
-          </h2>
-        </div>
-        <div className="hidden sm:flex gap-2">
-          <button
-            onClick={() => scroll(-1)}
-            className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button
-            onClick={() => scroll(1)}
-            className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-10 sm:pb-14">
+      <div className="text-center max-w-2xl mx-auto">
+        <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+          Happy Customers
+        </span>
+        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
+          What Our Customers Say
+        </h2>
+      </div>
+      <div className="mt-5 hidden sm:flex justify-center gap-2">
+        <button
+          onClick={() => scroll(-1)}
+          className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          onClick={() => scroll(1)}
+          className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
       </div>
 
-      <div ref={trackRef} className="flex gap-5 mt-8 overflow-x-auto no-scrollbar pb-2">
+      <div ref={trackRef} className="flex gap-5 mt-6 overflow-x-auto no-scrollbar pb-2">
         {testimonials.map((t) => (
           <div
             key={t.id}

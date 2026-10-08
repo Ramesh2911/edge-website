@@ -7,20 +7,18 @@ export default function PopularLocalities() {
   const scroll = (dir) => trackRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-16 sm:py-20">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
-            Popular Localities
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
-            Explore Top Localities
-          </h2>
-          <p className="text-slate-500 mt-2 text-[15px]">
-            Discover prime locations with great connectivity and lifestyle
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-10 sm:pt-14 pb-0">
+      <div className="text-center max-w-2xl mx-auto">
+        <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+          Popular Localities
+        </span>
+        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
+          Explore Top Localities
+        </h2>
+        <p className="text-slate-500 mt-2 text-[15px]">
+          Discover prime locations with great connectivity and lifestyle
+        </p>
+        <div className="mt-4 flex items-center justify-center gap-3">
           <a href="#" className="text-sm font-semibold text-[#6FA82C] hover:underline">
             View All Localities →
           </a>
@@ -41,7 +39,7 @@ export default function PopularLocalities() {
         </div>
       </div>
 
-      <div ref={trackRef} className="flex gap-4 mt-8 overflow-x-auto no-scrollbar pb-2">
+      <div ref={trackRef} className="flex gap-4 mt-6 overflow-x-auto no-scrollbar">
         {localities.map((loc) => (
           <button
             key={loc.id}
@@ -52,7 +50,7 @@ export default function PopularLocalities() {
                 src={loc.image}
                 alt={loc.name}
                 loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                 }}

@@ -25,7 +25,18 @@ const CATEGORY_ICON = {
 // (with a key) if you need custom styling or higher usage limits.
 
 export default function PropertyLocation({ address, lat, lng, nearby = [] }) {
-    const hasCoords = lat != null && lng != null;
+    // India-only guard: ignore bogus coordinates (e.g. dummy/test values stored
+    // in the DB) so the map always falls back to geocoding the real address.
+    const parsedLat = parseFloat(lat);
+    const parsedLng = parseFloat(lng);
+    const coordsValid =
+        Number.isFinite(parsedLat) &&
+        Number.isFinite(parsedLng) &&
+        parsedLat >= 6 &&
+        parsedLat <= 37.5 &&
+        parsedLng >= 68 &&
+        parsedLng <= 97.5;
+    const hasCoords = lat != null && lng != null && coordsValid;
 
     const mapSrc = hasCoords
         ? `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`

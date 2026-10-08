@@ -107,11 +107,11 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-2 bg-white">
+        <div className="h-[100dvh] overflow-hidden grid grid-rows-[minmax(0,1fr)] lg:grid-cols-2 bg-white">
             {/* ================================================================
           LEFT PANEL — brand / illustration (hidden on mobile)
       ================================================================ */}
-            <div className="hidden lg:flex relative flex-col justify-between bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-12 py-12">
+            <div className="hidden lg:flex relative flex-col justify-between bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-10 xl:px-12 py-10">
                 {/* Background illustration */}
                 <svg
                     className="absolute inset-0 w-full h-full opacity-[0.08]"
@@ -176,22 +176,33 @@ export default function LoginPage() {
             {/* ================================================================
           RIGHT PANEL — login form
       ================================================================ */}
-            <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-24 py-12">
-                <div className="w-full max-w-sm mx-auto animate-fade-in-up">
+            <div className="auth-tight relative flex flex-col overflow-y-auto overflow-x-hidden no-scrollbar min-h-0 px-6 sm:px-10 lg:px-12 xl:px-24 py-6 bg-gradient-to-br from-[#F7FAFC] via-white to-[#EAF6DE]/40">
+                {/* Soft decorative glows */}
+                <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#7CB93D]/10 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#1E4C8C]/10 blur-3xl" aria-hidden="true" />
+
+                <div className="relative w-full max-w-[400px] mx-auto my-auto shrink-0 animate-fade-in-up">
                     {/* Mobile-only logo */}
-                    <a href="/" className="flex lg:hidden mb-10">
+                    <a href="/" className="auth-logo flex lg:hidden justify-center mb-5">
                         <img src={logo} alt="Edge Mile Realty" className="h-11 w-auto" />
                     </a>
 
-                    <h2 className="font-display text-2xl sm:text-3xl text-[#153964] font-medium">
+                    <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#6FA82C]">
+                        Edge Mile Realty
+                    </p>
+                    <h2 className="font-display text-2xl sm:text-3xl text-[#153964] font-medium text-center mt-1.5">
                         Welcome back
                     </h2>
-                    <p className="text-slate-500 text-sm mt-2">
+                    <p className="auth-tagline text-slate-500 text-sm mt-1.5 text-center">
                         Sign in to continue to your account
                     </p>
 
+                    {/* Form card */}
+                    <div className="auth-card mt-5 bg-white rounded-3xl border border-slate-200/70 shadow-lift p-5 sm:p-6 relative overflow-hidden">
+                        {/* Card top accent */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-24 rounded-b-full bg-gradient-to-r from-[#1E4C8C] via-[#7CB93D] to-[#1E4C8C]" aria-hidden="true" />
                     {/* Email / Mobile toggle */}
-                    <div className="flex bg-[#EAF1FB] rounded-xl p-1 mt-7">
+                    <div className="flex bg-[#EAF1FB] rounded-xl p-1">
                         {[
                             { key: "email", label: "Email", icon: Mail },
                             { key: "mobile", label: "Mobile Number", icon: Phone },
@@ -211,7 +222,7 @@ export default function LoginPage() {
                         ))}
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5" noValidate>
+                    <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4" noValidate>
                         {/* Identifier field */}
                         <div>
                             <label className="block text-sm font-medium text-[#153964] mb-1.5">
@@ -236,9 +247,9 @@ export default function LoginPage() {
                                                     : "Enter a valid 10-digit mobile number",
                                         },
                                     })}
-                                    className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.identifier
+                                    className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.identifier
                                         ? "border-red-400 focus:ring-red-200"
-                                        : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                         }`}
                                 />
                             </div>
@@ -264,9 +275,9 @@ export default function LoginPage() {
                                         required: "Password is required",
                                         minLength: { value: 6, message: "Password must be at least 6 characters" },
                                     })}
-                                    className={`w-full border rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.password
+                                    className={`w-full border rounded-xl pl-10 pr-11 py-2.5 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.password
                                         ? "border-red-400 focus:ring-red-200"
-                                        : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                         }`}
                                 />
                                 <button
@@ -308,20 +319,21 @@ export default function LoginPage() {
                             size="lg"
                             fullWidth
                             loading={submitting}
+                            className="shadow-lg shadow-[#1E4C8C]/30 hover:shadow-xl hover:shadow-[#1E4C8C]/40"
                         >
                             {submitting ? "Signing in..." : "Sign In"}
                         </Button>
                     </form>
 
                     {/* Divider */}
-                    <div className="flex items-center gap-3 my-6">
-                        <div className="flex-1 h-px bg-slate-200" />
+                    <div className="auth-optional flex items-center gap-3 my-5">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#1E4C8C]/20" />
                         <span className="text-xs text-slate-400">or continue with</span>
-                        <div className="flex-1 h-px bg-slate-200" />
+                        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#1E4C8C]/20" />
                     </div>
 
                     {/* Social login placeholders */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="auth-optional grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             onClick={() => handleSocialLogin("Google")}
@@ -359,16 +371,17 @@ export default function LoginPage() {
                         </button>
                     </div>
 
-                    <p className="text-center text-sm text-slate-500 mt-8">
+                    <p className="text-center text-sm text-slate-500 mt-6">
                         Don&apos;t have an account?{" "}
-                        <Link to="/register" className="font-semibold text-[#1E4C8C] hover:text-[#7CB93D]">
+                        <Link to="/register" className="font-semibold text-[#1E4C8C] hover:text-[#7CB93D] transition-colors">
                             Create one
                         </Link>
                     </p>
+                    </div>
                 </div>
             </div>
 
-            {/* Entrance animation keyframes */}
+            {/* Entrance animation keyframes + zero-scroll responsive rules */}
             <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -377,6 +390,21 @@ export default function LoginPage() {
         .animate-fade-in-up {
           animation: fadeInUp 0.6s ease-out both;
         }
+
+        /* Short viewports: hide optional social section so the form never scrolls */
+        @media (max-height: 760px) {
+          .auth-optional { display: none !important; }
+        }
+
+        /* Very short viewports: compact mode — still no scroll */
+        @media (max-height: 660px) {
+          .auth-tight { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+          .auth-card { padding: 0.75rem !important; margin-top: 0.625rem !important; }
+          .auth-logo, .auth-tagline { display: none !important; }
+        }
+
+        /* Never allow horizontal overflow anywhere on the page */
+        html, body, #root { overflow-x: hidden; }
       `}</style>
         </div>
     );

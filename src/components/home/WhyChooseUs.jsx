@@ -5,7 +5,7 @@ const iconMap = { ShieldCheck, BadgePercent, Compass, Scale, Wallet };
 
 export default function WhyChooseUs() {
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-16 sm:py-20">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-10 sm:pt-14 pb-4 sm:pb-6">
       <div className="text-center max-w-xl mx-auto">
         <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
           Why Choose Us
@@ -18,7 +18,7 @@ export default function WhyChooseUs() {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-10">
+      <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-7">
         {excellenceFeatures.map((f) => {
           const Icon = iconMap[f.icon];
           return (

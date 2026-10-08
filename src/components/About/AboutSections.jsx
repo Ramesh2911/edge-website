@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
-    Building2, Target, Eye, ShieldCheck, Award,
-    Users, Key, TrendingUp, CheckCircle2, Star, ArrowRight
+    Target, Eye, ShieldCheck, Award,
+    Key, TrendingUp, Star, ArrowRight, Quote
 } from 'lucide-react';
 
 const fadeUp = {
@@ -15,77 +16,142 @@ const staggerContainer = {
     visible: { transition: { staggerChildren: 0.15 } }
 };
 
+const Eyebrow = ({ children, dark = false }) => (
+    <span className={`inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-4 ${dark ? 'text-[#8BC53F]' : 'text-[#6FA82C]'}`}>
+        {children}
+    </span>
+);
+
 // 1. HERO BANNER
 export const HeroBanner = () => (
-    <section className="relative h-[60vh] min-h-[480px] flex items-center justify-center bg-slate-900 text-white overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80')] bg-cover bg-center" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent z-0" />
+    <section className="relative min-h-[520px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+            <img
+                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80"
+                alt="Luxury residence"
+                className="w-full h-full object-cover"
+            />
+        </div>
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#153964]/95 via-[#1E4C8C]/85 to-[#1E4C8C]/60" />
+        <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full bg-[#8BC53F]/25 blur-3xl z-0" />
+        <div className="absolute -bottom-40 -left-24 w-[380px] h-[380px] rounded-full bg-[#7CB93D]/20 blur-3xl z-0" />
 
         <motion.div
             initial="hidden" animate="visible" variants={fadeUp}
-            className="relative z-10 max-w-4xl mx-auto text-center px-4"
+            className="relative z-10 max-w-4xl mx-auto text-center px-5 py-24"
         >
-            <span className="text-amber-400 font-semibold tracking-wider uppercase text-sm mb-3 block">
-                Redefining Modern Living
-            </span>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-                Architecting Dreams into Reality
+            <Eyebrow dark>Redefining Modern Living</Eyebrow>
+            <h1 className="font-display text-4xl md:text-6xl leading-[1.08] font-medium mb-6 text-[#F7FAFC]">
+                Architecting Dreams
+                <br className="hidden sm:block" /> into <span className="italic text-[#8BC53F]">Reality</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-[#F7FAFC]/75 max-w-2xl mx-auto">
                 We bridge the gap between extraordinary properties and discerning buyers across the globe.
             </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-9">
+                <Link
+                    to="/properties"
+                    className="bg-[#7CB93D] hover:bg-[#6FA82C] transition-colors text-white font-semibold text-sm rounded-xl px-7 py-3.5 shadow-lift"
+                >
+                    Explore Properties
+                </Link>
+                <Link
+                    to="/contact"
+                    className="border border-white/30 hover:border-[#8BC53F] text-white font-semibold text-sm rounded-xl px-7 py-3.5 transition-colors"
+                >
+                    Talk to an Advisor
+                </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
+                {[
+                    { big: '1,200+', small: 'Properties Managed' },
+                    { big: '99.2%', small: 'Client Satisfaction' },
+                    { big: '15+', small: 'Years of Trust' },
+                ].map((c) => (
+                    <div key={c.small} className="bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-2.5 text-left">
+                        <p className="font-display text-base text-[#8BC53F] font-semibold leading-none">{c.big}</p>
+                        <p className="text-[11px] text-[#F7FAFC]/70 mt-1">{c.small}</p>
+                    </div>
+                ))}
+            </div>
         </motion.div>
     </section>
 );
 
 // 2. COMPANY INTRO & MISSION & VISION
 export const CompanyOverview = () => (
-    <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <motion.div
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-                className="grid md:grid-cols-2 gap-12 items-center mb-20"
+                className="grid md:grid-cols-2 gap-12 items-center mb-16"
             >
                 <div>
-                    <h2 className="text-3xl font-bold text-slate-900 mb-6">
+                    <Eyebrow>Who We Are</Eyebrow>
+                    <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] font-medium mb-6 leading-tight">
                         Pioneering Excellence in Luxury Real Estate
                     </h2>
                     <p className="text-slate-600 mb-4 leading-relaxed">
-                        Founded with a vision to revolutionize real estate transactions, Elite Haven has grown into a premier brokerage trusted by high-net-worth individuals, investors, and families worldwide.
+                        Founded with a vision to revolutionize real estate transactions, Edge Realty has grown into a premier brokerage trusted by high-net-worth individuals, investors, and families worldwide.
                     </p>
                     <p className="text-slate-600 leading-relaxed">
                         We fuse deep local market expertise with cutting-edge market analytics to deliver an unparalleled property search and acquisition experience.
                     </p>
+
+                    <div className="flex items-center gap-6 mt-7 pt-7 border-t border-[#1E4C8C]/10">
+                        <div>
+                            <p className="font-display text-2xl text-[#1E4C8C] font-semibold">$2.4B+</p>
+                            <p className="text-xs text-slate-500 mt-0.5">Volume Sold</p>
+                        </div>
+                        <div className="w-px h-10 bg-[#1E4C8C]/10" />
+                        <div>
+                            <p className="font-display text-2xl text-[#1E4C8C] font-semibold">50+</p>
+                            <p className="text-xs text-slate-500 mt-0.5">Cities Covered</p>
+                        </div>
+                    </div>
                 </div>
+
                 <div className="relative">
+                    <div className="absolute -top-4 -left-4 w-28 h-28 rounded-2xl bg-[#EAF6DE] border border-[#8BC53F]/40" />
                     <img
                         src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80"
                         alt="Modern Office"
-                        className="rounded-2xl shadow-2xl object-cover h-96 w-full"
+                        className="relative rounded-2xl shadow-lift object-cover h-96 w-full"
                     />
+                    <div className="absolute -bottom-6 -right-3 sm:right-6 bg-white rounded-2xl border border-[#1E4C8C]/10 shadow-lift px-5 py-4 flex items-center gap-3">
+                        <span className="w-11 h-11 rounded-xl bg-[#EAF6DE] text-[#6FA82C] flex items-center justify-center">
+                            <Award className="w-5 h-5" />
+                        </span>
+                        <div>
+                            <p className="font-display text-base text-[#1E4C8C] font-semibold leading-none">Award Winning</p>
+                            <p className="text-[11px] text-slate-500 mt-1">Trusted brokerage since 2010</p>
+                        </div>
+                    </div>
                 </div>
             </motion.div>
 
             {/* Mission & Vision Cards */}
             <motion.div
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-                className="grid md:grid-cols-2 gap-8"
+                className="grid md:grid-cols-2 gap-6"
             >
-                <motion.div variants={fadeUp} className="bg-slate-50 p-8 rounded-2xl border border-slate-100">
-                    <div className="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+                <motion.div variants={fadeUp} className="group bg-[#F7FAFC] p-8 rounded-2xl border border-[#1E4C8C]/10 hover:shadow-lift hover:-translate-y-1 transition-all">
+                    <div className="w-12 h-12 bg-[#EAF6DE] text-[#6FA82C] rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#7CB93D] group-hover:text-white transition-colors">
                         <Target className="w-6 h-6" />
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Our Mission</h3>
+                    <h3 className="font-display text-2xl text-[#1E4C8C] font-medium mb-3">Our Mission</h3>
                     <p className="text-slate-600 leading-relaxed">
                         To empower clients through transparent data, exceptional advisory services, and a seamless digital platform that makes acquiring premier property simple and gratifying.
                     </p>
                 </motion.div>
 
-                <motion.div variants={fadeUp} className="bg-slate-50 p-8 rounded-2xl border border-slate-100">
-                    <div className="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+                <motion.div variants={fadeUp} className="group bg-[#F7FAFC] p-8 rounded-2xl border border-[#1E4C8C]/10 hover:shadow-lift hover:-translate-y-1 transition-all">
+                    <div className="w-12 h-12 bg-[#EAF6DE] text-[#6FA82C] rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#7CB93D] group-hover:text-white transition-colors">
                         <Eye className="w-6 h-6" />
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">Our Vision</h3>
+                    <h3 className="font-display text-2xl text-[#1E4C8C] font-medium mb-3">Our Vision</h3>
                     <p className="text-slate-600 leading-relaxed">
                         To set the global benchmark for integrity, luxury branding, and prop-tech innovation in the real estate sector for generations to come.
                     </p>
@@ -111,39 +177,49 @@ export const StatsAndValue = () => {
     ];
 
     return (
-        <section className="py-20 bg-slate-900 text-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-20 relative overflow-hidden bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white">
+            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full bg-[#8BC53F]/15 blur-3xl" />
+            <div className="absolute -bottom-40 -left-24 w-[380px] h-[380px] rounded-full bg-[#7CB93D]/10 blur-3xl" />
+
+            <div className="max-w-7xl mx-auto px-5 lg:px-8 relative z-10">
                 {/* Stats Grid */}
                 <motion.div
                     initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-20 border-b border-slate-800 text-center"
+                    className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-16 border-b border-white/10 text-center"
                 >
                     {stats.map((s, idx) => (
                         <motion.div key={idx} variants={fadeUp}>
-                            <div className="text-4xl md:text-5xl font-extrabold text-amber-400 mb-2">{s.value}</div>
-                            <div className="text-slate-400 font-medium text-sm md:text-base">{s.label}</div>
+                            <div className="font-display text-4xl md:text-5xl text-[#8BC53F] mb-2 font-semibold">{s.value}</div>
+                            <div className="text-[#F7FAFC]/60 font-medium text-sm md:text-base">{s.label}</div>
                         </motion.div>
                     ))}
                 </motion.div>
 
                 {/* Why Choose Us */}
-                <div className="pt-20">
-                    <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Discerning Clients Choose Us</h2>
-                        <p className="text-slate-400">Excellence isn't an accident—it's our standard operating procedure.</p>
+                <div className="pt-16">
+                    <div className="text-center max-w-2xl mx-auto mb-12">
+                        <Eyebrow dark>Why Choose Us</Eyebrow>
+                        <h2 className="font-display text-3xl sm:text-4xl font-medium mb-4">Why Discerning Clients Choose Us</h2>
+                        <p className="text-[#F7FAFC]/60">Excellence isn't an accident—it's our standard operating procedure.</p>
                     </div>
 
                     <motion.div
                         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-                        className="grid md:grid-cols-3 gap-8"
+                        className="grid md:grid-cols-3 gap-6"
                     >
                         {features.map((f, idx) => {
                             const Icon = f.icon;
                             return (
-                                <motion.div key={idx} variants={fadeUp} className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700/50">
-                                    <Icon className="w-10 h-10 text-amber-400 mb-6" />
-                                    <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                                    <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
+                                <motion.div
+                                    key={idx}
+                                    variants={fadeUp}
+                                    className="group bg-white/5 hover:bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/10 hover:border-[#8BC53F]/40 transition-all"
+                                >
+                                    <span className="w-12 h-12 rounded-xl bg-[#8BC53F]/15 text-[#8BC53F] flex items-center justify-center mb-6 group-hover:bg-[#7CB93D] group-hover:text-white transition-colors">
+                                        <Icon className="w-6 h-6" />
+                                    </span>
+                                    <h3 className="font-display text-xl font-medium mb-3">{f.title}</h3>
+                                    <p className="text-[#F7FAFC]/60 leading-relaxed text-sm">{f.desc}</p>
                                 </motion.div>
                             );
                         })}
@@ -164,21 +240,29 @@ export const ServicesAndJourney = () => {
     ];
 
     return (
-        <section className="py-20 bg-slate-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center max-w-2xl mx-auto mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">The Acquisition Journey</h2>
+        <section className="py-16 sm:py-20 bg-[#FBF7EF]">
+            <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                    <Eyebrow>How It Works</Eyebrow>
+                    <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] font-medium mb-4">The Acquisition Journey</h2>
                     <p className="text-slate-600">A structured four-step path to secure your property effortlessly.</p>
                 </div>
 
                 <motion.div
                     initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-                    className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
+                    className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     {steps.map((step, idx) => (
-                        <motion.div key={idx} variants={fadeUp} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative">
-                            <span className="text-5xl font-black text-amber-500/20 absolute top-4 right-6">{step.num}</span>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2 mt-4">{step.title}</h3>
+                        <motion.div
+                            key={idx}
+                            variants={fadeUp}
+                            className="group bg-white p-7 rounded-2xl shadow-card border border-[#1E4C8C]/5 relative overflow-hidden hover:shadow-lift hover:-translate-y-1 transition-all"
+                        >
+                            <span className="absolute top-0 left-0 h-1 w-0 bg-[#7CB93D] group-hover:w-full transition-all duration-500" />
+                            <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#EAF1FB] text-[#1E4C8C] font-display text-lg font-semibold mb-5">
+                                {step.num}
+                            </span>
+                            <h3 className="font-display text-xl text-[#1E4C8C] font-medium mb-2">{step.title}</h3>
                             <p className="text-slate-600 text-sm leading-relaxed">{step.desc}</p>
                         </motion.div>
                     ))}
@@ -197,29 +281,35 @@ export const TeamSection = () => {
     ];
 
     return (
-        <section className="py-20 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center max-w-2xl mx-auto mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Leadership Team</h2>
+        <section className="py-16 sm:py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-5 lg:px-8">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                    <Eyebrow>Our People</Eyebrow>
+                    <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] font-medium mb-4">Leadership Team</h2>
                     <p className="text-slate-600">Industry veterans driven by integrity, passion, and innovation.</p>
                 </div>
 
                 <motion.div
                     initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-                    className="grid md:grid-cols-3 gap-8"
+                    className="grid md:grid-cols-3 gap-6"
                 >
                     {team.map((member, idx) => (
-                        <motion.div key={idx} variants={fadeUp} className="group overflow-hidden rounded-2xl bg-slate-50 border border-slate-100">
-                            <div className="overflow-hidden">
+                        <motion.div
+                            key={idx}
+                            variants={fadeUp}
+                            className="group overflow-hidden rounded-2xl bg-white border border-[#1E4C8C]/10 hover:shadow-lift hover:-translate-y-1.5 transition-all duration-300"
+                        >
+                            <div className="overflow-hidden relative">
                                 <img
                                     src={member.img}
                                     alt={member.name}
                                     className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#153964]/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
                             <div className="p-6">
-                                <h3 className="text-xl font-bold text-slate-900">{member.name}</h3>
-                                <p className="text-amber-600 text-sm font-medium mt-1">{member.role}</p>
+                                <h3 className="font-display text-xl text-[#1E4C8C] font-medium">{member.name}</h3>
+                                <p className="text-[#6FA82C] text-sm font-semibold mt-1">{member.role}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -232,33 +322,37 @@ export const TeamSection = () => {
 // 6. TESTIMONIALS & CTA
 export const TestimonialsAndCTA = () => (
     <>
-        <section className="py-20 bg-slate-50">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-                <div className="flex justify-center gap-1 text-amber-500 mb-6">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-6 h-6 fill-amber-500" />)}
+        <section className="py-16 sm:py-20 bg-[#FBF7EF] relative overflow-hidden">
+            <div className="max-w-4xl mx-auto px-5 text-center relative">
+                <Quote className="w-12 h-12 text-[#7CB93D]/30 mx-auto mb-6" />
+                <div className="flex justify-center gap-1 mb-6">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-[#7CB93D] text-[#7CB93D]" />)}
                 </div>
-                <blockquote className="text-2xl md:text-3xl font-medium text-slate-900 mb-8 leading-snug">
-                    "Elite Haven made purchasing our coastal estate smooth beyond expectation. Their market foresight and discretion are completely unmatched."
+                <blockquote className="font-display text-2xl md:text-3xl text-[#1E4C8C] mb-8 leading-snug font-medium">
+                    "Edge Realty made purchasing our coastal estate smooth beyond expectation. Their market foresight and discretion are completely unmatched."
                 </blockquote>
                 <cite className="not-italic text-slate-600 font-semibold block">
-                    Marcus & Eleanor Vance — Estate Buyers
+                    Marcus &amp; Eleanor Vance — Estate Buyers
                 </cite>
             </div>
         </section>
 
         {/* CTA Banner */}
-        <section className="py-20 bg-amber-600 text-white relative overflow-hidden">
-            <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-                <h2 className="text-3xl md:text-5xl font-extrabold mb-6">Ready to Find Your Dream Property?</h2>
-                <p className="text-amber-100 text-lg max-w-2xl mx-auto mb-8">
+        <section className="py-16 sm:py-20 bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white relative overflow-hidden">
+            <div className="absolute -top-24 right-1/4 w-80 h-80 rounded-full bg-[#8BC53F]/20 blur-3xl" />
+            <div className="max-w-5xl mx-auto px-5 text-center relative z-10">
+                <h2 className="font-display text-3xl md:text-5xl font-medium mb-6">
+                    Ready to Find Your <span className="italic text-[#8BC53F]">Dream</span> Property?
+                </h2>
+                <p className="text-[#F7FAFC]/70 text-lg max-w-2xl mx-auto mb-8">
                     Get in touch with our team of advisors to explore exclusive listings today.
                 </p>
-                <a
-                    href="/contact"
-                    className="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-slate-800 transition-colors shadow-lg"
+                <Link
+                    to="/contact"
+                    className="inline-flex items-center gap-2 bg-[#7CB93D] hover:bg-[#6FA82C] text-white px-8 py-4 rounded-xl font-semibold transition-colors shadow-lift"
                 >
                     Contact an Advisor <ArrowRight className="w-5 h-5" />
-                </a>
+                </Link>
             </div>
         </section>
     </>

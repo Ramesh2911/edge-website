@@ -17,8 +17,6 @@ import {
     Landmark,
     Globe2,
     Hash,
-    Camera,
-    X,
     UserCheck,
     Building,
     UserSquare2,
@@ -52,9 +50,6 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [profileImage, setProfileImage] = useState(null);
-    const [profilePreview, setProfilePreview] = useState(null);
-    const [imageError, setImageError] = useState("");
 
     const {
         register,
@@ -85,32 +80,6 @@ export default function RegisterPage() {
     const requiresCompanyFields = COMPANY_ROLES.includes(selectedRole);
 
     // --------------------------------------------------------
-    // Profile image handling
-    // --------------------------------------------------------
-    const handleImageChange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (!file.type.startsWith("image/")) {
-            setImageError("Please select a valid image file");
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            setImageError("Image must be under 5MB");
-            return;
-        }
-
-        setImageError("");
-        setProfileImage(file);
-        setProfilePreview(URL.createObjectURL(file));
-    };
-
-    const removeImage = () => {
-        setProfileImage(null);
-        setProfilePreview(null);
-    };
-
-    // --------------------------------------------------------
     // Submit
     // --------------------------------------------------------
     const onSubmit = async (data) => {
@@ -121,7 +90,6 @@ export default function RegisterPage() {
                 if (key === "confirmPassword") return;
                 formData.append(key, value ?? "");
             });
-            if (profileImage) formData.append("profileImage", profileImage);
 
             const res = await authService.register(formData);
             const { user, token } = res.data;
@@ -141,11 +109,11 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen grid lg:grid-cols-2 bg-white">
+        <div className="h-[100dvh] overflow-hidden grid grid-rows-[minmax(0,1fr)] lg:grid-cols-2 bg-white">
             {/* ================================================================
           LEFT PANEL — brand / illustration (hidden on mobile)
       ================================================================ */}
-            <div className="hidden lg:flex relative flex-col justify-between bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-12 py-12">
+            <div className="hidden lg:flex relative flex-col justify-between bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-10 xl:px-12 py-10">
                 <svg
                     className="absolute inset-0 w-full h-full opacity-[0.08]"
                     viewBox="0 0 600 800"
@@ -204,21 +172,33 @@ export default function RegisterPage() {
             {/* ================================================================
           RIGHT PANEL — registration form
       ================================================================ */}
-            <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-12">
-                <div className="w-full max-w-xl mx-auto animate-fade-in-up">
+            <div className="auth-scroll relative flex flex-col overflow-y-auto overflow-x-hidden min-h-0 px-6 sm:px-10 lg:px-12 xl:px-24 bg-gradient-to-br from-[#F7FAFC] via-white to-[#EAF6DE]/40">
+                {/* Soft decorative glows (kept inside vertical bounds to avoid phantom scroll) */}
+                <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#7CB93D]/10 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute bottom-0 -left-20 w-72 h-72 rounded-full bg-[#1E4C8C]/10 blur-3xl" aria-hidden="true" />
+
+                <div className="relative w-full max-w-xl mx-auto min-h-full shrink-0 flex flex-col justify-center py-6 animate-fade-in-up">
                     {/* Mobile-only logo */}
-                    <a href="/" className="flex lg:hidden mb-8">
+                    <a href="/" className="auth-logo flex lg:hidden justify-center mb-4">
                         <img src={logo} alt="Edge Mile Realty" className="h-11 w-auto" />
                     </a>
 
-                    <h2 className="font-display text-2xl sm:text-3xl text-[#153964] font-medium">
+                    <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#6FA82C]">
+                        Edge Mile Realty
+                    </p>
+                    <h2 className="font-display text-2xl sm:text-3xl text-[#153964] font-medium text-center mt-1.5">
                         Create your account
                     </h2>
-                    <p className="text-slate-500 text-sm mt-2">
+                    <p className="text-slate-500 text-sm mt-1.5 text-center">
                         Fill in your details to get started
                     </p>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-7" noValidate>
+                    {/* Form card */}
+                    <div className="auth-card mt-5 shrink-0 bg-white rounded-3xl border border-slate-200/70 shadow-lift p-5 sm:p-6 relative overflow-hidden">
+                        {/* Card top accent */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-24 rounded-b-full bg-gradient-to-r from-[#1E4C8C] via-[#7CB93D] to-[#1E4C8C]" aria-hidden="true" />
+
+                    <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5" noValidate>
                         {/* ============== Role selection ============== */}
                         <div>
                             <label className="block text-sm font-semibold text-[#153964] mb-3">
@@ -228,8 +208,8 @@ export default function RegisterPage() {
                                 {ROLES.map(({ value, label, icon: Icon, desc }) => (
                                     <label
                                         key={value}
-                                        className={`flex items-start gap-2.5 border rounded-xl px-3.5 py-3 cursor-pointer transition-colors ${selectedRole === value
-                                            ? "border-[#7CB93D] bg-[#7CB93D]/10"
+                                        className={`flex items-start gap-2.5 border rounded-xl px-3 py-2.5 cursor-pointer transition-all ${selectedRole === value
+                                            ? "border-[#7CB93D] bg-[#7CB93D]/10 shadow-sm"
                                             : "border-slate-200 hover:border-slate-300"
                                             }`}
                                     >
@@ -254,42 +234,8 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* ============== Profile image upload ============== */}
-                        <div>
-                            <label className="block text-sm font-semibold text-[#153964] mb-3">
-                                Profile Photo <span className="font-normal text-slate-500">(optional)</span>
-                            </label>
-                            <div className="flex items-center gap-4">
-                                <div className="relative w-16 h-16 rounded-full bg-[#EAF1FB] border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                    {profilePreview ? (
-                                        <img src={profilePreview} alt="Profile preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <User size={22} className="text-slate-400" />
-                                    )}
-                                </div>
-
-                                <label className="flex items-center gap-2 border border-slate-200 hover:border-[#8BC53F] rounded-lg px-4 py-2.5 text-sm font-medium text-[#153964] cursor-pointer transition-colors">
-                                    <Camera size={15} />
-                                    {profilePreview ? "Change Photo" : "Upload Photo"}
-                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                                </label>
-
-                                {profilePreview && (
-                                    <button
-                                        type="button"
-                                        onClick={removeImage}
-                                        aria-label="Remove photo"
-                                        className="w-8 h-8 rounded-full bg-[#EAF1FB] hover:bg-red-50 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
-                                    >
-                                        <X size={15} />
-                                    </button>
-                                )}
-                            </div>
-                            {imageError && <p className="text-red-500 text-xs mt-2">{imageError}</p>}
-                        </div>
-
                         {/* ============== Basic details ============== */}
-                        <div className="grid sm:grid-cols-2 gap-5">
+                        <div className="grid sm:grid-cols-2 gap-4">
                             <div className="sm:col-span-2">
                                 <label className="block text-sm font-medium text-[#153964] mb-1.5">Full Name</label>
                                 <div className="relative">
@@ -302,7 +248,7 @@ export default function RegisterPage() {
                                             required: "Full name is required",
                                             minLength: { value: 2, message: "Name must be at least 2 characters" },
                                         })}
-                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.fullName ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.fullName ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                             }`}
                                     />
                                 </div>
@@ -321,7 +267,7 @@ export default function RegisterPage() {
                                             required: "Email is required",
                                             pattern: { value: EMAIL_PATTERN, message: "Enter a valid email address" },
                                         })}
-                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.email ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.email ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                             }`}
                                     />
                                 </div>
@@ -340,7 +286,7 @@ export default function RegisterPage() {
                                             required: "Mobile number is required",
                                             pattern: { value: MOBILE_PATTERN, message: "Enter a valid 10-digit mobile number" },
                                         })}
-                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.mobile ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.mobile ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                             }`}
                                     />
                                 </div>
@@ -359,7 +305,7 @@ export default function RegisterPage() {
                                             required: "Password is required",
                                             minLength: { value: 8, message: "Password must be at least 8 characters" },
                                         })}
-                                        className={`w-full border rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.password ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        className={`w-full border rounded-xl pl-10 pr-11 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.password ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                             }`}
                                     />
                                     <button
@@ -386,7 +332,7 @@ export default function RegisterPage() {
                                             required: "Please confirm your password",
                                             validate: (value) => value === password || "Passwords do not match",
                                         })}
-                                        className={`w-full border rounded-xl pl-10 pr-11 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.confirmPassword ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                        className={`w-full border rounded-xl pl-10 pr-11 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.confirmPassword ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                             }`}
                                     />
                                     <button
@@ -406,7 +352,7 @@ export default function RegisterPage() {
 
                         {/* ============== Conditional: Broker / Developer fields ============== */}
                         {requiresCompanyFields && (
-                            <div className="grid sm:grid-cols-2 gap-5 bg-[#EAF1FB]/60 rounded-xl p-4 sm:p-5 animate-fade-in-up">
+                            <div className="grid sm:grid-cols-2 gap-4 bg-[#EAF1FB]/60 rounded-xl p-4 sm:p-5 animate-fade-in-up">
                                 <div className="sm:col-span-2">
                                     <p className="text-xs font-semibold uppercase tracking-wide text-[#7CB93D] mb-1">
                                         {selectedRole === "developer" ? "Developer" : "Brokerage"} Details
@@ -423,7 +369,7 @@ export default function RegisterPage() {
                                             {...register("companyName", {
                                                 required: requiresCompanyFields ? "Company name is required" : false,
                                             })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 transition-colors ${errors.companyName ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 transition-colors ${errors.companyName ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -442,7 +388,7 @@ export default function RegisterPage() {
                                             {...register("reraNumber", {
                                                 required: requiresCompanyFields ? "RERA number is required" : false,
                                             })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 transition-colors ${errors.reraNumber ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 transition-colors ${errors.reraNumber ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -456,7 +402,7 @@ export default function RegisterPage() {
                         {/* ============== Address details ============== */}
                         <div>
                             <p className="text-sm font-semibold text-[#153964] mb-3">Address</p>
-                            <div className="grid sm:grid-cols-2 gap-5">
+                            <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="sm:col-span-2">
                                     <div className="relative">
                                         <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -464,7 +410,7 @@ export default function RegisterPage() {
                                             type="text"
                                             placeholder="Street address"
                                             {...register("address", { required: "Address is required" })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.address ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.address ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -478,7 +424,7 @@ export default function RegisterPage() {
                                             type="text"
                                             placeholder="City"
                                             {...register("city", { required: "City is required" })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.city ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.city ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -492,7 +438,7 @@ export default function RegisterPage() {
                                             type="text"
                                             placeholder="State"
                                             {...register("state", { required: "State is required" })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.state ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.state ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -506,7 +452,7 @@ export default function RegisterPage() {
                                             type="text"
                                             placeholder="Country"
                                             {...register("country", { required: "Country is required" })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.country ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.country ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -524,7 +470,7 @@ export default function RegisterPage() {
                                                 required: "Pincode is required",
                                                 pattern: { value: PINCODE_PATTERN, message: "Enter a valid 6-digit pincode" },
                                             })}
-                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-colors ${errors.pincode ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#8BC53F] focus:border-[#8BC53F]"
+                                            className={`w-full border rounded-xl pl-10 pr-4 py-3 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:ring-2 transition-all ${errors.pincode ? "border-red-400 focus:ring-red-200" : "border-slate-200 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D]"
                                                 }`}
                                         />
                                     </div>
@@ -540,17 +486,19 @@ export default function RegisterPage() {
                             size="lg"
                             fullWidth
                             loading={submitting}
+                            className="shadow-lg shadow-[#1E4C8C]/30 hover:shadow-xl hover:shadow-[#1E4C8C]/40"
                         >
                             {submitting ? "Creating your account..." : "Create Account"}
                         </Button>
                     </form>
 
-                    <p className="text-center text-sm text-slate-500 mt-7">
+                    <p className="text-center text-sm text-slate-500 mt-5">
                         Already have an account?{" "}
-                        <Link to="/login" className="font-semibold text-[#1E4C8C] hover:text-[#7CB93D]">
+                        <Link to="/login" className="font-semibold text-[#1E4C8C] hover:text-[#7CB93D] transition-colors">
                             Sign in
                         </Link>
                     </p>
+                    </div>
                 </div>
             </div>
 
@@ -561,6 +509,25 @@ export default function RegisterPage() {
         }
         .animate-fade-in-up {
           animation: fadeInUp 0.6s ease-out both;
+        }
+
+        /* Slim visible scrollbar so long form stays discoverable */
+        .auth-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: #CBD5E1 transparent;
+        }
+        .auth-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .auth-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .auth-scroll::-webkit-scrollbar-thumb {
+          background: #CBD5E1;
+          border-radius: 999px;
+        }
+        .auth-scroll::-webkit-scrollbar-thumb:hover {
+          background: #94A3B8;
         }
       `}</style>
         </div>

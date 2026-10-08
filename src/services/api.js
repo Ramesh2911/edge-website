@@ -56,10 +56,16 @@ api.interceptors.response.use(
 
                 case 401:
 
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
+                    // Only force-redirect when an existing session expired.
+                    // Public pages must never bounce guests to /login from a stray 401.
+                    if (localStorage.getItem("token")) {
 
-                    window.location.href = "/login";
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+
+                        window.location.href = "/login";
+
+                    }
 
                     break;
 
