@@ -232,7 +232,7 @@ export default function PropertyCard({
         const shareData = {
             title,
             text: `${title} — ${formatPrice(price)}`,
-            url: typeof window !== "undefined" ? `${window.location.origin}/property/${id}` : "",
+            url: typeof window !== "undefined" ? `${window.location.origin}/properties/details/${id}` : "",
         };
         if (navigator.share) {
             try {

@@ -87,7 +87,7 @@ export default function FeaturedProperties() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between gap-4 mt-7">
+      <div className="flex items-center gap-4 mt-7">
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
           {categories.map((tab) => (
             <button
@@ -103,22 +103,6 @@ export default function FeaturedProperties() {
             </button>
           ))}
         </div>
-        <div className="hidden sm:flex gap-2 shrink-0">
-          <button
-            onClick={() => scroll(-1)}
-            className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button
-            onClick={() => scroll(1)}
-            className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
-            aria-label="Scroll right"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
       </div>
 
       {/* Property Cards Slider */}
@@ -132,7 +116,23 @@ export default function FeaturedProperties() {
           {error}
         </div>
       ) : (
-        <div ref={trackRef} className="flex gap-5 mt-7 overflow-x-auto no-scrollbar scroll-px-5 pb-2">
+        <div className="relative mt-7">
+          <button
+            onClick={() => scroll(-1)}
+            className="absolute -left-1 sm:-left-3 top-[72px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={() => scroll(1)}
+            className="absolute -right-1 sm:-right-3 top-[72px] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          <div ref={trackRef} className="flex gap-5 overflow-x-auto no-scrollbar scroll-px-5 pb-2">
           {list.map((p) => {
             const title = p.property_title || p.title || "Untitled Property";
             const location = p.city ? `${p.city}, ${p.state || ""}` : p.address || "Location N/A";
@@ -214,6 +214,7 @@ export default function FeaturedProperties() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 

@@ -97,7 +97,7 @@ export default function RegisterPage() {
             login(user, token);
 
             toast.success(`Welcome to Edge Mile Realty, ${data.fullName.split(" ")[0]}!`);
-            navigate("/");
+            navigate("/dashboard");
         } catch (err) {
             const message =
                 err?.response?.data?.message ||

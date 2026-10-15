@@ -16,22 +16,23 @@ export default function Testimonials() {
           What Our Customers Say
         </h2>
       </div>
-      <div className="mt-5 hidden sm:flex justify-center gap-2">
+      <div className="relative mt-6">
         <button
           onClick={() => scroll(-1)}
-          className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
+          aria-label="Scroll left"
+          className="absolute -left-1 sm:-left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={20} />
         </button>
         <button
           onClick={() => scroll(1)}
-          className="w-9 h-9 rounded-full border border-[#1E4C8C]/15 flex items-center justify-center hover:bg-[#7CB93D] hover:text-white hover:border-[#7CB93D] transition-colors"
+          aria-label="Scroll right"
+          className="absolute -right-1 sm:-right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={20} />
         </button>
-      </div>
 
-      <div ref={trackRef} className="flex gap-5 mt-6 overflow-x-auto no-scrollbar pb-2">
+        <div ref={trackRef} className="flex gap-5 overflow-x-auto no-scrollbar pb-2">
         {testimonials.map((t) => (
           <div
             key={t.id}
@@ -55,6 +56,7 @@ export default function Testimonials() {
             </div>
           </div>
         ))}
+        </div>
       </div>
     </section>
   );

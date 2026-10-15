@@ -3,7 +3,22 @@ import { excellenceFeatures } from "../../data/staticData";
 
 const iconMap = { ShieldCheck, BadgePercent, Compass, Scale, Wallet };
 
+function FeatureCard({ f }) {
+  const Icon = iconMap[f.icon];
+  return (
+    <div className="w-[240px] shrink-0 bg-[#EAF1FB] rounded-2xl p-6 text-center hover:bg-white hover:shadow-card transition-all">
+      <span className="w-12 h-12 rounded-xl bg-[#EAF6DE] flex items-center justify-center mx-auto">
+        <Icon size={20} className="text-[#6FA82C]" />
+      </span>
+      <p className="font-display text-base text-[#1E4C8C] font-medium mt-4">{f.title}</p>
+      <p className="text-slate-500 text-xs mt-1.5 leading-snug">{f.desc}</p>
+    </div>
+  );
+}
+
 export default function WhyChooseUs() {
+  const items = [...excellenceFeatures, ...excellenceFeatures];
+
   return (
     <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-10 sm:pt-14 pb-4 sm:pb-6">
       <div className="text-center max-w-xl mx-auto">
@@ -18,22 +33,14 @@ export default function WhyChooseUs() {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-7">
-        {excellenceFeatures.map((f) => {
-          const Icon = iconMap[f.icon];
-          return (
-            <div
-              key={f.title}
-              className="bg-[#EAF1FB] rounded-2xl p-6 text-center hover:bg-white hover:shadow-card transition-all"
-            >
-              <span className="w-12 h-12 rounded-xl bg-[#EAF6DE] flex items-center justify-center mx-auto">
-                <Icon size={20} className="text-[#6FA82C]" />
-              </span>
-              <p className="font-display text-base text-[#1E4C8C] font-medium mt-4">{f.title}</p>
-              <p className="text-slate-500 text-xs mt-1.5 leading-snug">{f.desc}</p>
+      <div className="mt-7 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+        <div className="partner-marquee flex w-max py-2">
+          {items.map((f, i) => (
+            <div key={`${f.title}-${i}`} className="mr-4" aria-hidden={i >= excellenceFeatures.length}>
+              <FeatureCard f={f} />
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </section>
   );

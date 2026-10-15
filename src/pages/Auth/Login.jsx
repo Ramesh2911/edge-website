@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
     Mail,
@@ -22,6 +22,8 @@ const MOBILE_PATTERN = /^[6-9]\d{9}$/; // 10-digit Indian mobile number
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const redirectTo = searchParams.get("redirect");
     const { login } = useAuth();
 
     const [loginMode, setLoginMode] = useState("email"); // "email" | "mobile"
@@ -58,37 +60,20 @@ export default function LoginPage() {
 
             const { token, user } = res.data.data;
 
-            // Store in localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("role", user.role_name);
-
-            // Auth Context
+            // Auth Context (persists token/user/role in localStorage)
             login(user, token);
 
             toast.success(`Welcome back, ${user.full_name}!`);
 
             reset();
 
-            switch (user.role_name) {
-                case "Owner":
-                    navigate("/dashboard");
-                    break;
-
-                case "Broker":
-                    navigate("/dashboard");
-                    break;
-
-                case "Developer":
-                    navigate("/dashboard");
-                    break;
-
-                case "Buyer":
-                    navigate("/dashboard");
-                    break;
-
-                default:
-                    navigate("/");
+            // Redirect back to the page the guest came from (e.g. /wishlist,
+            // /add-property) — only allow same-origin paths (must start with
+            // "/", not "//") to avoid open-redirects. Otherwise → dashboard.
+            if (redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")) {
+                navigate(redirectTo);
+            } else {
+                navigate("/dashboard");
             }
 
         } catch (err) {

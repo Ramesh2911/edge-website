@@ -9,12 +9,6 @@ export default function LeadPopup() {
     name: "",
     phone: "",
     email: "",
-    purpose: "Buy",
-    propertyType: "House",
-    minBudget: "",
-    maxBudget: "",
-    city: "",
-    notes: "",
   });
 
   useEffect(() => {
@@ -129,88 +123,6 @@ export default function LeadPopup() {
                     onChange={handleChange}
                     placeholder="Your email address"
                     className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] placeholder:text-[#6B6E6F]/50 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                  />
-                </div>
-
-                {/* Purpose & Property Type Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#2B2D2E] mb-1">What are you looking for?</label>
-                    <select
-                      name="purpose"
-                      value={form.purpose}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                    >
-                      <option value="Buy">Buy</option>
-                      <option value="Rent">Rent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#2B2D2E] mb-1">Property Type</label>
-                    <select
-                      name="propertyType"
-                      value={form.propertyType}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                    >
-                      <option value="House">House</option>
-                      <option value="Apartment">Apartment</option>
-                      <option value="Office">Office</option>
-                      <option value="Plot">Plot</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Budget Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#2B2D2E] mb-1">Min Budget</label>
-                    <input
-                      type="number"
-                      name="minBudget"
-                      value={form.minBudget}
-                      onChange={handleChange}
-                      placeholder="e.g. 2000000"
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] placeholder:text-[#6B6E6F]/50 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#2B2D2E] mb-1">Max Budget</label>
-                    <input
-                      type="number"
-                      name="maxBudget"
-                      value={form.maxBudget}
-                      onChange={handleChange}
-                      placeholder="e.g. 5000000"
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] placeholder:text-[#6B6E6F]/50 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                    />
-                  </div>
-                </div>
-
-                {/* City */}
-                <div>
-                  <label className="block text-sm font-medium text-[#2B2D2E] mb-1">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={form.city}
-                    onChange={handleChange}
-                    placeholder="Preferred city"
-                    className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] placeholder:text-[#6B6E6F]/50 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
-                  />
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="block text-sm font-medium text-[#2B2D2E] mb-1">Notes</label>
-                  <textarea
-                    name="notes"
-                    value={form.notes}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="Any specific requirements..."
-                    className="w-full px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 bg-white text-[#2B2D2E] placeholder:text-[#6B6E6F]/50 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition resize-none"
                   />
                 </div>
 

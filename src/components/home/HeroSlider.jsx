@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const AUTO_DELAY = 5000;
 
-export default function HeroSlider({ slides }) {
+export default function HeroSlider({ slides, children }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const total = slides.length;
@@ -21,7 +21,7 @@ export default function HeroSlider({ slides }) {
 
   return (
     <section
-      className="relative overflow-hidden h-[240px] sm:h-[320px] lg:h-[380px]"
+      className="relative overflow-hidden h-[300px] sm:h-[380px] lg:h-[440px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -40,16 +40,38 @@ export default function HeroSlider({ slides }) {
         />
       ))}
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-4">
-        <button
-          type="button"
-          aria-label="Previous slide"
-          onClick={() => go(-1)}
-          className="w-9 h-9 rounded-full bg-white/80 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <div className="flex items-center gap-2">
+      {/* Side arrows */}
+      {total > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Previous slide"
+            onClick={() => go(-1)}
+            className="absolute left-3 bottom-5 sm:left-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            aria-label="Next slide"
+            onClick={() => go(1)}
+            className="absolute right-3 bottom-5 sm:right-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
+      )}
+
+      {/* Center overlay (search bar) */}
+      {children && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-14 pt-12 sm:pt-16">
+          <div className="w-full max-w-4xl">{children}</div>
+        </div>
+      )}
+
+      {/* Dots */}
+      {total > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
           {slides.map((slide, i) => (
             <button
               key={slide.id}
@@ -58,20 +80,14 @@ export default function HeroSlider({ slides }) {
               aria-current={i === current}
               onClick={() => setCurrent(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? "w-7 bg-[#7CB93D]" : "w-2 bg-[#1E4C8C]/25 hover:bg-[#1E4C8C]/40"
+                i === current
+                  ? "w-7 bg-[#7CB93D]"
+                  : "w-2 bg-white/70 hover:bg-white"
               }`}
             />
           ))}
         </div>
-        <button
-          type="button"
-          aria-label="Next slide"
-          onClick={() => go(1)}
-          className="w-9 h-9 rounded-full bg-white/80 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
-        >
-          <ChevronRight size={18} />
-        </button>
-      </div>
+      )}
     </section>
   );
 }

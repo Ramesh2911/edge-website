@@ -1,9 +1,8 @@
 import Hero from "../../components/home/Hero";
 import ExploreMore from "../../components/home/ExploreMore";
 import FeaturedProperties from "../../components/home/FeaturedProperties";
-import TrustBadges from "../../components/home/TrustBadges";
 import PopularLocalities from "../../components/home/PopularLocalities";
-import DreamHomeCTA from "../../components/home/DreamHomeCTA";
+import HomeLoan from "../../components/home/HomeLoan";
 import WhyChooseUs from "../../components/home/WhyChooseUs";
 import Testimonials from "../../components/home/Testimonials";
 import StatsCTA from "../../components/home/StatsCTA";
@@ -15,16 +14,15 @@ export default function Home() {
     return (
         <>
             <Hero />
-            <ExploreMore />
             <FeaturedProperties />
-            <TrustBadges />
+            <ExploreMore />
             <PopularLocalities />
-            <DreamHomeCTA />
-            <WhyChooseUs />
+      <HomeLoan />
+      <WhyChooseUs />
+      <Partners />
             <Testimonials />
-            <StatsCTA />
-            <Partners />
             <BlogSection />
+            <StatsCTA />
             <LeadPopup />
         </>
     );
