@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Heart, BedDouble, Ruler, CalendarCheck, Loader2 } from "lucide-react";
 import propertyService from '../../services/property.service';
+import { formatPrice } from '../../utils/formatPrice';
 
 export default function FeaturedProperties() {
   const [categories, setCategories] = useState(["All Properties"]);
@@ -70,17 +71,14 @@ export default function FeaturedProperties() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-10 sm:pb-14">
-      <div className="text-center max-w-2xl mx-auto">
-        <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+      <div className="text-center max-w-3xl mx-auto">
+        <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-[#1E4C8C] font-medium">
           Featured Properties
-        </span>
-        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
-          Handpicked Properties for You
         </h2>
         <a
           href="/properties"
-          className="inline-block text-sm font-semibold text-[#6FA82C] hover:underline mt-3"
+          className="inline-block text-sm font-semibold text-[#6FA82C] hover:underline mt-2.5"
         >
           View All Properties →
         </a>
@@ -137,9 +135,7 @@ export default function FeaturedProperties() {
             const title = p.property_title || p.title || "Untitled Property";
             const location = p.city ? `${p.city}, ${p.state || ""}` : p.address || "Location N/A";
             const rawPrice = parseFloat(p.price || 0);
-            const formattedPrice = rawPrice > 0 
-              ? `₹${rawPrice.toLocaleString('en-IN')}` 
-              : "Price on Request";
+            const formattedPrice = formatPrice(rawPrice);
             
             const imageSrc = p.image_url || p.cover_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80";
             const badgeLabel = p.construction_status || p.property_for || "For Sale";

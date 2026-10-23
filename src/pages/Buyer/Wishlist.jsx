@@ -1,203 +1,500 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-    Heart, Search, Grid, List, Trash2, Share2, Scale,
-    MessageSquare, Eye, Loader2, ArrowRight, Building
-} from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
-import SEO from '../../components/Contact/SEO';
-import propertyService from '../../services/property.service';
+    Heart,
+    Search,
+    LayoutGrid,
+    List,
+    Trash2,
+    Share2,
+    Eye,
+    Loader2,
+    MapPin,
+    BedDouble,
+    Bath,
+    Ruler,
+    ArrowRight,
+    Sparkles,
+    Home,
+    SlidersHorizontal,
+} from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+import SEO from "../../components/Contact/SEO";
+import propertyService from "../../services/property.service";
+import { resolveImageUrl } from "../../utils/imageUrl";
+import { formatPrice } from "../../utils/formatPrice";
+
+const PLACEHOLDER =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F8E8E8"/><stop offset="100%" stop-color="#F0D4D4"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/><path d="M320 270 C290 240 250 215 250 185 C250 165 265 150 285 150 C300 150 312 158 320 170 C328 158 340 150 355 150 C375 150 390 165 390 185 C390 215 350 240 320 270 Z" fill="none" stroke="#D4A0A0" stroke-width="4" stroke-linejoin="round"/></svg>`
+    );
+
+const STATUS_META = {
+    Approved: { label: "Live", badge: "bg-[#EAF6DE] text-[#4F7D1F] border-[#7CB93D]/30", dot: "bg-[#7CB93D]" },
+    Pending: { label: "Pending", badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
+    Rejected: { label: "Rejected", badge: "bg-red-50 text-red-600 border-red-200", dot: "bg-red-500" },
+};
+
+const statusMeta = (s) =>
+    STATUS_META[s] || {
+        label: s || "Unknown",
+        badge: "bg-slate-100 text-slate-600 border-slate-200",
+        dot: "bg-slate-400",
+    };
+
+const formatDate = (d) => {
+    if (!d) return "—";
+    try {
+        return new Date(d).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    } catch {
+        return "—";
+    }
+};
 
 export default function Wishlist() {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-
-    // Filtering and Parameter Controls State Machine
-    const [searchQuery, setSearchQuery] = useState('');
-    const [purposeFilter, setPurposeFilter] = useState('all'); // 'all' | 'sale' | 'rent'
-    const [typeFilter, setTypeFilter] = useState('all');
-    const [maxPrice, setMaxPrice] = useState('');
-
-    // Property Asset Comparison Drawer State Array
-    const [compareList, setCompareList] = useState([]);
-
-    useEffect(() => {
-        fetchSavedWishlist();
-    }, []);
+    const [viewMode, setViewMode] = useState("grid");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [purposeFilter, setPurposeFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [removeId, setRemoveId] = useState(null);
+    const [isRemoving, setIsRemoving] = useState(false);
 
     const fetchSavedWishlist = async () => {
         setLoading(true);
         try {
-            const { data } = await propertyService.getWishlist();
-            setItems(data.wishlist || []);
+            const res = await propertyService.getWishlist();
+            const list = res?.data?.data || [];
+            setItems(Array.isArray(list) ? list : []);
         } catch (err) {
-            // High-fidelity fallback mock array configuration for direct execution
-            setItems([
-                { id: '1', title: 'Grand Horizon Penthouse', price: 2100000, type: 'apartment', purpose: 'sale', city: 'Manhattan', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400', beds: 3, baths: 3.5, area: 3200 },
-                { id: '2', title: 'Coastal Serenity Estate', price: 4850000, type: 'villa', purpose: 'sale', city: 'Malibu', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400', beds: 5, baths: 6, area: 5400 },
-                { id: '3', title: 'Urban Lofts Over Madison', price: 6500, type: 'apartment', purpose: 'rent', city: 'Chicago', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400', beds: 1, baths: 1.5, area: 1100 }
-            ]);
+            toast.error(err?.response?.data?.message || err.message || "Failed to load wishlist.");
+            setItems([]);
         } finally {
             setLoading(false);
         }
     };
 
+    useEffect(() => {
+        fetchSavedWishlist();
+    }, []);
+
+    const stats = useMemo(() => {
+        const total = items.length;
+        const sale = items.filter((i) => (i.property_for || "Sale") === "Sale").length;
+        const rent = items.filter((i) => i.property_for === "Rent").length;
+        const live = items.filter((i) => i.property_status === "Approved").length;
+        return { total, sale, rent, live };
+    }, [items]);
+
+    const filteredItems = useMemo(() => {
+        let list = items.slice();
+
+        if (purposeFilter !== "all") {
+            list = list.filter((i) => (i.property_for || "Sale") === purposeFilter);
+        }
+        if (statusFilter !== "all") {
+            list = list.filter((i) => i.property_status === statusFilter);
+        }
+
+        const q = searchQuery.trim().toLowerCase();
+        if (q) {
+            list = list.filter(
+                (i) =>
+                    (i.property_title || "").toLowerCase().includes(q) ||
+                    (i.city || "").toLowerCase().includes(q) ||
+                    (i.address || "").toLowerCase().includes(q)
+            );
+        }
+
+        const max = Number(maxPrice);
+        if (maxPrice && !Number.isNaN(max)) {
+            list = list.filter((i) => parseFloat(i.price || 0) <= max);
+        }
+
+        list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        return list;
+    }, [items, purposeFilter, statusFilter, searchQuery, maxPrice]);
+
     const removeItem = async (id, title) => {
+        setRemoveId(id);
+        setIsRemoving(true);
         try {
             await propertyService.removeWishlist(id);
-            // Remove element locally for immediate interface snap feedback
-            setItems(prev => prev.filter(item => item.id !== id));
-            setCompareList(prev => prev.filter(item => item.id !== id));
-            toast.success(`"${title}" removed from saved portfolio.`);
+            setItems((prev) => prev.filter((item) => item.id !== id));
+            toast.success(`"${title || "Property"}" removed from wishlist.`);
         } catch (err) {
-            toast.error('Failed to update wishlist repository.');
+            toast.error(err?.response?.data?.message || err.message || "Failed to remove.");
+        } finally {
+            setIsRemoving(false);
+            setRemoveId(null);
         }
     };
 
     const sharePropertyLink = (id) => {
-        const domain = window.location.origin;
-        navigator.clipboard.writeText(`${domain}/properties/${id}`);
-        toast.success('Property asset share URL copied to clipboard!');
+        const url = `${window.location.origin}/properties/details/${id}`;
+        navigator.clipboard.writeText(url);
+        toast.success("Property link copied!");
     };
 
-    const toggleCompareState = (item) => {
-        const exists = compareList.find(c => c.id === item.id);
-        if (exists) {
-            setCompareList(prev => prev.filter(c => c.id !== item.id));
-            toast.success('Removed from comparison grid.');
-        } else {
-            if (compareList.length >= 3) {
-                return toast.error('You can compare a maximum of 3 unique properties simultaneously.');
-            }
-            setCompareList(prev => [...prev, item]);
-            toast.success('Added to comparison checklist.');
-        }
+    const coverOf = (prop) => {
+        if (prop.images && prop.images.length) return resolveImageUrl(prop.images[0]);
+        return PLACEHOLDER;
     };
 
-    const dispatchAgentConsultation = (title) => {
-        toast(`Routing priority live-chat channel to assigned broker for: ${title}`, { icon: '💬' });
-    };
-
-    // Client-Side Performance Tuned Processing Filters
-    const filteredItems = items.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || item.city.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesPurpose = purposeFilter === 'all' || item.purpose === purposeFilter;
-        const matchesType = typeFilter === 'all' || item.type === typeFilter;
-        const matchesPrice = !maxPrice || item.price <= parseInt(maxPrice, 10);
-        return matchesSearch && matchesPurpose && matchesType && matchesPrice;
-    });
+    const statCards = [
+        { key: "total", label: "Saved Homes", value: stats.total, icon: Heart, gradient: "from-[#0F2D52] via-[#153964] to-[#1E4C8C]" },
+        { key: "sale", label: "For Sale", value: stats.sale, icon: Home, gradient: "from-[#7CB93D] to-[#5A9E2B]" },
+        { key: "rent", label: "For Rent", value: stats.rent, icon: Sparkles, gradient: "from-amber-400 to-amber-500" },
+        { key: "live", label: "Live Listings", value: stats.live, icon: Eye, gradient: "from-rose-400 to-rose-500" },
+    ];
 
     return (
         <>
-            <SEO title="My Saved Wishlist | Buyer Portfolio" description="Review saved residential holdings, evaluate price metrics, and execute cross-property structural comparisons." />
+            <SEO
+                title="My Wishlist | Edge Mile Realty"
+                description="Review and manage your saved property shortlist."
+            />
             <Toaster position="top-right" />
 
-            <main className="min-h-screen bg-slate-50 dark:bg-slate-900 py-10 px-4 sm:px-6 lg:px-8 pb-32">
-                <div className="max-w-7xl mx-auto space-y-8">
-
-                    {/* Header Summary Stats Row */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                                <Heart className="w-8 h-8 text-rose-500 fill-rose-500" /> Saved Properties
-                            </h1>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                You have curated <span className="text-indigo-600 dark:text-indigo-400 font-bold">{filteredItems.length}</span> luxury assets across your tracked collection indices.
-                            </p>
+            <div className="min-h-screen bg-[#F7FAFC] pb-16">
+                {/* Hero */}
+                <div className="bg-gradient-to-r from-[#0F2D52] via-[#153964] to-[#1E4C8C] relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <svg viewBox="0 0 800 200" fill="none" className="w-full h-full">
+                            <circle cx="680" cy="100" r="160" stroke="#8BC53F" strokeWidth="1" />
+                            <circle cx="680" cy="100" r="110" stroke="#8BC53F" strokeWidth="1" />
+                            <path d="M0 150 L200 90 L400 130 L600 70 L800 110" stroke="#8BC53F" strokeWidth="1.5" />
+                        </svg>
+                    </div>
+                    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+                            <div>
+                                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 backdrop-blur-sm mb-4">
+                                    <Heart size={14} className="text-rose-300 fill-rose-300" />
+                                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-rose-200">
+                                        Shortlist Collection
+                                    </span>
+                                </div>
+                                <h1 className="font-display text-3xl sm:text-4xl text-white font-medium leading-tight">
+                                    My Wishlist
+                                </h1>
+                                <p className="text-white/55 text-sm mt-3 max-w-lg">
+                                    Properties you have saved — compare, share, or jump straight to details.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/properties")}
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#7CB93D] hover:bg-[#8BC53F] text-white text-sm font-bold rounded-xl shadow-[0_10px_30px_-8px_rgba(124,185,61,0.55)] transition-all active:scale-[0.98] shrink-0"
+                            >
+                                Browse More Properties
+                                <ArrowRight size={16} />
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    {/* Advanced Refinement Query Bar */}
-                    <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/80 flex flex-col lg:flex-row gap-4 items-center justify-between">
-                        <div className="relative w-full lg:w-72">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search title name or city matrix..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
-                            />
-                        </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 space-y-6">
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        {statCards.map(({ key, label, value, icon: Icon, gradient }) => (
+                            <div
+                                key={key}
+                                className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] p-4 sm:p-5 flex items-center gap-3.5 hover:shadow-[0_8px_28px_-6px_rgba(21,57,100,0.12)] transition-shadow"
+                            >
+                                <div
+                                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-md shrink-0`}
+                                >
+                                    <Icon size={20} className={key === "total" ? "fill-white" : ""} />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">
+                                        {label}
+                                    </p>
+                                    <p className="text-2xl font-extrabold text-slate-800 leading-tight mt-0.5">
+                                        {loading ? "—" : value}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
 
-                        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
-                            <select value={purposeFilter} onChange={(e) => setPurposeFilter(e.target.value)} className="text-sm p-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl outline-none">
-                                <option value="all">All Intentions</option>
-                                <option value="sale">For Acquisition</option>
-                                <option value="rent">For Rent / Lease</option>
-                            </select>
+                    {/* Toolbar */}
+                    <div className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] p-4 sm:p-5">
+                        <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4">
+                            <div className="relative flex-1 min-w-0">
+                                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by title, city, or address…"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15 transition-all placeholder:text-slate-400"
+                                />
+                            </div>
 
-                            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="text-sm p-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl outline-none">
-                                <option value="all">All Structures</option>
-                                <option value="apartment">Apartments</option>
-                                <option value="villa">Villas / Mansions</option>
-                            </select>
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <div className="relative">
+                                    <SlidersHorizontal
+                                        size={14}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                                    />
+                                    <select
+                                        value={purposeFilter}
+                                        onChange={(e) => setPurposeFilter(e.target.value)}
+                                        className="appearance-none pl-9 pr-8 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-medium bg-[#F7FAFC] focus:bg-white focus:outline-none focus:border-[#7CB93D] transition-all text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="all">All Intent</option>
+                                        <option value="Sale">For Sale</option>
+                                        <option value="Rent">For Rent</option>
+                                    </select>
+                                </div>
 
-                            <input
-                                type="number"
-                                placeholder="Max Price (₹)"
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(e.target.value)}
-                                className="text-sm p-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl w-32 outline-none"
-                            />
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="appearance-none px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-medium bg-[#F7FAFC] focus:bg-white focus:outline-none focus:border-[#7CB93D] transition-all text-slate-700 cursor-pointer"
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="Approved">Live</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
 
-                            <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 p-1 rounded-xl bg-slate-50 dark:bg-slate-900">
-                                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-lg ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-indigo-600' : 'text-slate-400'}`}>
-                                    <Grid className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-lg ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-indigo-600' : 'text-slate-400'}`}>
-                                    <List className="w-4 h-4" />
-                                </button>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Max ₹"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(e.target.value)}
+                                    className="w-28 px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-medium bg-[#F7FAFC] focus:bg-white focus:outline-none focus:border-[#7CB93D] transition-all placeholder:text-slate-400"
+                                />
+
+                                <div className="flex items-center border-2 border-slate-200 p-1 rounded-xl bg-[#F7FAFC]">
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode("grid")}
+                                        aria-label="Grid view"
+                                        className={`p-2 rounded-lg transition-all ${
+                                            viewMode === "grid"
+                                                ? "bg-white text-[#153964] shadow-sm"
+                                                : "text-slate-400 hover:text-slate-600"
+                                        }`}
+                                    >
+                                        <LayoutGrid size={16} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode("list")}
+                                        aria-label="List view"
+                                        className={`p-2 rounded-lg transition-all ${
+                                            viewMode === "list"
+                                                ? "bg-white text-[#153964] shadow-sm"
+                                                : "text-slate-400 hover:text-slate-600"
+                                        }`}
+                                    >
+                                        <List size={16} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
+                        {!loading && (
+                            <p className="text-xs text-slate-400 mt-3 font-medium">
+                                Showing{" "}
+                                <span className="text-slate-600 font-bold">{filteredItems.length}</span> of{" "}
+                                <span className="text-slate-600 font-bold">{items.length}</span> saved{" "}
+                                {items.length === 1 ? "property" : "properties"}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Grid Conditional Processing Render Viewports */}
+                    {/* Content */}
                     {loading ? (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[...Array(3)].map((_, i) => (
-                                <div key={i} className="w-full aspect-[4/3] bg-white dark:bg-slate-800 rounded-2xl animate-pulse border border-slate-100 dark:border-slate-700" />
+                        <div
+                            className={
+                                viewMode === "grid"
+                                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                                    : "space-y-3"
+                            }
+                        >
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden animate-pulse"
+                                >
+                                    <div className={viewMode === "grid" ? "aspect-[16/10] bg-slate-100" : "h-0"} />
+                                    <div className="p-5 space-y-3">
+                                        <div className="h-4 w-2/3 bg-slate-100 rounded-full" />
+                                        <div className="h-3 w-1/2 bg-slate-100 rounded-full" />
+                                        <div className="h-6 w-1/3 bg-slate-100 rounded-full" />
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     ) : filteredItems.length === 0 ? (
-                        <div className="text-center py-24 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 max-w-xl mx-auto">
-                            <Building className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                            <p className="text-lg font-bold text-slate-900 dark:text-white">Your curated board is clear</p>
-                            <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">No tracking matrices match your filter criteria or you haven't appended any bookmarks yet.</p>
-                            <button onClick={() => navigate('/properties')} className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-white bg-indigo-600 px-4 py-2 rounded-xl hover:bg-indigo-700 transition">Explore Properties <ArrowRight className="w-3.5 h-3.5" /></button>
+                        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 py-20 px-6 text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-rose-500 flex items-center justify-center text-white mx-auto shadow-lg mb-5">
+                                <Heart size={26} className="fill-white" />
+                            </div>
+                            <h3 className="font-display text-xl text-slate-800 font-medium">
+                                {items.length === 0 ? "Your wishlist is empty" : "No matching properties"}
+                            </h3>
+                            <p className="text-sm text-slate-400 mt-2 max-w-sm mx-auto">
+                                {items.length === 0
+                                    ? "Tap the heart on any property to save it here for later."
+                                    : "Try adjusting search, intent, status, or max price filters."}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    items.length === 0
+                                        ? navigate("/properties")
+                                        : (setSearchQuery(""),
+                                          setPurposeFilter("all"),
+                                          setStatusFilter("all"),
+                                          setMaxPrice(""))
+                                }
+                                className="mt-6 inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#153964] to-[#1E4C8C] text-white text-sm font-bold rounded-xl shadow-[0_8px_24px_-6px_rgba(21,57,100,0.4)] transition-all active:scale-[0.98]"
+                            >
+                                {items.length === 0 ? (
+                                    <>
+                                        Explore Properties <ArrowRight size={16} />
+                                    </>
+                                ) : (
+                                    "Clear Filters"
+                                )}
+                            </button>
                         </div>
-                    ) : viewMode === 'grid' ? (
-                        /* Card Grid Presentation Engine */
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredItems.map((item) => {
-                                const isCompared = compareList.some(c => c.id === item.id);
+                    ) : viewMode === "grid" ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {filteredItems.map((prop) => {
+                                const meta = statusMeta(prop.property_status);
+                                const cover = coverOf(prop);
+                                const isRemoval = removeId === prop.id && isRemoving;
                                 return (
-                                    <div key={item.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-between">
-                                        <div className="relative aspect-[16/10] bg-slate-100">
-                                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                                            <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded">For {item.purpose}</span>
-                                            <button onClick={() => removeItem(item.id, item.title)} className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-slate-900/90 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition shadow-sm" title="Remove">
-                                                <Trash2 className="w-4 h-4" />
+                                    <div
+                                        key={prop.id}
+                                        className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] overflow-hidden hover:shadow-[0_12px_32px_-8px_rgba(21,57,100,0.16)] hover:-translate-y-0.5 transition-all group flex flex-col"
+                                    >
+                                        <div
+                                            className="relative aspect-[16/10] bg-slate-100 overflow-hidden cursor-pointer"
+                                            onClick={() => navigate(`/properties/details/${prop.id}`)}
+                                        >
+                                            <img
+                                                src={cover}
+                                                alt={prop.property_title || "Property"}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                onError={(e) => {
+                                                    e.currentTarget.src = PLACEHOLDER;
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+
+                                            <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur text-[#153964] px-2.5 py-1 rounded-full shadow-sm">
+                                                {prop.property_for || "Sale"}
+                                            </span>
+
+                                            <span
+                                                className={`absolute top-3 right-14 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border backdrop-blur ${meta.badge}`}
+                                            >
+                                                <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+                                                {meta.label}
+                                            </span>
+
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeItem(prop.id, prop.property_title);
+                                                }}
+                                                disabled={isRemoval}
+                                                title="Remove from wishlist"
+                                                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 backdrop-blur flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white shadow-md transition-all disabled:opacity-60"
+                                            >
+                                                {isRemoval ? (
+                                                    <Loader2 size={15} className="animate-spin" />
+                                                ) : (
+                                                    <Trash2 size={15} />
+                                                )}
                                             </button>
+
+                                            <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg shadow">
+                                                <span className="text-sm font-extrabold text-[#153964]">
+                                                    {formatPrice(prop.price)}
+                                                </span>
+                                                {prop.property_for === "Rent" && (
+                                                    <span className="text-[10px] text-slate-500 font-bold">/mo</span>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                                            <div>
-                                                <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{item.title}</h3>
-                                                <p className="text-xs text-slate-400 mt-0.5 font-medium">{item.city} Structure Portfolio</p>
-                                                <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-2.5">
-                                                    ₹{item.price.toLocaleString()}
-                                                    {item.purpose === 'rent' && <span className="text-xs font-normal text-slate-400">/mo</span>}
-                                                </div>
+                                        <div className="p-4 sm:p-5 flex-1 flex flex-col">
+                                            <h3
+                                                className="font-bold text-slate-800 line-clamp-1 cursor-pointer hover:text-[#153964] transition-colors"
+                                                onClick={() => navigate(`/properties/details/${prop.id}`)}
+                                            >
+                                                {prop.property_title || "Untitled property"}
+                                            </h3>
+                                            <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1 line-clamp-1">
+                                                <MapPin size={12} className="shrink-0" />
+                                                {prop.address ||
+                                                    [prop.city, prop.state].filter(Boolean).join(", ") ||
+                                                    "Location not set"}
+                                            </p>
+
+                                            <div className="flex flex-wrap gap-x-3.5 gap-y-1.5 mt-3 text-[11px] font-semibold text-slate-500">
+                                                {prop.area != null && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <Ruler size={12} className="text-[#7CB93D]" />
+                                                        {Number(prop.area).toLocaleString("en-IN")}{" "}
+                                                        {prop.area_unit || "sq.ft"}
+                                                    </span>
+                                                )}
+                                                {Number(prop.bedroom) > 0 && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <BedDouble size={12} className="text-[#7CB93D]" />
+                                                        {prop.bedroom} Bed
+                                                    </span>
+                                                )}
+                                                {Number(prop.bathroom) > 0 && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <Bath size={12} className="text-[#7CB93D]" />
+                                                        {prop.bathroom} Bath
+                                                    </span>
+                                                )}
                                             </div>
 
-                                            <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-50 dark:border-slate-700/50 text-center text-slate-400 text-xs font-bold">
-                                                <button onClick={() => navigate(`/properties/${item.id}`)} className="p-2 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center transition" title="Inspect Layout"><Eye className="w-4 h-4 text-slate-500" /></button>
-                                                <button onClick={() => toggleCompareState(item)} className={`p-2 rounded-lg flex items-center justify-center transition ${isCompared ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600' : 'bg-slate-50 dark:bg-slate-900 hover:bg-slate-100'}`} title="Toggle Compare Grid"><Scale className="w-4 h-4" /></button>
-                                                <button onClick={() => sharePropertyLink(item.id)} className="p-2 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 rounded-lg flex items-center justify-center transition" title="Share Assets"><Share2 className="w-4 h-4" /></button>
-                                                <button onClick={() => dispatchAgentConsultation(item.title)} className="p-2 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 rounded-lg flex items-center justify-center transition" title="Contact Representative"><MessageSquare className="w-4 h-4" /></button>
+                                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                                                <span className="text-[11px] text-slate-400 font-medium">
+                                                    Saved {formatDate(prop.created_at)}
+                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => sharePropertyLink(prop.id)}
+                                                        title="Share"
+                                                        className="p-2 rounded-lg text-slate-500 hover:text-[#153964] hover:bg-[#153964]/8 transition-all"
+                                                    >
+                                                        <Share2 size={15} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => navigate(`/properties/details/${prop.id}`)}
+                                                        title="View details"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-white bg-gradient-to-r from-[#153964] to-[#1E4C8C] rounded-lg hover:from-[#0F2D52] hover:to-[#153964] transition-all"
+                                                    >
+                                                        <Eye size={13} /> View
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -205,59 +502,102 @@ export default function Wishlist() {
                             })}
                         </div>
                     ) : (
-                        /* Compressed Line Row View Mode Engine */
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden divide-y divide-slate-100 dark:divide-slate-700/60 shadow-sm">
-                            {filteredItems.map((item) => (
-                                <div key={item.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition">
-                                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                                        <img src={item.image} alt="" className="w-20 h-14 object-cover rounded-xl border bg-slate-100 flex-shrink-0" />
-                                        <div className="min-w-0">
-                                            <h3 className="font-bold text-slate-900 dark:text-white truncate">{item.title}</h3>
-                                            <p className="text-xs text-slate-400 font-medium">{item.city} • <span className="uppercase font-bold text-[10px] tracking-wider text-slate-500">For {item.purpose}</span></p>
-                                            <div className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1">₹{item.price.toLocaleString()}</div>
+                        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] overflow-hidden">
+                            <div className="divide-y divide-slate-100">
+                                {filteredItems.map((prop) => {
+                                    const meta = statusMeta(prop.property_status);
+                                    const isRemoval = removeId === prop.id && isRemoving;
+                                    return (
+                                        <div
+                                            key={prop.id}
+                                            className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-slate-50/70 transition-colors"
+                                        >
+                                            <div
+                                                className="flex items-center gap-4 min-w-0 flex-1 cursor-pointer"
+                                                onClick={() => navigate(`/properties/details/${prop.id}`)}
+                                            >
+                                                <div className="w-24 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/60">
+                                                    <img
+                                                        src={coverOf(prop)}
+                                                        alt=""
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = PLACEHOLDER;
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <h3 className="font-bold text-slate-800 line-clamp-1">
+                                                            {prop.property_title || "Untitled property"}
+                                                        </h3>
+                                                        <span
+                                                            className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${meta.badge}`}
+                                                        >
+                                                            {meta.label}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-400 mt-1 flex items-center gap-1 line-clamp-1">
+                                                        <MapPin size={11} className="shrink-0" />
+                                                        {prop.city || "—"}
+                                                        {prop.state ? `, ${prop.state}` : ""}
+                                                    </p>
+                                                    <div className="flex items-center gap-3 mt-1.5 text-[11px] font-semibold text-slate-500">
+                                                        <span className="font-extrabold text-[#153964] text-sm">
+                                                            {formatPrice(prop.price)}
+                                                            {prop.property_for === "Rent" && "/mo"}
+                                                        </span>
+                                                        {prop.area != null && (
+                                                            <span>
+                                                                {Number(prop.area).toLocaleString("en-IN")}{" "}
+                                                                {prop.area_unit || "sq.ft"}
+                                                            </span>
+                                                        )}
+                                                        {Number(prop.bedroom) > 0 && (
+                                                            <span>{prop.bedroom} Bed</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 sm:justify-end shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => sharePropertyLink(prop.id)}
+                                                    title="Share"
+                                                    className="p-2.5 rounded-xl border border-slate-200 text-slate-500 hover:text-[#153964] hover:border-[#153964]/30 transition-all"
+                                                >
+                                                    <Share2 size={15} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate(`/properties/details/${prop.id}`)}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#153964] to-[#1E4C8C] rounded-xl hover:from-[#0F2D52] hover:to-[#153964] transition-all"
+                                                >
+                                                    <Eye size={14} /> View
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeItem(prop.id, prop.property_title)}
+                                                    disabled={isRemoval}
+                                                    title="Remove"
+                                                    className="p-2.5 rounded-xl border border-rose-200 text-rose-500 bg-rose-50 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all disabled:opacity-60"
+                                                >
+                                                    {isRemoval ? (
+                                                        <Loader2 size={15} className="animate-spin" />
+                                                    ) : (
+                                                        <Trash2 size={15} />
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-0 pt-3 sm:pt-0">
-                                        <button onClick={() => navigate(`/properties/${item.id}`)} className="px-3 py-1.5 text-xs font-bold border rounded-lg hover:bg-slate-50 dark:bg-slate-900 dark:text-white transition">View Details</button>
-                                        <button onClick={() => removeItem(item.id, item.title)} className="p-2 border border-rose-100 text-rose-500 bg-rose-50/50 dark:bg-rose-950/20 dark:border-rose-900/40 rounded-lg hover:bg-rose-600 hover:text-white transition"><Trash2 className="w-4 h-4" /></button>
-                                    </div>
-                                </div>
-                            ))}
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
-            </main>
-
-            {/* Persistent Global Compare Metrics Overlay Dock Panel */}
-            {compareList.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 shadow-[0_-8px_30px_rgb(0,0,0,0.06)] p-4 animate-slideUp">
-                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2"><Scale className="w-4 h-4 text-indigo-600" /> Matrix Match Analysis Deck</h4>
-                            <p className="text-[11px] text-slate-400 mt-0.5">Comparing <span className="font-bold text-indigo-600">{compareList.length} / 3</span> chosen unique architecture designs.</p>
-                        </div>
-
-                        <div className="flex gap-3 overflow-x-auto w-full md:w-auto py-1 scrollbar-none">
-                            {compareList.map(c => (
-                                <div key={c.id} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 flex-shrink-0">
-                                    <span className="truncate max-w-[120px] font-bold">{c.title}</span>
-                                    <button onClick={() => toggleCompareState(c)} className="text-slate-400 hover:text-rose-500 font-bold ml-1">×</button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={() => {
-                                toast.success('Compiling performance blueprint profiles...');
-                                // Append custom routing logic triggering comparative metrics view dashboards
-                            }}
-                            className="w-full md:w-auto text-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition"
-                        >
-                            Launch Comparison Matrix
-                        </button>
-                    </div>
-                </div>
-            )}
+            </div>
         </>
     );
 }

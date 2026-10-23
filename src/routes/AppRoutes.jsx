@@ -34,6 +34,13 @@ import Interested from "../pages/Buyer/Interested";
 
 import BuyerRequirement from "../pages/Lead/BuyerRequirement";
 
+import SiteVisits from "../pages/SiteVisits/SiteVisits";
+import Deals from "../pages/Deals/Deals";
+import Commissions from "../pages/Commission/Commissions";
+import Reports from "../pages/Reports/Reports";
+import Projects from "../pages/Projects/Projects";
+import ManageUnits from "../pages/Units/ManageUnits";
+
 import NotFound from "../pages/NotFound/NotFound";
 
 export default function AppRoutes() {
@@ -162,6 +169,18 @@ export default function AppRoutes() {
 
                         />
 
+                        <Route path="/site-visits" element={<SiteVisits />} />
+
+                        <Route path="/deals" element={<Deals />} />
+
+                        <Route path="/commissions" element={<Commissions />} />
+
+                        <Route path="/reports" element={<Reports />} />
+
+                        <Route path="/projects" element={<Projects />} />
+
+                        <Route path="/manage-units" element={<ManageUnits />} />
+
                     </Route>
 
                 </Route>
@@ -170,13 +189,17 @@ export default function AppRoutes() {
                     404
                 ========================== */}
 
-                <Route
+                <Route element={<MainLayout />}>
 
-                    path="*"
+                    <Route
 
-                    element={<NotFound />}
+                        path="*"
 
-                />
+                        element={<NotFound />}
+
+                    />
+
+                </Route>
 
             </Routes>
 

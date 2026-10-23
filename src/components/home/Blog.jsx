@@ -3,7 +3,7 @@ import { blogPosts } from "../../data/staticData";
 
 export default function Blog() {
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 py-10 sm:py-14">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-6 sm:pt-8 pb-10 sm:pb-14">
       <div className="text-center max-w-2xl mx-auto">
         <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
           Our Blog

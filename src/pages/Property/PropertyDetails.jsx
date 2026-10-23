@@ -13,6 +13,7 @@ import {
     Car,
     Building2,
     Sofa,
+    FileText,
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
@@ -25,6 +26,7 @@ import PropertyContact from '../../components/property/PropertyContact';
 import PropertyGrid from '../../components/property/PropertyGrid';
 import propertyService from '../../services/property.service';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { formatPrice } from '../../utils/formatPrice';
 
 // Fallback gallery when the backend hasn't attached images yet.
 const PLACEHOLDER_IMAGES = [
@@ -145,6 +147,11 @@ export default function PropertyDetails() {
                     },
 
                     description: rawProperty.description,
+                    floorPlan: rawProperty.floor_plan_url
+                        ? resolveImageUrl(rawProperty.floor_plan_url)
+                        : rawProperty.floor_plan
+                          ? resolveImageUrl(`/uploads/property/floor-plans/${rawProperty.floor_plan}`)
+                          : null,
                     amenities: rawProperty.amenities?.length
                         ? rawProperty.amenities
                         : ['Parking', 'Ownership Transferable'],
@@ -194,6 +201,24 @@ export default function PropertyDetails() {
     const shareProperty = () => {
         navigator.clipboard.writeText(window.location.href);
         toast.success('Property link copied to clipboard!');
+    };
+
+    const handleEnquiry = async (formData) => {
+        try {
+            await propertyService.interestedProperty(property.id, {
+                message:
+                    formData.message?.trim() ||
+                    `Hi, I'm interested in ${property.title}. Please share more details.`,
+            });
+            toast.success('Enquiry sent — the owner will get back to you.');
+        } catch (err) {
+            if (err?.response?.status === 401) {
+                toast.error('Please log in to send an enquiry.');
+            } else {
+                toast.error(err?.response?.data?.message || 'Could not send enquiry. Try again.');
+            }
+            throw err;
+        }
     };
 
     // ---------- Loading ----------
@@ -362,7 +387,7 @@ export default function PropertyDetails() {
                                         </p>
                                         <p className="font-display text-3xl sm:text-[2.5rem] text-white font-semibold leading-tight drop-shadow-lg">
                                             {property.price > 0
-                                                ? `₹${property.price.toLocaleString('en-IN')}`
+                                                ? formatPrice(property.price)
                                                 : 'Price on Request'}
                                             {property.purpose === 'rent' &&
                                                 property.price > 0 && (
@@ -406,26 +431,60 @@ export default function PropertyDetails() {
                         </section>
                     )}
 
-                    {/* ================= Two-column body ================= */}
+                    {/* ================= Two-column body with divided card ================= */}
                     <div className="grid lg:grid-cols-12 gap-6 mt-6 items-start">
-                        <div className="lg:col-span-8 space-y-6">
-                            <PropertyOverview
-                                overview={{ ...ov, areaUnit }}
-                                description={property.description}
-                            />
-                            <PropertyAmenities amenities={property.amenities} />
-                            <PropertyLocation
-                                address={property.address || property.location}
-                                lat={property.coordinates.lat}
-                                lng={property.coordinates.lng}
-                                nearby={property.nearby}
-                            />
+                        <div className="lg:col-span-8">
+                            <div className="bg-white rounded-2xl border bg-gradient-to-b from-charcoal-deep/5 to-transparent shadow-2xl shadow-charcoal-deep/5 p-8 sm:p-10">
+                                <PropertyOverview
+                                    overview={{ ...ov, areaUnit }}
+                                    description={property.description}
+                                />
+
+                                <div className="my-8 border-b border-charcoal-deep/10 border-opacity-60"></div>
+
+                                <PropertyAmenities amenities={property.amenities} />
+
+                                {property.floorPlan && (
+                                    <>
+                                        <div className="my-8 border-b border-charcoal-deep/10 border-opacity-60"></div>
+                                        <section>
+                                            <div className="flex items-center gap-2.5 mb-4">
+                                                <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-light/70 to-gold-light/25 flex items-center justify-center shrink-0">
+                                                    <FileText size={17} className="text-gold-dark" />
+                                                </span>
+                                                <div>
+                                                    <h3 className="font-display text-xl text-charcoal-deep font-medium">Floor Plan</h3>
+                                                    <p className="text-xs text-stone mt-0.5">Layout blueprint of this property</p>
+                                                </div>
+                                            </div>
+                                            <div className="rounded-2xl border border-charcoal/8 bg-cream/60 overflow-hidden">
+                                                <img
+                                                    src={property.floorPlan}
+                                                    alt={`${property.title} floor plan`}
+                                                    className="w-full h-auto max-h-[480px] object-contain bg-white p-4"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        </section>
+                                    </>
+                                )}
+
+                                <div className="my-8 border-b border-charcoal-deep/10 border-opacity-60"></div>
+
+                                <PropertyLocation
+                                    address={property.address || property.location}
+                                    lat={property.coordinates.lat}
+                                    lng={property.coordinates.lng}
+                                    nearby={property.nearby}
+                                />
+                            </div>
                         </div>
 
                         <div className="lg:col-span-4">
                             <PropertyContact
                                 contact={property.agent}
                                 propertyTitle={property.title}
+                                onSubmit={handleEnquiry}
                             />
                         </div>
                     </div>

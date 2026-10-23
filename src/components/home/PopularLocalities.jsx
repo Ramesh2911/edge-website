@@ -7,17 +7,17 @@ export default function PopularLocalities() {
   const scroll = (dir) => trackRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-10 sm:pt-14 pb-0">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
       <div className="text-center max-w-2xl mx-auto">
-        <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+        {/* <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
           Popular Localities
-        </span>
-        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] mt-3 font-medium">
+        </span> */}
+        <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] font-medium">
           Explore Top Localities
         </h2>
-        <p className="text-slate-500 mt-2 text-[15px]">
+        {/* <p className="text-slate-500 mt-2 text-[15px]">
           Discover prime locations with great connectivity and lifestyle
-        </p>
+        </p> */}
       </div>
 
       <div className="relative mt-6">

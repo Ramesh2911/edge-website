@@ -43,7 +43,7 @@ export default function HomeLoan() {
   }, [amount, years, rate]);
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-2 sm:pt-3 pb-10 sm:pb-14">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-6 sm:pt-8 pb-10 sm:pb-14">
       <div className="bg-gradient-to-br from-[#153964] to-[#1E4C8C] rounded-3xl overflow-hidden grid sm:grid-cols-2 shadow-xl shadow-[#153964]/20">
         {/* Left — content */}
         <div className="p-8 sm:p-10 flex flex-col justify-center">

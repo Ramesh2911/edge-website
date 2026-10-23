@@ -202,7 +202,7 @@ export default function ForgotPasswordPage() {
             {/* ================================================================
           LEFT PANEL — brand / illustration (hidden on mobile)
       ================================================================ */}
-            <div className="hidden lg:flex relative flex-col justify-between bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-12 py-12">
+            <div className="hidden lg:flex relative flex-col bg-gradient-to-br from-[#153964] to-[#1E4C8C] overflow-hidden px-12 py-8">
                 <svg
                     className="absolute inset-0 w-full h-full opacity-[0.08]"
                     viewBox="0 0 600 800"
@@ -217,21 +217,21 @@ export default function ForgotPasswordPage() {
                 </svg>
                 <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-[#8BC53F]/15 blur-3xl" aria-hidden="true" />
 
-                <a href="/" className="relative animate-fade-in-up">
+                <a href="/" className="relative z-10 animate-fade-in-up shrink-0">
                     <div className="inline-flex bg-white rounded-2xl px-4 py-3 shadow-lg">
                         <img src={logo} alt="Edge Mile Realty" className="h-12 w-auto" />
                     </div>
                 </a>
 
-                <div className="relative animate-fade-in-up [animation-delay:120ms]">
-                    <h1 className="font-display text-4xl xl:text-[2.75rem] text-white font-medium leading-tight max-w-md">
+                <div className="relative z-10 flex-1 flex flex-col justify-center animate-fade-in-up [animation-delay:120ms] py-6">
+                    <h1 className="font-display text-3xl xl:text-[2.1rem] text-white font-medium leading-snug max-w-md">
                         Let's get you back in.
                     </h1>
-                    <p className="text-white/70 text-sm mt-4 max-w-sm leading-relaxed">
+                    <p className="text-white/55 text-sm mt-3 max-w-sm leading-relaxed">
                         Verify your mobile number and you'll have a new password set up in under a minute.
                     </p>
 
-                    <div className="flex flex-col gap-4 mt-10">
+                    <div className="flex flex-col gap-3 mt-6">
                         {[
                             { icon: ShieldCheck, text: "Your number is only used for verification" },
                             { icon: KeyRound, text: "One-time code, expires automatically" },
@@ -241,16 +241,16 @@ export default function ForgotPasswordPage() {
                                 className="flex items-center gap-3 animate-fade-in-up"
                                 style={{ animationDelay: `${200 + i * 90}ms` }}
                             >
-                                <span className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                                    <Icon size={16} className="text-[#8BC53F]" />
+                                <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                    <Icon size={15} className="text-[#8BC53F]" />
                                 </span>
-                                <span className="text-sm text-white/85">{text}</span>
+                                <span className="text-sm text-white/75">{text}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <p className="relative text-white/40 text-xs animate-fade-in-up [animation-delay:500ms]">
+                <p className="relative z-10 text-white/30 text-xs animate-fade-in-up [animation-delay:500ms] shrink-0">
                     © {new Date().getFullYear()} Edge Mile Realty. All Rights Reserved.
                 </p>
             </div>

@@ -21,12 +21,7 @@ import {
 // Helpers
 // ============================================================
 
-const formatPrice = (value) => {
-    if (value == null) return "Price on request";
-    if (value >= 10000000) return `₹${(value / 10000000).toFixed(value % 10000000 === 0 ? 0 : 2)} Cr`;
-    if (value >= 100000) return `₹${(value / 100000).toFixed(value % 100000 === 0 ? 0 : 2)} Lac`;
-    return `₹${value.toLocaleString("en-IN")}`;
-};
+import { formatPrice } from "../../utils/formatPrice";
 
 const formatArea = (value, unit = "sq.ft") => {
     if (value == null) return "—";

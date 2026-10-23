@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-    Phone,
     MessageCircle,
     Mail,
     BadgeCheck,
@@ -41,7 +40,7 @@ export default function PropertyContact({
         name: "",
         phone: "",
         email: "",
-        message: `Hi, I'm interested in ${propertyTitle}. Please share more details.`,
+        message: "",
     });
 
     const {
@@ -80,6 +79,8 @@ export default function PropertyContact({
         try {
             await onSubmit?.(formData);
             setSubmitted(true);
+        } catch {
+            // error already surfaced by onSubmit (toast) — keep the form open
         } finally {
             setSubmitting(false);
         }
@@ -153,45 +154,6 @@ export default function PropertyContact({
                 </div>
             </div>
 
-            {/* ---------- Quick contact actions ---------- */}
-            <div className="px-5 sm:px-6 -mt-4 relative">
-                <div className="grid grid-cols-2 gap-2.5">
-                    <button
-                        type="button"
-                        onClick={handleRevealPhone}
-                        disabled={revealing}
-                        className="flex items-center justify-center gap-1.5 bg-charcoal-deep hover:bg-charcoal text-cream text-sm font-semibold rounded-xl px-3 py-3.5 shadow-card transition-colors disabled:opacity-70"
-                    >
-                        {revealing ? (
-                            <Loader2 size={15} className="animate-spin" />
-                        ) : (
-                            <Phone size={15} className="text-gold-light" />
-                        )}
-                        {phoneRevealed && phone ? phone : "Show Number"}
-                    </button>
-
-                    {whatsappHref ? (
-                        <a
-                            href={whatsappHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl px-3 py-3.5 shadow-card transition-colors"
-                        >
-                            <MessageCircle size={15} />
-                            WhatsApp
-                        </a>
-                    ) : (
-                        <a
-                            href={email ? `mailto:${email}` : "#"}
-                            className="flex items-center justify-center gap-1.5 bg-cream-deep hover:bg-gold-light/30 text-charcoal-deep text-sm font-semibold rounded-xl px-3 py-3.5 border border-charcoal/8 transition-colors"
-                        >
-                            <Mail size={15} />
-                            Email
-                        </a>
-                    )}
-                </div>
-            </div>
-
             {/* ---------- Enquiry form ---------- */}
             <div className="px-5 sm:px-6 pt-6 pb-6">
                 {submitted ? (
@@ -234,21 +196,6 @@ export default function PropertyContact({
                             placeholder="Phone Number"
                             required
                             className={inputCls}
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="Email (optional)"
-                            className={inputCls}
-                        />
-                        <textarea
-                            name="message"
-                            value={formData.message}
-                            onChange={handleChange}
-                            rows={3}
-                            className={`${inputCls} resize-none`}
                         />
 
                         <button

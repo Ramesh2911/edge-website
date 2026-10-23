@@ -7,7 +7,7 @@ export default function Testimonials() {
   const scroll = (dir) => trackRef.current?.scrollBy({ left: dir * 340, behavior: "smooth" });
 
   return (
-    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-10 sm:pb-14">
+    <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
       <div className="text-center max-w-2xl mx-auto">
         <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
           Happy Customers

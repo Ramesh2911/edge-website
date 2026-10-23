@@ -64,6 +64,12 @@ const propertyService = {
     getInterestedProperty() {
         return api.get("/properties/leads/interested");
     },
+    removeInquiry(id) {
+        return api.delete(`/properties/inquiries/${id}`);
+    },
+    updateInquiryStatus(id, status) {
+        return api.patch(`/properties/inquiries/${id}/status`, { status });
+    },
 
     // Administrative Gateways
     approveProperty(id, comments) {

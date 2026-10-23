@@ -15,11 +15,11 @@ export default function Home() {
         <>
             <Hero />
             <FeaturedProperties />
-            <ExploreMore />
             <PopularLocalities />
-      <HomeLoan />
-      <WhyChooseUs />
-      <Partners />
+            <HomeLoan />
+            {/* <ExploreMore /> */}
+            <WhyChooseUs />
+            <Partners />
             <Testimonials />
             <BlogSection />
             <StatsCTA />

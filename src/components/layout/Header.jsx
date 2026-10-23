@@ -7,15 +7,13 @@ import {
   Heart,
   ClipboardList,
   KeyRound,
-  LayoutDashboard,
   UserRound,
   Building2,
-  PlusCircle,
-  MessageSquare,
   LogOut,
   Lock,
 } from "lucide-react";
 import { navLinks } from "../../data/staticData";
+import { getMenusForRole } from "../../data/roleMenus";
 import { useAuth } from "../../context/AuthContext";
 import authService from "../../services/auth.service";
 import { resolveImageUrl } from "../../utils/imageUrl";
@@ -60,20 +58,7 @@ export default function Header() {
       .join("")
       .toUpperCase() || "U";
 
-  const accountLinks = [
-    { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/profile", icon: UserRound, label: "My Profile" },
-    ...(isBuyer
-      ? [
-          { to: "/wishlist", icon: Heart, label: "Wishlist" },
-          { to: "/interested", icon: MessageSquare, label: "My Enquiries" },
-          { to: "/buyer-requirement", icon: ClipboardList, label: "Post Requirement" },
-        ]
-      : [
-          { to: "/my-properties", icon: Building2, label: "My Properties" },
-          { to: "/add-property", icon: PlusCircle, label: "Add New Property" },
-        ]),
-  ];
+  const accountLinks = getMenusForRole(role);
 
   const activeClass = ({ isActive }) =>
     isActive ? "text-[#6FA82C]" : "hover:text-[#6FA82C] transition-colors";
@@ -192,15 +177,6 @@ export default function Header() {
                   Sign in
                 </Link>
               </div>
-
-              <div className="my-1.5 border-t border-[#1E4C8C]/10" />
-
-              {GUEST_MENU.map(({ to, icon: Icon, label }) => (
-                <Link key={to} to={to} className={menuItemClass}>
-                  <Icon size={16} className="shrink-0" />
-                  {label}
-                </Link>
-              ))}
             </>
           )}
         </div>
@@ -253,13 +229,15 @@ export default function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Link
-            to="/add-property"
-            className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
-          >
-            List Property
-            <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
-          </Link>
+          {(!user || !isBuyer) && (
+            <Link
+              to="/add-property"
+              className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
+            >
+              List Property
+              <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
+            </Link>
+          )}
           <DesktopAccount />
         </div>
 
@@ -404,13 +382,15 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-3 pt-1">
-            <Link
-              to="/add-property"
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
-            >
-              List Property
-              <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
-            </Link>
+            {(!user || !isBuyer) && (
+              <Link
+                to="/add-property"
+                className="flex items-center gap-1.5 text-xs font-semibold text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
+              >
+                List Property
+                <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
+              </Link>
+            )}
             {!user && (
               <button
                 onClick={() => {

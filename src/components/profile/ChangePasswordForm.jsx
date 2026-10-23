@@ -9,7 +9,8 @@ import Button from "../common/Button";
 
 export default function ChangePasswordForm({
     loading = false,
-    onSubmit
+    onSubmit,
+    onCancel
 }) {
 
     const [formData, setFormData] = useState({
@@ -132,25 +133,11 @@ export default function ChangePasswordForm({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-8">
-
-            <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <LockKeyhole className="text-blue-600" />
-                </div>
-                <div>
-                    <h2 className="text-2xl font-bold">
-                        Change Password
-                    </h2>
-                    <p className="text-gray-500 text-sm">
-                        Update your account password
-                    </p>
-                </div>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-1">
 
             {/* Current Password */}
             <div className="mb-6">
-                <label className="block mb-2 font-medium">
+                <label className="block mb-2 text-sm font-bold text-slate-600">
                     Current Password
                 </label>
                 <div className="relative">
@@ -159,15 +146,15 @@ export default function ChangePasswordForm({
                         name="old_password"
                         value={formData.old_password}
                         onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-3 pr-12 focus:border-blue-500 outline-none"
-                        placeholder="Enter Current Password"
+                        className="w-full border-2 border-slate-200 bg-[#F7FAFC] rounded-xl px-4 py-2.5 pr-12 text-sm outline-none focus:bg-white focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15 transition-all"
+                        placeholder="Enter current password"
                     />
                     <button
                         type="button"
                         onClick={() => togglePassword("old")}
-                        className="absolute right-4 top-3.5"
+                        className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600"
                     >
-                        {showPassword.old ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showPassword.old ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 </div>
                 {errors.old_password && (
@@ -179,7 +166,7 @@ export default function ChangePasswordForm({
 
             {/* New Password */}
             <div className="mb-6">
-                <label className="block mb-2 font-medium">
+                <label className="block mb-2 text-sm font-bold text-slate-600">
                     New Password
                 </label>
                 <div className="relative">
@@ -188,15 +175,15 @@ export default function ChangePasswordForm({
                         name="new_password"
                         value={formData.new_password}
                         onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-3 pr-12 focus:border-blue-500 outline-none"
-                        placeholder="Enter New Password"
+                        className="w-full border-2 border-slate-200 bg-[#F7FAFC] rounded-xl px-4 py-2.5 pr-12 text-sm outline-none focus:bg-white focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15 transition-all"
+                        placeholder="Enter new password"
                     />
                     <button
                         type="button"
                         onClick={() => togglePassword("new")}
-                        className="absolute right-4 top-3.5"
+                        className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600"
                     >
-                        {showPassword.new ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showPassword.new ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 </div>
                 {errors.new_password && (
@@ -210,14 +197,14 @@ export default function ChangePasswordForm({
             {formData.new_password && (
                 <div className="mb-6">
                     <div className="flex justify-between mb-2">
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-slate-500 font-medium">
                             Password Strength
                         </span>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-bold text-slate-700">
                             {strength.text}
                         </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-gray-200">
+                    <div className="w-full h-2 rounded-full bg-slate-100">
                         <div
                             className={`h-2 rounded-full transition-all duration-300 ${strength.color}`}
                             style={{ width: strength.width }}
@@ -228,7 +215,7 @@ export default function ChangePasswordForm({
 
             {/* Confirm Password */}
             <div className="mb-6">
-                <label className="block mb-2 font-medium">
+                <label className="block mb-2 text-sm font-bold text-slate-600">
                     Confirm Password
                 </label>
                 <div className="relative">
@@ -237,15 +224,15 @@ export default function ChangePasswordForm({
                         name="confirm_password"
                         value={formData.confirm_password}
                         onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-3 pr-12 focus:border-blue-500 outline-none"
-                        placeholder="Confirm Password"
+                        className="w-full border-2 border-slate-200 bg-[#F7FAFC] rounded-xl px-4 py-2.5 pr-12 text-sm outline-none focus:bg-white focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15 transition-all"
+                        placeholder="Confirm new password"
                     />
                     <button
                         type="button"
                         onClick={() => togglePassword("confirm")}
-                        className="absolute right-4 top-3.5"
+                        className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600"
                     >
-                        {showPassword.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showPassword.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 </div>
                 {errors.confirm_password && (
@@ -256,12 +243,13 @@ export default function ChangePasswordForm({
             </div>
 
             {/* Password Tips */}
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
-                <h4 className="font-semibold mb-2">
+            <div className="bg-[#F7FAFC] border border-slate-200 rounded-xl p-4 mb-8">
+                <h4 className="font-bold mb-2 text-sm text-slate-700 flex items-center gap-1.5">
+                    <LockKeyhole size={14} className="text-[#153964]" />
                     Password Requirements
                 </h4>
-                <ul className="text-sm text-gray-600 space-y-1 list-disc ml-5">
-                    <li>Minimum 8 characters recommended</li>
+                <ul className="text-xs text-slate-500 space-y-1 list-disc ml-5">
+                    <li>Minimum 6 characters required</li>
                     <li>Include uppercase letters</li>
                     <li>Include lowercase letters</li>
                     <li>Include numbers</li>
@@ -270,11 +258,11 @@ export default function ChangePasswordForm({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-3 pt-5 border-t border-slate-100">
                 <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => window.history.back()}
+                    onClick={() => (onCancel ? onCancel() : window.history.back())}
                 >
                     Cancel
                 </Button>
