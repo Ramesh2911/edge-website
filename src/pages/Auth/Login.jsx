@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
     Phone,
     Lock,
@@ -82,6 +82,8 @@ export default function LoginPage() {
     };
 
     return (
+        <>
+        <Toaster position="top-right" />
         <div className="min-h-[100dvh] grid lg:grid-cols-2 overflow-hidden">
             {/* ============================================================
                 LEFT PANEL — Brand showcase (hidden on mobile)
@@ -357,5 +359,6 @@ export default function LoginPage() {
                 html, body, #root { overflow-x: hidden; }
             `}</style>
         </div>
+        </>
     );
 }

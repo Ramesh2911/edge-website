@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Heart, BedDouble, Ruler, CalendarCheck, Loader2 } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 import propertyService from '../../services/property.service';
+import { useWishlist } from '../../context/WishlistContext';
 import { formatPrice } from '../../utils/formatPrice';
 
 export default function FeaturedProperties() {
@@ -10,7 +12,7 @@ export default function FeaturedProperties() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [liked, setLiked] = useState(new Set());
+  const { isWishlisted, toggle } = useWishlist();
   const trackRef = useRef(null);
 
   useEffect(() => {
@@ -62,16 +64,9 @@ export default function FeaturedProperties() {
     trackRef.current.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
 
-  const toggleLike = (id) => {
-    setLiked((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
   return (
     <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
+      <Toaster position="top-right" />
       <div className="text-center max-w-3xl mx-auto">
         <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-[#1E4C8C] font-medium">
           Featured Properties
@@ -162,13 +157,14 @@ export default function FeaturedProperties() {
                     {badgeLabel}
                   </span>
                   <button
-                    onClick={() => toggleLike(p.id)}
+                    onClick={() => toggle(p.id)}
                     className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm scale-90 opacity-90 group-hover:scale-100 group-hover:opacity-100 transition-all"
-                    aria-label="Save to wishlist"
+                    aria-label={isWishlisted(p.id) ? "Remove from wishlist" : "Save to wishlist"}
+                    aria-pressed={isWishlisted(p.id)}
                   >
                     <Heart
                       size={15}
-                      className={liked.has(p.id) ? "fill-[#E76F51] text-[#E76F51]" : "text-slate-600"}
+                      className={isWishlisted(p.id) ? "fill-[#E76F51] text-[#E76F51]" : "text-slate-600"}
                     />
                   </button>
                 </div>

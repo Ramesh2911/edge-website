@@ -21,6 +21,7 @@ import PropertyFilter, {
 import PropertyCard from '../../components/property/PropertyCard';
 import API from '../../services/api';
 import propertyService from '../../services/property.service';
+import { useWishlist } from '../../context/WishlistContext';
 import { resolveImageUrl } from '../../utils/imageUrl';
 
 // ============================================================
@@ -197,6 +198,7 @@ function Pagination({ page, totalPages, onChange }) {
 export default function PropertyList() {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { isWishlisted, toggle: toggleWishlist } = useWishlist();
 
     const [properties, setProperties] = useState([]);
     const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 1, limit: 9 });
@@ -204,7 +206,6 @@ export default function PropertyList() {
     const [viewMode, setViewMode] = useState('grid');
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
     const [typeOptions, setTypeOptions] = useState([]);
-    const [wishlist, setWishlist] = useState([]);
     const [compareList, setCompareList] = useState([]);
     const [keywordDraft, setKeywordDraft] = useState('');
 
@@ -299,18 +300,6 @@ export default function PropertyList() {
 
     // ---- Card action handlers ----
     const handleViewDetails = (id) => navigate(`/properties/details/${id}`);
-
-    const handleToggleWishlist = async (id) => {
-        const has = wishlist.includes(id);
-        setWishlist((prev) => (has ? prev.filter((x) => x !== id) : [...prev, id]));
-        try {
-            if (has) await propertyService.removeWishlist(id);
-            else await propertyService.addWishlist(id);
-        } catch {
-            /* not signed in or API offline — keep optimistic UI + toast */
-        }
-        toast.success(has ? 'Removed from wishlist' : 'Saved to wishlist');
-    };
 
     const handleToggleCompare = (id) => {
         setCompareList((prev) => {
@@ -634,9 +623,9 @@ export default function PropertyList() {
                                         <PropertyCard
                                             key={property.id}
                                             property={property}
-                                            isWishlisted={wishlist.includes(property.id)}
+                                            isWishlisted={isWishlisted(property.id)}
                                             isCompared={compareList.includes(property.id)}
-                                            onToggleWishlist={handleToggleWishlist}
+                                            onToggleWishlist={toggleWishlist}
                                             onToggleCompare={handleToggleCompare}
                                             onViewDetails={handleViewDetails}
                                             onContactOwner={handleContactOwner}

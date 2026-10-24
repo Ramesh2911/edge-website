@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { WishlistProvider } from "../context/WishlistContext";
+
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -48,6 +50,8 @@ export default function AppRoutes() {
     return (
 
         <BrowserRouter>
+
+            <WishlistProvider>
 
             <Routes>
 
@@ -202,6 +206,8 @@ export default function AppRoutes() {
                 </Route>
 
             </Routes>
+
+            </WishlistProvider>
 
         </BrowserRouter>
 

@@ -21,6 +21,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import SEO from "../../components/Contact/SEO";
 import propertyService from "../../services/property.service";
+import { useWishlist } from "../../context/WishlistContext";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import { formatPrice } from "../../utils/formatPrice";
 
@@ -67,6 +68,7 @@ export default function Wishlist() {
     const [maxPrice, setMaxPrice] = useState("");
     const [removeId, setRemoveId] = useState(null);
     const [isRemoving, setIsRemoving] = useState(false);
+    const { toggle } = useWishlist();
 
     const fetchSavedWishlist = async () => {
         setLoading(true);
@@ -126,16 +128,16 @@ export default function Wishlist() {
     const removeItem = async (id, title) => {
         setRemoveId(id);
         setIsRemoving(true);
-        try {
-            await propertyService.removeWishlist(id);
+        // Silent toggle keeps this page's title-specific toast as the only feedback.
+        const ok = await toggle(id, { silent: true });
+        if (ok) {
             setItems((prev) => prev.filter((item) => item.id !== id));
             toast.success(`"${title || "Property"}" removed from wishlist.`);
-        } catch (err) {
-            toast.error(err?.response?.data?.message || err.message || "Failed to remove.");
-        } finally {
-            setIsRemoving(false);
-            setRemoveId(null);
+        } else {
+            toast.error("Failed to remove from wishlist. Please try again.");
         }
+        setIsRemoving(false);
+        setRemoveId(null);
     };
 
     const sharePropertyLink = (id) => {

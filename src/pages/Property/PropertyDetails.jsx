@@ -25,6 +25,7 @@ import PropertyLocation from '../../components/property/PropertyLocation';
 import PropertyContact from '../../components/property/PropertyContact';
 import PropertyGrid from '../../components/property/PropertyGrid';
 import propertyService from '../../services/property.service';
+import { useWishlist } from '../../context/WishlistContext';
 import { resolveImageUrl } from '../../utils/imageUrl';
 import { formatPrice } from '../../utils/formatPrice';
 
@@ -86,7 +87,9 @@ export default function PropertyDetails() {
     const [property, setProperty] = useState(null);
     const [similarProperties, setSimilarProperties] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [wishBusy, setWishBusy] = useState(false);
+    const { ids, toggle } = useWishlist();
+    const isWishlisted = ids.includes(Number(id));
 
     useEffect(() => {
         const fetchPropertyData = async () => {
@@ -191,11 +194,15 @@ export default function PropertyDetails() {
         fetchPropertyData();
     }, [id]);
 
-    const toggleWishlist = () => {
-        setIsWishlisted(!isWishlisted);
-        toast.success(
-            isWishlisted ? 'Removed from collection' : 'Saved to exclusive collection'
-        );
+    const toggleWishlist = async () => {
+        if (wishBusy) return;
+        setWishBusy(true);
+        try {
+            // Guests are redirected to /login?redirect=... by the context.
+            await toggle(id);
+        } finally {
+            setWishBusy(false);
+        }
     };
 
     const shareProperty = () => {
@@ -313,6 +320,7 @@ export default function PropertyDetails() {
                             <>
                                 <button
                                     onClick={toggleWishlist}
+                                    disabled={wishBusy}
                                     aria-label={
                                         isWishlisted
                                             ? 'Remove from wishlist'
@@ -511,6 +519,8 @@ export default function PropertyDetails() {
 
                             <PropertyGrid
                                 properties={similarProperties}
+                                wishlist={ids}
+                                onToggleWishlist={toggle}
                                 onViewDetails={(sid) => navigate(`/properties/details/${sid}`)}
                             />
                         </section>

@@ -88,7 +88,7 @@ export default function PropertyGrid({
                     <PropertyCard
                         key={property.id}
                         property={property}
-                        isWishlisted={wishlist.includes(property.id)}
+                        isWishlisted={wishlist.some((x) => Number(x) === Number(property.id))}
                         isCompared={compareList.includes(property.id)}
                         onToggleWishlist={onToggleWishlist}
                         onToggleCompare={onToggleCompare}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     User,
     ShieldCheck,
@@ -20,6 +21,7 @@ import {
     XCircle,
     Activity,
     LogIn,
+    LogOut,
     PlusCircle,
     FileText,
     ArrowRight,
@@ -32,6 +34,8 @@ import toast, { Toaster } from "react-hot-toast";
 import SEO from "../../components/Contact/SEO";
 import profileService from "../../services/profile.service";
 import propertyService from "../../services/property.service";
+import authService from "../../services/auth.service";
+import { useAuth } from "../../context/AuthContext";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
 import EditProfileForm from "../../components/profile/EditProfileForm";
@@ -86,6 +90,19 @@ export default function Profile() {
     const [leadsCount, setLeadsCount] = useState(0);
     const [activities, setActivities] = useState([]);
     const [activeModal, setActiveModal] = useState(null); // 'edit-profile' | 'change-password' | null
+
+    const navigate = useNavigate();
+    const { logout } = useAuth();
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+        } catch {
+            // token already invalid — ignore
+        }
+        logout();
+        navigate("/");
+    };
 
     const loadAll = async () => {
         setLoading(true);
@@ -337,6 +354,13 @@ export default function Profile() {
                                 >
                                     <KeyRound size={15} /> Change Password
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/10 hover:bg-red-500/20 border border-white/15 hover:border-red-400/40 text-white hover:text-red-100 text-sm font-bold rounded-xl backdrop-blur transition-all active:scale-[0.98]"
+                                >
+                                    <LogOut size={15} /> Logout
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -555,6 +579,13 @@ export default function Profile() {
                                             className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-[#153964] bg-[#F7FAFC] border border-slate-200 rounded-xl hover:border-[#153964]/30 transition-all"
                                         >
                                             <KeyRound size={14} /> Change Password
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl hover:bg-red-100 hover:border-red-200 transition-all"
+                                        >
+                                            <LogOut size={14} /> Logout
                                         </button>
                                     </div>
                                 </div>
