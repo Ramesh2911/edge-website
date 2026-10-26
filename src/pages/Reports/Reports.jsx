@@ -178,24 +178,26 @@ export default function Reports() {
                 </div>
               </div>
 
-              <div className="flex items-end gap-2 sm:gap-4 h-48">
-                {MOCK_MONTHLY.map((m) => (
-                  <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="w-full flex items-end justify-center gap-1 h-full">
-                      <div
-                        className="w-1/2 max-w-[20px] bg-gradient-to-t from-[#153964] to-[#1E4C8C] rounded-t-md transition-all duration-700 hover:opacity-80"
-                        style={{ height: `${(m.views / maxViews) * 100}%` }}
-                        title={`${m.views} views`}
-                      />
-                      <div
-                        className="w-1/2 max-w-[20px] bg-gradient-to-t from-[#7CB93D] to-[#8BC53F] rounded-t-md transition-all duration-700 hover:opacity-80"
-                        style={{ height: `${(m.leads / 100) * 100}%` }}
-                        title={`${m.leads} leads`}
-                      />
+              <div className="overflow-x-auto -mx-1 px-1">
+                <div className="flex items-end gap-2 sm:gap-4 h-48 min-w-[480px]">
+                  {MOCK_MONTHLY.map((m) => (
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full flex items-end justify-center gap-1 h-full">
+                        <div
+                          className="w-1/2 max-w-[20px] bg-gradient-to-t from-[#153964] to-[#1E4C8C] rounded-t-md transition-all duration-700 hover:opacity-80"
+                          style={{ height: `${(m.views / maxViews) * 100}%` }}
+                          title={`${m.views} views`}
+                        />
+                        <div
+                          className="w-1/2 max-w-[20px] bg-gradient-to-t from-[#7CB93D] to-[#8BC53F] rounded-t-md transition-all duration-700 hover:opacity-80"
+                          style={{ height: `${(m.leads / 100) * 100}%` }}
+                          title={`${m.leads} leads`}
+                        />
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-500">{m.month}</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-500">{m.month}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 

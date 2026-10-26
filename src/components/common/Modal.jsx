@@ -43,7 +43,7 @@ export default function Modal({
 
                 {/* Header */}
 
-                <div className="flex items-center justify-between border-b px-6 py-4">
+                <div className="flex items-center justify-between border-b px-4 sm:px-6 py-4">
 
                     <h2 className="text-xl font-semibold">
 
@@ -64,7 +64,7 @@ export default function Modal({
 
                 {/* Body */}
 
-                <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto">
 
                     {children}
 

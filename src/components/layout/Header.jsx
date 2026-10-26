@@ -186,12 +186,12 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-[#F7FAFC]/95 backdrop-blur border-b border-[#1E4C8C]/10">
-      <div className="max-w-7xl mx-auto px-5 lg:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-5 lg:px-8 h-16 lg:h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center shrink-0">
           <img
             src={logo}
             alt="Edge Realty Logo"
-            className="h-20 w-auto object-contain"
+            className="h-14 lg:h-20 w-auto object-contain"
           />
         </Link>
 
@@ -251,7 +251,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <div className="lg:hidden border-t border-[#1E4C8C]/10 bg-[#F7FAFC] px-5 py-4 flex flex-col gap-3">
+        <div className="lg:hidden border-t border-[#1E4C8C]/10 bg-[#F7FAFC] px-5 py-4 flex flex-col gap-3 max-h-[calc(100vh-5rem)] overflow-y-auto">
           {navLinks.map((link) =>
             link.children ? (
               <div key={link.label}>

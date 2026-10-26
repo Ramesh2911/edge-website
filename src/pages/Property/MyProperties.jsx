@@ -551,14 +551,14 @@ export default function MyProperties() {
                     ) : (
                         <div className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[720px]">
+                                <table className="w-full text-left border-collapse min-w-[420px] md:min-w-[720px]">
                                     <thead>
                                         <tr className="bg-[#F7FAFC] text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
                                             <th className="px-5 py-3.5">Property</th>
-                                            <th className="px-4 py-3.5">Type</th>
+                                            <th className="hidden md:table-cell px-4 py-3.5">Type</th>
                                             <th className="px-4 py-3.5">Price</th>
                                             <th className="px-4 py-3.5">Status</th>
-                                            <th className="px-4 py-3.5">Added</th>
+                                            <th className="hidden md:table-cell px-4 py-3.5">Added</th>
                                             <th className="px-5 py-3.5 text-right">Actions</th>
                                         </tr>
                                     </thead>
@@ -600,7 +600,7 @@ export default function MyProperties() {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4">
+                                                    <td className="hidden md:table-cell px-4 py-4">
                                                         <span className="text-[10px] font-bold uppercase tracking-wider bg-[#153964]/8 text-[#153964] px-2.5 py-1 rounded-full">
                                                             {prop.property_for || "—"}
                                                         </span>
@@ -621,7 +621,7 @@ export default function MyProperties() {
                                                             {meta.label}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-4 text-xs text-slate-500 font-medium whitespace-nowrap">
+                                                    <td className="hidden md:table-cell px-4 py-4 text-xs text-slate-500 font-medium whitespace-nowrap">
                                                         {formatDate(prop.created_at)}
                                                     </td>
                                                     <td className="px-5 py-4">

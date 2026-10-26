@@ -105,7 +105,7 @@ export default function PropertyGallery({
             >
                 {/* Large active image */}
                 <div
-                    className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[560px] rounded-2xl lg:rounded-3xl overflow-hidden bg-cream-deep cursor-zoom-in group shadow-lift"
+                    className="relative aspect-square sm:aspect-[16/10] lg:aspect-auto lg:h-[560px] rounded-2xl lg:rounded-3xl overflow-hidden bg-cream-deep cursor-zoom-in group shadow-lift"
                     onClick={() => setLightboxOpen(true)}
                 >
                     <Img

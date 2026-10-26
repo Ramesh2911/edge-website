@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { WishlistProvider } from "../context/WishlistContext";
 
@@ -16,6 +17,8 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 
 import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
+import FooterContentPage from "../pages/FooterContent/FooterContentPage";
+import LegalPage from "../pages/Legal/LegalPage";
 
 // Property
 import PropertyList from "../pages/Property/PropertyList";
@@ -45,11 +48,23 @@ import ManageUnits from "../pages/Units/ManageUnits";
 
 import NotFound from "../pages/NotFound/NotFound";
 
+// SPA route change e page top-e scroll koro — na hole footer theke
+// navigate korle notun page er niche (same footer) e thake, mone hoy na move hoyeche.
+function ScrollToTop() {
+    const { pathname } = useLocation();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+    return null;
+}
+
 export default function AppRoutes() {
 
     return (
 
         <BrowserRouter>
+
+            <ScrollToTop />
 
             <WishlistProvider>
 
@@ -67,9 +82,17 @@ export default function AppRoutes() {
 
                     <Route path="/contact" element={<Contact />} />
 
+                    {/* Legal pages (admin-managed via Page Content → Legal) */}
+                    <Route path="/privacy-policy" element={<LegalPage kind="privacy" />} />
+
+                    <Route path="/terms-and-conditions" element={<LegalPage kind="terms" />} />
+
                     <Route path="/properties" element={<PropertyList />} />
 
                     <Route path="/properties/details/:id" element={<PropertyDetails />} />
+
+                    {/* Footer menu content pages (e.g. /listing-policy) — static routes rank higher */}
+                    <Route path="/:slug" element={<FooterContentPage />} />
 
                 </Route>
 

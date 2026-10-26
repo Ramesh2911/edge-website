@@ -348,8 +348,50 @@ export default function PropertyDetails() {
                         }
                         overlay={
                             <>
-                                {/* Badge row */}
-                                <div className="flex flex-wrap items-center gap-2 mb-3.5">
+                                {/* Title + price */}
+                                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <h1 className="font-display text-2xl sm:text-3xl lg:text-[2.4rem] text-white font-medium leading-tight drop-shadow-lg">
+                                            {property.title}
+                                        </h1>
+                                        <p className="flex items-start gap-1.5 text-white/85 text-sm mt-2.5 drop-shadow">
+                                            <MapPin
+                                                size={14}
+                                                className="mt-0.5 shrink-0"
+                                            />
+                                            <span className="min-w-0 max-w-xl line-clamp-2">
+                                                {property.address || property.location}
+                                                {property.pincode &&
+                                                !String(property.address || property.location || '').includes(
+                                                    property.pincode
+                                                )
+                                                    ? ` – ${property.pincode}`
+                                                    : ''}
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <div className="shrink-0 sm:text-right">
+                                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold-light">
+                                            Price
+                                        </p>
+                                        <p className="font-display text-3xl sm:text-[2.5rem] text-white font-semibold leading-tight drop-shadow-lg">
+                                            {property.price > 0
+                                                ? formatPrice(property.price)
+                                                : 'Price on Request'}
+                                            {property.purpose === 'rent' &&
+                                                property.price > 0 && (
+                                                    <span className="text-base font-normal text-white/70">
+                                                        {' '}
+                                                        /mo
+                                                    </span>
+                                                )}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Badge row (below address) */}
+                                <div className="flex flex-wrap items-center gap-2 mt-3.5">
                                     <span
                                         className={`text-[11px] uppercase tracking-widest font-bold px-3 py-1 rounded-full text-white ${
                                             property.purpose === 'rent'
@@ -371,41 +413,6 @@ export default function PropertyDetails() {
                                             <ShieldCheck size={12} /> Verified
                                         </span>
                                     )}
-                                </div>
-
-                                {/* Title + price */}
-                                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                                    <div className="min-w-0">
-                                        <h1 className="font-display text-2xl sm:text-3xl lg:text-[2.4rem] text-white font-medium leading-tight drop-shadow-lg">
-                                            {property.title}
-                                        </h1>
-                                        <p className="flex items-start gap-1.5 text-white/85 text-sm mt-2.5 drop-shadow">
-                                            <MapPin
-                                                size={14}
-                                                className="mt-0.5 shrink-0"
-                                            />
-                                            {property.address || property.location}
-                                            {property.pincode ? ` – ${property.pincode}` : ''}
-                                        </p>
-                                    </div>
-
-                                    <div className="shrink-0 sm:text-right">
-                                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold-light">
-                                            Price
-                                        </p>
-                                        <p className="font-display text-3xl sm:text-[2.5rem] text-white font-semibold leading-tight drop-shadow-lg">
-                                            {property.price > 0
-                                                ? formatPrice(property.price)
-                                                : 'Price on Request'}
-                                            {property.purpose === 'rent' &&
-                                                property.price > 0 && (
-                                                    <span className="text-base font-normal text-white/70">
-                                                        {' '}
-                                                        /mo
-                                                    </span>
-                                                )}
-                                        </p>
-                                    </div>
                                 </div>
                             </>
                         }

@@ -116,13 +116,13 @@ export default function BuyerRequirement() {
                     </div>
 
                     {/* Sourcing Summary Counter Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         {[
                             { label: 'Total Tracked Requirements', val: stats.total, icon: <FileText className="w-5 h-5 text-blue-600" /> },
                             { label: 'Active Open Searches', val: stats.open, icon: <Clock className="w-5 h-5 text-amber-600" /> },
                             { label: 'Fulfilled / Matched', val: stats.fulfilled, icon: <CheckCircle className="w-5 h-5 text-emerald-600" /> }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-sm flex items-center justify-between">
+                            <div key={i} className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-sm flex items-center justify-between">
                                 <div className="space-y-1">
                                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block truncate">{stat.label}</span>
                                     <div className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">{stat.val}</div>
@@ -236,8 +236,8 @@ export default function BuyerRequirement() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="col-span-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="sm:col-span-2">
                                     <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Preferred City Node *</label>
                                     <input type="text" {...register('city', { required: true })} className="w-full text-sm p-3 bg-slate-50 dark:bg-slate-900 dark:text-white border dark:border-slate-700 rounded-xl outline-none" />
                                 </div>
@@ -251,7 +251,7 @@ export default function BuyerRequirement() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Beds</label>
                                     <input type="number" {...register('beds')} className="w-full text-sm p-3 bg-slate-50 dark:bg-slate-900 dark:text-white border dark:border-slate-700 rounded-xl" />

@@ -25,6 +25,8 @@ import {
     Users,
     LineChart,
 } from 'lucide-react';
+import usePageContent from '../../hooks/usePageContent';
+import footerService from '../../services/footer.service';
 
 // ============================================================
 // Shared helpers
@@ -122,12 +124,123 @@ function Counter({ to, decimals = 0, prefix = '', suffix = '', duration = 1700 }
     );
 }
 
+/** "Architecting Dreams into *Reality*" → plain text with *word* wrapped as italic accent */
+const renderEmph = (text) =>
+    String(text || '')
+        .split('*')
+        .map((part, i) =>
+            i % 2 === 1 ? (
+                <span key={i} className="italic text-[#8BC53F]">
+                    {part}
+                </span>
+            ) : (
+                <React.Fragment key={i}>{part}</React.Fragment>
+            )
+        );
+
+const DEFAULT_STATS_RAW =
+    '$2.4B+ | Volume Sold\n1200+ | Properties Managed\n99.2% | Client Satisfaction\n15+ | Years Experience';
+
+// Section-level defaults: identical to admin seed values, so the page keeps
+// rendering the same content when the API is unavailable or a key is blank.
+const DEFAULT_HERO_TRUST = '12,000+ | happy families\n4.9 | on Google';
+const DEFAULT_HERO_STATS = '1200+ | Properties Managed\n99.2% | Client Satisfaction';
+const DEFAULT_HERO_HIGHLIGHTS =
+    'Award-Winning Brokerage | Trusted since 2010 · RERA registered\n$2.4B+ in Sales Volume | Across 50+ cities worldwide';
+const DEFAULT_AWARDS =
+    'Top Broker 2024\nRERA Registered\nGoogle 4.9 Rating\nISO 9001 Certified\n12,000+ Happy Families\nLuxury Portfolio Award\n50+ Cities Covered\nTrusted Advisors';
+const DEFAULT_OVERVIEW_PARA =
+    'Founded with a vision to revolutionize real estate transactions, Edge Realty has grown into a premier brokerage trusted by high-net-worth individuals, investors and families worldwide.\n\nWe fuse deep local market expertise with cutting-edge analytics to deliver an unparalleled property search and acquisition experience.';
+const DEFAULT_OVERVIEW_LIST =
+    '50-point physical & legal verification on every listing\nDedicated advisor from shortlist to handover\nTransparent, data-backed valuation reports';
+const DEFAULT_OVERVIEW_STATS = '$2.4B+ | Volume Sold\n50+ | Cities Covered\n15+ | Years of Trust';
+const DEFAULT_VALUES =
+    'Vetted Portfolio | Every property undergoes a rigorous 50-point physical & legal inspection.\nData-Driven Insights | Real-time neighbourhood trends and long-term yield projections.\nEnd-to-End Concierge | Legal, financial and interior design advisory under one roof.\nAbsolute Transparency | No hidden fees, no surprise commissions — clarity at every step.\nGlobal Reach | Local expertise amplified by an international buyer network.\nProp-Tech Platform | Virtual tours, instant valuation and digital closing, built in.';
+const DEFAULT_MILESTONES =
+    '2010 | The Beginning | Founded in a single office with a bold promise: integrity above commission.\n2014 | Regional Expansion | Opened three new branches and crossed 200 successful property closures.\n2018 | Prop-Tech Launch | Introduced our digital valuation engine and virtual tour platform.\n2021 | 1,000th Home Sold | Reached a milestone family and expanded into commercial portfolios.\n2024 | National Recognition | Named Top Brokerage and surpassing $2B in lifetime sales volume.\n2026 | Global Network | Serving clients across 50+ cities with 12,000+ delighted families.';
+const DEFAULT_STEPS =
+    'Consultation | Understanding your investment criteria and lifestyle desires.\nCuration | Presenting off-market and hand-selected luxury residences.\nAcquisition | Seamless negotiation, legal due diligence and closing.\nManagement | Post-purchase property setup and yield management.';
+const DEFAULT_GALLERY =
+    'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80 | Our Headquarters\nhttps://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80 | Client Meetings\nhttps://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80 | Advisory Lounge\nhttps://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80 | Workspace';
+const DEFAULT_TEAM =
+    'Sarah Jenkins | Managing Principal & Founder | https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80\nDavid Chen | Head of Global Acquisitions | https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80\nElena Rostova | Director of Luxury Estates | https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80\nMarcus Webb | Head of Client Relations | https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80';
+const DEFAULT_TESTIMONIALS =
+    'Edge Realty made purchasing our coastal estate smooth beyond expectation. Their market foresight and discretion are completely unmatched. | Marcus & Eleanor Vance | Estate Buyers\nAs an NRI investor, I needed a team I could trust blindly. Their data reports and virtual tours made closing remotely effortless. | Priya Sharma | Property Investor\nFrom shortlist to handover, every step was transparent. The concierge team even handled our interiors. Truly end-to-end service. | James Okafor | First-time Homeowner';
+
+/** Newline-separated non-empty trimmed lines (blank/whitespace-only skipped). */
+const lineItems = (raw, fallback) =>
+    String(raw || fallback || '')
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+/** Split one line into exactly n fields on the first n-1 pipes (missing → ''). */
+const pipeFields = (line, n) => {
+    const out = [];
+    let rest = String(line);
+    for (let i = 0; i < n - 1; i += 1) {
+        const idx = rest.indexOf('|');
+        if (idx < 0) break;
+        out.push(rest.slice(0, idx).trim());
+        rest = rest.slice(idx + 1);
+    }
+    out.push(rest.trim());
+    while (out.length < n) out.push('');
+    return out;
+};
+
+/** Lines → arrays of exactly n fields: parseRows(key, 2, default). */
+const parseRows = (raw, n, fallback) => lineItems(raw, fallback).map((l) => pipeFields(l, n));
+
+/** Blank-line separated paragraphs → array of paragraph strings. */
+const paragraphs = (raw, fallback) =>
+    String(raw || fallback || '')
+        .split(/\n\s*\n/)
+        .map((p) => p.replace(/\s*\n\s*/g, ' ').trim())
+        .filter(Boolean);
+
+/** "Value | Label" stats with a per-section fallback raw string. */
+const getStatsFrom = (raw, fallback) => {
+    const parsed = parseStats(raw || fallback);
+    return parsed.length ? parsed : parseStats(fallback);
+};
+
+/** Lines of "Value | Label" → animated counter stats (prefix/suffix split from the value) */
+const parseStats = (raw) =>
+    String(raw || '')
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .map((line) => {
+            const [valuePart = '', label = ''] = line.split('|').map((s) => s.trim());
+            const m = valuePart.match(/^([^\d]*)(\d+(?:\.\d+)?)(.*)$/);
+            if (!m || !label) return null;
+            return {
+                to: Number(m[2]),
+                prefix: m[1],
+                suffix: m[3],
+                decimals: (m[2].split('.')[1] || '').length,
+                label,
+            };
+        })
+        .filter(Boolean);
+
+const getStats = (raw) => {
+    const parsed = parseStats(raw || DEFAULT_STATS_RAW);
+    return parsed.length ? parsed : parseStats(DEFAULT_STATS_RAW);
+};
+
 // ============================================================
 // 1. HERO BANNER
 // ============================================================
 
-export const HeroBanner = () => (
-    <section className="relative min-h-[600px] flex items-center overflow-hidden">
+export const HeroBanner = () => {
+    const content = usePageContent();
+    const trust = parseRows(content.about_hero_trust, 2, DEFAULT_HERO_TRUST);
+    const heroStats = getStatsFrom(content.about_hero_stats, DEFAULT_HERO_STATS);
+    const highlights = parseRows(content.about_hero_highlights, 2, DEFAULT_HERO_HIGHLIGHTS);
+    return (
+    <section className="relative min-h-[520px] lg:min-h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
             <img
                 src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80"
@@ -143,20 +256,19 @@ export const HeroBanner = () => (
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
-            className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center px-5 py-24 w-full"
+            className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center px-5 py-16 lg:py-24 w-full"
         >
             {/* Left: copy */}
             <motion.div variants={fadeUp}>
-                <Eyebrow dark>Redefining Modern Living</Eyebrow>
-                <h1 className="font-display text-4xl md:text-6xl leading-[1.08] font-medium mb-6 text-[#F7FAFC]">
-                    Architecting Dreams
-                    <br className="hidden sm:block" /> into{' '}
-                    <span className="italic text-[#8BC53F]">Reality</span>
+                <Eyebrow dark>{content.about_hero_eyebrow || 'Redefining Modern Living'}</Eyebrow>
+                <h1 className="font-display text-3xl sm:text-4xl md:text-6xl leading-[1.08] font-medium mb-6 text-[#F7FAFC]">
+                    {renderEmph(
+                        content.about_hero_title || 'Architecting Dreams into *Reality*'
+                    )}
                 </h1>
                 <p className="text-lg text-[#F7FAFC]/75 max-w-xl">
-                    We bridge the gap between extraordinary properties and discerning
-                    buyers across the globe — with data, discretion and decade-defying
-                    expertise.
+                    {content.about_hero_sub ||
+                        'We bridge the gap between extraordinary properties and discerning buyers across the globe — with data, discretion and decade-defying expertise.'}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 mt-9">
@@ -176,72 +288,80 @@ export const HeroBanner = () => (
 
                 {/* Trust row */}
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-10 pt-8 border-t border-white/10">
-                    <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
-                            {[...Array(4)].map((_, i) => (
-                                <span
-                                    key={i}
-                                    className="w-8 h-8 rounded-full border-2 border-[#1E4C8C] bg-gradient-to-br from-[#8BC53F] to-[#6FA82C]"
-                                />
-                            ))}
+                    {trust.map(([value, text], i) => (
+                        <div
+                            key={i}
+                            className={`flex items-center ${i === 1 ? 'gap-1.5' : 'gap-2'}`}
+                        >
+                            {i === 0 && (
+                                <div className="flex -space-x-2">
+                                    {[...Array(4)].map((_, j) => (
+                                        <span
+                                            key={j}
+                                            className="w-8 h-8 rounded-full border-2 border-[#1E4C8C] bg-gradient-to-br from-[#8BC53F] to-[#6FA82C]"
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                            {i === 1 && (
+                                <div className="flex gap-1.5">
+                                    {[...Array(5)].map((_, j) => (
+                                        <Star
+                                            key={j}
+                                            className="w-4 h-4 fill-[#8BC53F] text-[#8BC53F]"
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                            <span
+                                className={`text-[#F7FAFC]/70 text-sm ${i === 1 ? 'ml-1' : ''}`}
+                            >
+                                <b className="text-white">{value}</b> {text}
+                            </span>
                         </div>
-                        <span className="text-[#F7FAFC]/70 text-sm">
-                            <b className="text-white">12,000+</b> happy families
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-[#8BC53F] text-[#8BC53F]" />
-                        ))}
-                        <span className="text-[#F7FAFC]/70 text-sm ml-1">
-                            <b className="text-white">4.9</b> on Google
-                        </span>
-                    </div>
+                    ))}
                 </div>
             </motion.div>
 
             {/* Right: floating glass stat cards */}
             <motion.div variants={fadeUp} className="hidden lg:grid gap-4">
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5">
-                        <p className="font-display text-3xl text-[#8BC53F] font-semibold leading-none">
-                            <Counter to={1200} suffix="+" />
-                        </p>
-                        <p className="text-[11px] text-[#F7FAFC]/70 mt-2">Properties Managed</p>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5">
-                        <p className="font-display text-3xl text-[#8BC53F] font-semibold leading-none">
-                            <Counter to={99.2} decimals={1} suffix="%" />
-                        </p>
-                        <p className="text-[11px] text-[#F7FAFC]/70 mt-2">Client Satisfaction</p>
-                    </div>
+                    {heroStats.map((s, i) => (
+                        <div
+                            key={i}
+                            className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5"
+                        >
+                            <p className="font-display text-3xl text-[#8BC53F] font-semibold leading-none">
+                                <Counter
+                                    to={s.to}
+                                    decimals={s.decimals || 0}
+                                    prefix={s.prefix || ''}
+                                    suffix={s.suffix || ''}
+                                />
+                            </p>
+                            <p className="text-[11px] text-[#F7FAFC]/70 mt-2">{s.label}</p>
+                        </div>
+                    ))}
                 </div>
-                <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 flex items-center gap-4">
-                    <span className="w-12 h-12 rounded-xl bg-[#8BC53F]/20 text-[#8BC53F] flex items-center justify-center shrink-0">
-                        <Award className="w-6 h-6" />
-                    </span>
-                    <div>
-                        <p className="font-display text-lg text-white font-semibold leading-none">
-                            Award-Winning Brokerage
-                        </p>
-                        <p className="text-[11px] text-[#F7FAFC]/60 mt-1.5">
-                            Trusted since 2010 · RERA registered
-                        </p>
-                    </div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 flex items-center gap-4">
-                    <span className="w-12 h-12 rounded-xl bg-[#8BC53F]/20 text-[#8BC53F] flex items-center justify-center shrink-0">
-                        <LineChart className="w-6 h-6" />
-                    </span>
-                    <div>
-                        <p className="font-display text-lg text-white font-semibold leading-none">
-                            $2.4B+ in Sales Volume
-                        </p>
-                        <p className="text-[11px] text-[#F7FAFC]/60 mt-1.5">
-                            Across 50+ cities worldwide
-                        </p>
-                    </div>
-                </div>
+                {highlights.map(([title, sub], i) => {
+                    const Icon = HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length];
+                    return (
+                        <div
+                            key={i}
+                            className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-5 flex items-center gap-4"
+                        >
+                            <span className="w-12 h-12 rounded-xl bg-[#8BC53F]/20 text-[#8BC53F] flex items-center justify-center shrink-0">
+                                <Icon className="w-6 h-6" />
+                            </span>
+                            <div>
+                                <p className="font-display text-lg text-white font-semibold leading-none">
+                                    {title}
+                                </p>
+                                <p className="text-[11px] text-[#F7FAFC]/60 mt-1.5">{sub}</p>
+                            </div>
+                        </div>
+                    );
+                })}
             </motion.div>
         </motion.div>
 
@@ -251,41 +371,36 @@ export const HeroBanner = () => (
             <span className="w-px h-8 bg-gradient-to-b from-white/60 to-transparent" />
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 2. AWARDS / TRUST MARQUEE
 // ============================================================
 
-const ACCOLADES = [
-    { icon: Award, label: 'Top Broker 2024' },
-    { icon: ShieldCheck, label: 'RERA Registered' },
-    { icon: Star, label: 'Google 4.9 Rating' },
-    { icon: Globe2, label: 'ISO 9001 Certified' },
-    { icon: Handshake, label: '12,000+ Happy Families' },
-    { icon: Sparkles, label: 'Luxury Portfolio Award' },
-    { icon: Building2, label: '50+ Cities Covered' },
-    { icon: Users, label: 'Trusted Advisors' },
-];
+const HIGHLIGHT_ICONS = [Award, LineChart];
+const AWARD_ICONS = [Award, ShieldCheck, Star, Globe2, Handshake, Sparkles, Building2, Users];
 
 export const AwardsMarquee = () => {
-    const items = [...ACCOLADES, ...ACCOLADES];
+    const content = usePageContent();
+    const labels = lineItems(content.about_awards, DEFAULT_AWARDS);
+    const items = [...labels, ...labels];
     return (
         <section className="bg-white border-y border-[#1E4C8C]/8 py-5 overflow-hidden">
             <div className="partner-marquee flex w-max items-center">
-                {items.map((a, i) => {
-                    const Icon = a.icon;
+                {items.map((label, i) => {
+                    const Icon = AWARD_ICONS[(i % labels.length) % AWARD_ICONS.length];
                     return (
                         <div
-                            key={`${a.label}-${i}`}
+                            key={`${label}-${i}`}
                             className="flex items-center gap-2.5 px-7 shrink-0"
-                            aria-hidden={i >= ACCOLADES.length}
+                            aria-hidden={i >= labels.length}
                         >
                             <span className="w-9 h-9 rounded-full bg-[#EAF6DE] text-[#6FA82C] flex items-center justify-center">
                                 <Icon className="w-4 h-4" />
                             </span>
                             <span className="text-sm font-semibold text-[#1E4C8C] whitespace-nowrap">
-                                {a.label}
+                                {label}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-[#1E4C8C]/20 ml-4" />
                         </div>
@@ -300,7 +415,12 @@ export const AwardsMarquee = () => {
 // 3. COMPANY OVERVIEW + MISSION & VISION
 // ============================================================
 
-export const CompanyOverview = () => (
+export const CompanyOverview = () => {
+    const content = usePageContent();
+    const paras = paragraphs(content.about_overview_para, DEFAULT_OVERVIEW_PARA);
+    const overviewList = lineItems(content.about_overview_list, DEFAULT_OVERVIEW_LIST);
+    const overviewStats = getStatsFrom(content.about_overview_stats, DEFAULT_OVERVIEW_STATS);
+    return (
     <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <motion.div
@@ -311,26 +431,26 @@ export const CompanyOverview = () => (
                 className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center mb-16"
             >
                 <div>
-                    <Eyebrow>Who We Are</Eyebrow>
+                    <Eyebrow>
+                        {content.about_overview_eyebrow || 'Who We Are'}
+                    </Eyebrow>
                     <h2 className="font-display text-3xl sm:text-4xl text-[#1E4C8C] font-medium mb-6 leading-tight">
-                        Pioneering Excellence in Luxury Real Estate
+                        {content.about_overview_title ||
+                            'Pioneering Excellence in Luxury Real Estate'}
                     </h2>
-                    <p className="text-slate-600 mb-4 leading-relaxed">
-                        Founded with a vision to revolutionize real estate transactions,
-                        Edge Realty has grown into a premier brokerage trusted by
-                        high-net-worth individuals, investors and families worldwide.
-                    </p>
-                    <p className="text-slate-600 leading-relaxed">
-                        We fuse deep local market expertise with cutting-edge analytics to
-                        deliver an unparalleled property search and acquisition experience.
-                    </p>
+                    {paras.map((p, i) => (
+                        <p
+                            key={i}
+                            className={`text-slate-600 leading-relaxed ${
+                                i < paras.length - 1 ? 'mb-4' : ''
+                            }`}
+                        >
+                            {p}
+                        </p>
+                    ))}
 
                     <ul className="mt-7 space-y-3">
-                        {[
-                            '50-point physical & legal verification on every listing',
-                            'Dedicated advisor from shortlist to handover',
-                            'Transparent, data-backed valuation reports',
-                        ].map((t) => (
+                        {overviewList.map((t) => (
                             <li key={t} className="flex items-start gap-2.5">
                                 <CheckCircle2 className="w-5 h-5 text-[#6FA82C] shrink-0 mt-0.5" />
                                 <span className="text-slate-600 text-sm leading-relaxed">{t}</span>
@@ -338,27 +458,23 @@ export const CompanyOverview = () => (
                         ))}
                     </ul>
 
-                    <div className="flex items-center gap-8 mt-8 pt-8 border-t border-[#1E4C8C]/10">
-                        <div>
-                            <p className="font-display text-3xl text-[#1E4C8C] font-semibold leading-none">
-                                <Counter to={2.4} decimals={1} prefix="$" suffix="B+" />
-                            </p>
-                            <p className="text-xs text-slate-500 mt-1.5">Volume Sold</p>
-                        </div>
-                        <div className="w-px h-12 bg-[#1E4C8C]/10" />
-                        <div>
-                            <p className="font-display text-3xl text-[#1E4C8C] font-semibold leading-none">
-                                <Counter to={50} suffix="+" />
-                            </p>
-                            <p className="text-xs text-slate-500 mt-1.5">Cities Covered</p>
-                        </div>
-                        <div className="w-px h-12 bg-[#1E4C8C]/10" />
-                        <div>
-                            <p className="font-display text-3xl text-[#1E4C8C] font-semibold leading-none">
-                                <Counter to={15} suffix="+" />
-                            </p>
-                            <p className="text-xs text-slate-500 mt-1.5">Years of Trust</p>
-                        </div>
+                    <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#1E4C8C]/10">
+                        {overviewStats.map((s, i) => (
+                            <div
+                                key={i}
+                                className={i > 0 ? 'border-l border-[#1E4C8C]/10 pl-4' : ''}
+                            >
+                                <p className="font-display text-2xl sm:text-3xl text-[#1E4C8C] font-semibold leading-none">
+                                    <Counter
+                                        to={s.to}
+                                        decimals={s.decimals || 0}
+                                        prefix={s.prefix || ''}
+                                        suffix={s.suffix || ''}
+                                    />
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1.5">{s.label}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -366,12 +482,18 @@ export const CompanyOverview = () => (
                 <div className="relative">
                     <div className="absolute -top-4 -left-4 w-28 h-28 rounded-2xl bg-[#EAF6DE] border border-[#8BC53F]/40" />
                     <img
-                        src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80"
+                        src={
+                            content.about_overview_img1 ||
+                            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80'
+                        }
                         alt="Modern Office"
-                        className="relative rounded-2xl shadow-lift object-cover h-[26rem] w-full"
+                        className="relative rounded-2xl shadow-lift object-cover h-[18rem] sm:h-[26rem] w-full"
                     />
                     <img
-                        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80"
+                        src={
+                            content.about_overview_img2 ||
+                            'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80'
+                        }
                         alt="Team meeting"
                         className="absolute -bottom-8 -left-6 w-40 h-32 object-cover rounded-xl border-4 border-white shadow-lift hidden sm:block"
                     />
@@ -381,10 +503,10 @@ export const CompanyOverview = () => (
                         </span>
                         <div>
                             <p className="font-display text-base text-[#1E4C8C] font-semibold leading-none">
-                                Award Winning
+                                {content.about_overview_badge_title || 'Award Winning'}
                             </p>
                             <p className="text-[11px] text-slate-500 mt-1">
-                                Trusted brokerage since 2010
+                                {content.about_overview_badge_sub || 'Trusted brokerage since 2010'}
                             </p>
                         </div>
                     </div>
@@ -408,12 +530,11 @@ export const CompanyOverview = () => (
                         <Target className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-2xl text-[#1E4C8C] font-medium mb-3">
-                        Our Mission
+                        {content.about_mission_title || 'Our Mission'}
                     </h3>
                     <p className="text-slate-600 leading-relaxed">
-                        To empower clients through transparent data, exceptional advisory
-                        services and a seamless digital platform that makes acquiring
-                        premier property simple and gratifying.
+                        {content.about_mission ||
+                            'To empower clients through transparent data, exceptional advisory services and a seamless digital platform that makes acquiring premier property simple and gratifying.'}
                     </p>
                 </motion.div>
 
@@ -426,64 +547,32 @@ export const CompanyOverview = () => (
                         <Eye className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-2xl text-[#1E4C8C] font-medium mb-3">
-                        Our Vision
+                        {content.about_vision_title || 'Our Vision'}
                     </h3>
                     <p className="text-slate-600 leading-relaxed">
-                        To set the global benchmark for integrity, luxury branding and
-                        prop-tech innovation in the real estate sector for generations to
-                        come.
+                        {content.about_vision ||
+                            'To set the global benchmark for integrity, luxury branding and prop-tech innovation in the real estate sector for generations to come.'}
                     </p>
                 </motion.div>
             </motion.div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 4. STATS BAND + WHY CHOOSE US
 // ============================================================
 
-const STATS = [
-    { to: 2.4, decimals: 1, prefix: '$', suffix: 'B+', label: 'Volume Sold' },
-    { to: 1200, suffix: '+', label: 'Properties Managed' },
-    { to: 99.2, decimals: 1, suffix: '%', label: 'Client Satisfaction' },
-    { to: 15, suffix: '+', label: 'Years Experience' },
-];
+// Stats now come from admin-managed `about_stats` via getStats() (Value | Label lines)
 
-const VALUES = [
-    {
-        title: 'Vetted Portfolio',
-        desc: 'Every property undergoes a rigorous 50-point physical & legal inspection.',
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Data-Driven Insights',
-        desc: 'Real-time neighbourhood trends and long-term yield projections.',
-        icon: TrendingUp,
-    },
-    {
-        title: 'End-to-End Concierge',
-        desc: 'Legal, financial and interior design advisory under one roof.',
-        icon: Key,
-    },
-    {
-        title: 'Absolute Transparency',
-        desc: 'No hidden fees, no surprise commissions — clarity at every step.',
-        icon: Handshake,
-    },
-    {
-        title: 'Global Reach',
-        desc: 'Local expertise amplified by an international buyer network.',
-        icon: Globe2,
-    },
-    {
-        title: 'Prop-Tech Platform',
-        desc: 'Virtual tours, instant valuation and digital closing, built in.',
-        icon: Compass,
-    },
-];
+const VALUE_ICONS = [ShieldCheck, TrendingUp, Key, Handshake, Globe2, Compass];
 
-export const StatsAndValue = () => (
+export const StatsAndValue = () => {
+    const content = usePageContent();
+    const stats = getStats(content.about_stats);
+    const values = parseRows(content.about_values, 2, DEFAULT_VALUES);
+    return (
     <section className="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white">
         <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full bg-[#8BC53F]/15 blur-3xl" />
         <div className="absolute -bottom-40 -left-24 w-[380px] h-[380px] rounded-full bg-[#7CB93D]/10 blur-3xl" />
@@ -497,9 +586,9 @@ export const StatsAndValue = () => (
                 variants={staggerContainer}
                 className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-16 border-b border-white/10 text-center"
             >
-                {STATS.map((s, idx) => (
+                {stats.map((s, idx) => (
                     <motion.div key={idx} variants={fadeUp}>
-                        <div className="font-display text-4xl md:text-5xl text-[#8BC53F] mb-2 font-semibold">
+                        <div className="font-display text-3xl sm:text-4xl md:text-5xl text-[#8BC53F] mb-2 font-semibold">
                             <Counter
                                 to={s.to}
                                 decimals={s.decimals || 0}
@@ -518,9 +607,12 @@ export const StatsAndValue = () => (
             <div className="pt-16">
                 <SectionHeading
                     dark
-                    eyebrow="Why Choose Us"
-                    title="Why Discerning Clients Choose Us"
-                    subtitle="Excellence isn't an accident — it's our standard operating procedure."
+                    eyebrow={content.about_values_eyebrow || 'Why Choose Us'}
+                    title={content.about_values_title || 'Why Discerning Clients Choose Us'}
+                    subtitle={
+                        content.about_values_sub ||
+                        "Excellence isn't an accident — it's our standard operating procedure."
+                    }
                 />
 
                 <motion.div
@@ -530,8 +622,8 @@ export const StatsAndValue = () => (
                     variants={staggerContainer}
                     className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
                 >
-                    {VALUES.map((f, idx) => {
-                        const Icon = f.icon;
+                    {values.map(([title, desc], idx) => {
+                        const Icon = VALUE_ICONS[idx % VALUE_ICONS.length];
                         return (
                             <motion.div
                                 key={idx}
@@ -542,10 +634,10 @@ export const StatsAndValue = () => (
                                     <Icon className="w-6 h-6" />
                                 </span>
                                 <h3 className="font-display text-xl font-medium mb-2">
-                                    {f.title}
+                                    {title}
                                 </h3>
                                 <p className="text-[#F7FAFC]/60 leading-relaxed text-sm">
-                                    {f.desc}
+                                    {desc}
                                 </p>
                             </motion.div>
                         );
@@ -554,52 +646,26 @@ export const StatsAndValue = () => (
             </div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 5. MILESTONES / JOURNEY TIMELINE
 // ============================================================
 
-const MILESTONES = [
-    {
-        year: '2010',
-        title: 'The Beginning',
-        desc: 'Founded in a single office with a bold promise: integrity above commission.',
-    },
-    {
-        year: '2014',
-        title: 'Regional Expansion',
-        desc: 'Opened three new branches and crossed 200 successful property closures.',
-    },
-    {
-        year: '2018',
-        title: 'Prop-Tech Launch',
-        desc: 'Introduced our digital valuation engine and virtual tour platform.',
-    },
-    {
-        year: '2021',
-        title: '1,000th Home Sold',
-        desc: 'Reached a milestone family and expanded into commercial portfolios.',
-    },
-    {
-        year: '2024',
-        title: 'National Recognition',
-        desc: 'Named Top Brokerage and surpassing $2B in lifetime sales volume.',
-    },
-    {
-        year: '2026',
-        title: 'Global Network',
-        desc: 'Serving clients across 50+ cities with 12,000+ delighted families.',
-    },
-];
-
-export const Milestones = () => (
+export const Milestones = () => {
+    const content = usePageContent();
+    const milestones = parseRows(content.about_milestones, 3, DEFAULT_MILESTONES);
+    return (
     <section className="py-16 sm:py-24 bg-[#FBF7EF]">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <SectionHeading
-                eyebrow="Our Journey"
-                title="A Decade of Milestones"
-                subtitle="From a single office to a nationally recognised brokerage — built one trusted relationship at a time."
+                eyebrow={content.about_milestones_eyebrow || 'Our Journey'}
+                title={content.about_milestones_title || 'A Decade of Milestones'}
+                subtitle={
+                    content.about_milestones_sub ||
+                    'From a single office to a nationally recognised brokerage — built one trusted relationship at a time.'
+                }
             />
 
             <div className="relative">
@@ -607,11 +673,11 @@ export const Milestones = () => (
                 <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[#1E4C8C]/20 to-transparent" />
 
                 <div className="space-y-8 lg:space-y-0">
-                    {MILESTONES.map((m, idx) => {
+                    {milestones.map(([year, title, desc], idx) => {
                         const isLeft = idx % 2 === 0;
                         return (
                             <motion.div
-                                key={m.year}
+                                key={idx}
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true, margin: '-80px' }}
@@ -633,13 +699,13 @@ export const Milestones = () => (
                                     <span className="lg:hidden absolute left-[5px] top-5 bottom-[-2rem] w-px bg-[#1E4C8C]/15" />
 
                                     <span className="inline-block font-display text-2xl text-[#7CB93D] font-semibold">
-                                        {m.year}
+                                        {year}
                                     </span>
                                     <h3 className="font-display text-xl text-[#1E4C8C] font-medium mt-1.5 mb-2">
-                                        {m.title}
+                                        {title}
                                     </h3>
                                     <p className="text-slate-600 text-sm leading-relaxed max-w-sm lg:max-w-none inline-block">
-                                        {m.desc}
+                                        {desc}
                                     </p>
                                 </div>
                             </motion.div>
@@ -649,42 +715,26 @@ export const Milestones = () => (
             </div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 6. ACQUISITION JOURNEY
 // ============================================================
 
-const STEPS = [
-    {
-        num: '01',
-        title: 'Consultation',
-        desc: 'Understanding your investment criteria and lifestyle desires.',
-    },
-    {
-        num: '02',
-        title: 'Curation',
-        desc: 'Presenting off-market and hand-selected luxury residences.',
-    },
-    {
-        num: '03',
-        title: 'Acquisition',
-        desc: 'Seamless negotiation, legal due diligence and closing.',
-    },
-    {
-        num: '04',
-        title: 'Management',
-        desc: 'Post-purchase property setup and yield management.',
-    },
-];
-
-export const ServicesAndJourney = () => (
+export const ServicesAndJourney = () => {
+    const content = usePageContent();
+    const steps = parseRows(content.about_steps, 2, DEFAULT_STEPS);
+    return (
     <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <SectionHeading
-                eyebrow="How It Works"
-                title="The Acquisition Journey"
-                subtitle="A structured four-step path to secure your property effortlessly."
+                eyebrow={content.about_steps_eyebrow || 'How It Works'}
+                title={content.about_steps_title || 'The Acquisition Journey'}
+                subtitle={
+                    content.about_steps_sub ||
+                    'A structured four-step path to secure your property effortlessly.'
+                }
             />
 
             <motion.div
@@ -694,7 +744,7 @@ export const ServicesAndJourney = () => (
                 variants={staggerContainer}
                 className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
             >
-                {STEPS.map((step, idx) => (
+                {steps.map(([title, desc], idx) => (
                     <motion.div
                         key={idx}
                         variants={fadeUp}
@@ -702,53 +752,43 @@ export const ServicesAndJourney = () => (
                     >
                         <span className="absolute top-0 left-0 h-1 w-0 bg-[#7CB93D] group-hover:w-full transition-all duration-500" />
                         <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#EAF1FB] text-[#1E4C8C] font-display text-lg font-semibold mb-5 group-hover:bg-[#7CB93D] group-hover:text-white transition-colors">
-                            {step.num}
+                            {String(idx + 1).padStart(2, '0')}
                         </span>
                         <h3 className="font-display text-xl text-[#1E4C8C] font-medium mb-2">
-                            {step.title}
+                            {title}
                         </h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">{step.desc}</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">{desc}</p>
                     </motion.div>
                 ))}
             </motion.div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 7. OFFICE / LIFESTYLE GALLERY
 // ============================================================
 
-const GALLERY = [
-    {
-        src: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80',
-        label: 'Our Headquarters',
-        span: 'sm:col-span-2 sm:row-span-2',
-    },
-    {
-        src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80',
-        label: 'Client Meetings',
-        span: '',
-    },
-    {
-        src: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80',
-        label: 'Advisory Lounge',
-        span: '',
-    },
-    {
-        src: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80',
-        label: 'Workspace',
-        span: 'sm:col-span-2',
-    },
-];
+const gallerySpan = (idx) => {
+    if (idx % 4 === 0) return 'sm:col-span-2 sm:row-span-2';
+    if (idx % 4 === 3) return 'sm:col-span-2';
+    return '';
+};
 
-export const OfficeGallery = () => (
+export const OfficeGallery = () => {
+    const content = usePageContent();
+    const gallery = parseRows(content.about_gallery, 2, DEFAULT_GALLERY);
+    return (
     <section className="py-16 sm:py-24 bg-[#FBF7EF]">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <SectionHeading
-                eyebrow="Inside Edge"
-                title="Where Expertise Meets Elegance"
-                subtitle="A glimpse into the spaces where we craft property experiences."
+                eyebrow={content.about_gallery_eyebrow || 'Inside Edge'}
+                title={content.about_gallery_title || 'Where Expertise Meets Elegance'}
+                subtitle={
+                    content.about_gallery_sub ||
+                    'A glimpse into the spaces where we craft property experiences.'
+                }
             />
 
             <motion.div
@@ -758,65 +798,49 @@ export const OfficeGallery = () => (
                 variants={staggerContainer}
                 className="grid grid-cols-2 sm:grid-cols-4 gap-4 auto-rows-[180px] sm:auto-rows-[200px]"
             >
-                {GALLERY.map((g, idx) => (
+                {gallery.map(([src, label], idx) => (
                     <motion.figure
                         key={idx}
                         variants={fadeUp}
-                        className={`group relative overflow-hidden rounded-2xl ${g.span}`}
+                        className={`group relative overflow-hidden rounded-2xl ${gallerySpan(idx)}`}
                     >
                         <img
-                            src={g.src}
-                            alt={g.label}
+                            src={src}
+                            alt={label}
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#153964]/80 via-transparent to-transparent opacity-70 group-hover:opacity-90 transition-opacity" />
                         <figcaption className="absolute bottom-4 left-4 text-white font-display text-lg drop-shadow">
-                            {g.label}
+                            {label}
                         </figcaption>
                     </motion.figure>
                 ))}
             </motion.div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 8. TEAM
 // ============================================================
 
-const TEAM = [
-    {
-        name: 'Sarah Jenkins',
-        role: 'Managing Principal & Founder',
-        img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80',
-    },
-    {
-        name: 'David Chen',
-        role: 'Head of Global Acquisitions',
-        img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80',
-    },
-    {
-        name: 'Elena Rostova',
-        role: 'Director of Luxury Estates',
-        img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80',
-    },
-    {
-        name: 'Marcus Webb',
-        role: 'Head of Client Relations',
-        img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80',
-    },
-];
-
 const SOCIALS = ['IN', 'X', 'IG', 'F'];
 
-export const TeamSection = () => (
+export const TeamSection = () => {
+    const content = usePageContent();
+    const team = parseRows(content.about_team, 3, DEFAULT_TEAM);
+    return (
     <section className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <SectionHeading
-                eyebrow="Our People"
-                title="Leadership Team"
-                subtitle="Industry veterans driven by integrity, passion and innovation."
+                eyebrow={content.about_team_eyebrow || 'Our People'}
+                title={content.about_team_title || 'Leadership Team'}
+                subtitle={
+                    content.about_team_sub ||
+                    'Industry veterans driven by integrity, passion and innovation.'
+                }
             />
 
             <motion.div
@@ -826,7 +850,7 @@ export const TeamSection = () => (
                 variants={staggerContainer}
                 className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
             >
-                {TEAM.map((member, idx) => (
+                {team.map(([name, role, img], idx) => (
                     <motion.div
                         key={idx}
                         variants={fadeUp}
@@ -834,8 +858,8 @@ export const TeamSection = () => (
                     >
                         <div className="overflow-hidden relative">
                             <img
-                                src={member.img}
-                                alt={member.name}
+                                src={img}
+                                alt={name}
                                 loading="lazy"
                                 className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
                             />
@@ -848,7 +872,7 @@ export const TeamSection = () => (
                                         key={i}
                                         href="#"
                                         onClick={(e) => e.preventDefault()}
-                                        aria-label={`${member.name} on ${s}`}
+                                        aria-label={`${name} on ${s}`}
                                         className="w-8 h-8 rounded-full bg-white/20 backdrop-blur border border-white/25 text-white text-[11px] font-bold flex items-center justify-center hover:bg-[#7CB93D] transition-colors"
                                     >
                                         {s}
@@ -858,10 +882,10 @@ export const TeamSection = () => (
                         </div>
                         <div className="p-5">
                             <h3 className="font-display text-lg text-[#1E4C8C] font-medium">
-                                {member.name}
+                                {name}
                             </h3>
                             <p className="text-[#6FA82C] text-sm font-semibold mt-1">
-                                {member.role}
+                                {role}
                             </p>
                         </div>
                     </motion.div>
@@ -869,44 +893,29 @@ export const TeamSection = () => (
             </motion.div>
         </div>
     </section>
-);
+    );
+};
 
 // ============================================================
 // 9. TESTIMONIALS CAROUSEL
 // ============================================================
 
-const TESTIMONIALS = [
-    {
-        quote:
-            'Edge Realty made purchasing our coastal estate smooth beyond expectation. Their market foresight and discretion are completely unmatched.',
-        name: 'Marcus & Eleanor Vance',
-        role: 'Estate Buyers',
-    },
-    {
-        quote:
-            'As an NRI investor, I needed a team I could trust blindly. Their data reports and virtual tours made closing remotely effortless.',
-        name: 'Priya Sharma',
-        role: 'Property Investor',
-    },
-    {
-        quote:
-            'From shortlist to handover, every step was transparent. The concierge team even handled our interiors. Truly end-to-end service.',
-        name: 'James Okafor',
-        role: 'First-time Homeowner',
-    },
-];
-
 export const Testimonials = () => {
+    const content = usePageContent();
+    const testimonials = parseRows(content.about_testimonials, 3, DEFAULT_TESTIMONIALS);
+    const total = testimonials.length;
     const [idx, setIdx] = useState(0);
-    const total = TESTIMONIALS.length;
 
     useEffect(() => {
+        if (total < 2) return undefined;
         const t = setInterval(() => setIdx((i) => (i + 1) % total), 6000);
         return () => clearInterval(t);
     }, [total]);
 
     const prev = () => setIdx((i) => (i - 1 + total) % total);
     const next = () => setIdx((i) => (i + 1) % total);
+
+    const active = testimonials[idx] || testimonials[0];
 
     return (
         <section className="py-16 sm:py-24 bg-[#FBF7EF] relative overflow-hidden">
@@ -932,11 +941,11 @@ export const Testimonials = () => {
                             key={idx}
                             className="font-display text-2xl md:text-3xl text-[#1E4C8C] mb-8 leading-snug font-medium transition-opacity duration-500"
                         >
-                            “{TESTIMONIALS[idx].quote}”
+                            “{active.quote}”
                         </blockquote>
                         <cite className="not-italic text-slate-600 font-semibold block">
-                            {TESTIMONIALS[idx].name}{' '}
-                            <span className="text-[#6FA82C]">— {TESTIMONIALS[idx].role}</span>
+                            {active.name}{' '}
+                            <span className="text-[#6FA82C]">— {active.role}</span>
                         </cite>
                     </div>
 
@@ -950,7 +959,7 @@ export const Testimonials = () => {
                             <ChevronLeft className="w-5 h-5" />
                         </button>
                         <div className="flex gap-2">
-                            {TESTIMONIALS.map((_, i) => (
+                            {testimonials.map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setIdx(i)}
@@ -979,7 +988,24 @@ export const Testimonials = () => {
 // 10. CTA BANNER
 // ============================================================
 
-export const CTABanner = () => (
+export const CTABanner = () => {
+    const content = usePageContent();
+    const [contact, setContact] = useState(null);
+
+    useEffect(() => {
+        let alive = true;
+        footerService
+            .getFooter()
+            .then((res) => {
+                if (alive) setContact(res?.data?.data?.contact || null);
+            })
+            .catch(() => {});
+        return () => {
+            alive = false;
+        };
+    }, []);
+
+    return (
     <section className="py-16 sm:py-24 bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white relative overflow-hidden">
         <div className="absolute -top-24 right-1/4 w-80 h-80 rounded-full bg-[#8BC53F]/20 blur-3xl" />
         <div className="absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
@@ -991,14 +1017,15 @@ export const CTABanner = () => (
                 viewport={{ once: true, margin: '-80px' }}
                 variants={fadeUp}
             >
-                <Eyebrow dark>Let's Begin</Eyebrow>
+                <Eyebrow dark>{content.about_cta_eyebrow || "Let's Begin"}</Eyebrow>
                 <h2 className="font-display text-3xl md:text-5xl font-medium mb-5 leading-tight">
-                    Ready to Find Your <span className="italic text-[#8BC53F]">Dream</span>{' '}
-                    Property?
+                    {renderEmph(
+                        content.about_cta_title || 'Ready to Find Your *Dream* Property?'
+                    )}
                 </h2>
                 <p className="text-[#F7FAFC]/70 text-lg max-w-xl mb-8">
-                    Get in touch with our advisors to explore exclusive listings tailored to
-                    your goals.
+                    {content.about_cta_sub ||
+                        'Get in touch with our advisors to explore exclusive listings tailored to your goals.'}
                 </p>
                 <div className="flex flex-wrap gap-4">
                     <Link
@@ -1024,7 +1051,9 @@ export const CTABanner = () => (
                 variants={fadeUp}
                 className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8"
             >
-                <p className="font-display text-xl mb-6">Reach us directly</p>
+                <p className="font-display text-xl mb-6">
+                    {content.about_cta_card_title || 'Reach us directly'}
+                </p>
                 <ul className="space-y-5">
                     <li className="flex items-start gap-3.5">
                         <span className="w-10 h-10 rounded-xl bg-[#8BC53F]/20 text-[#8BC53F] flex items-center justify-center shrink-0">
@@ -1033,7 +1062,7 @@ export const CTABanner = () => (
                         <div>
                             <p className="text-sm font-semibold">Head Office</p>
                             <p className="text-[#F7FAFC]/60 text-sm">
-                                Sector 18, Gurugram, Haryana
+                                {contact?.address || '59/1 Panchanan Tala Road, Howrah- 711101'}
                             </p>
                         </div>
                     </li>
@@ -1043,7 +1072,9 @@ export const CTABanner = () => (
                         </span>
                         <div>
                             <p className="text-sm font-semibold">Phone</p>
-                            <p className="text-[#F7FAFC]/60 text-sm">+91 98765 43210</p>
+                            <p className="text-[#F7FAFC]/60 text-sm">
+                                {contact?.phone || '(+91) 8585033913'}
+                            </p>
                         </div>
                     </li>
                     <li className="flex items-start gap-3.5">
@@ -1053,7 +1084,7 @@ export const CTABanner = () => (
                         <div>
                             <p className="text-sm font-semibold">Email</p>
                             <p className="text-[#F7FAFC]/60 text-sm">
-                                hello@edgemilerealty.in
+                                {contact?.email || 'info@edgemilerealty.com'}
                             </p>
                         </div>
                     </li>
@@ -1061,7 +1092,8 @@ export const CTABanner = () => (
             </motion.div>
         </div>
     </section>
-);
+    );
+};
 
 // Keep legacy export name used elsewhere (testimonials + CTA combined view).
 export const TestimonialsAndCTA = () => (

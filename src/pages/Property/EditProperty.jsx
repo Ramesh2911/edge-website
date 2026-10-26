@@ -89,7 +89,9 @@ export default function EditProperty() {
     } = useForm();
 
     useEffect(() => {
-        const fetchLookups = async () => {
+        const loadPage = async () => {
+            // 1) Categories first — reset() below can only bind category_id
+            //    once the <option> elements exist, otherwise the select stays blank.
             try {
                 const res = await propertyService.getCategories();
                 setDynamicCategories(res.data.data || []);
@@ -98,12 +100,8 @@ export default function EditProperty() {
             } finally {
                 setIsLoadingLookups(false);
             }
-        };
-        fetchLookups();
-    }, []);
 
-    useEffect(() => {
-        const fetchPropertyData = async () => {
+            // 2) Property data
             try {
                 const { data } = await propertyService.getPropertyById(id);
                 const listing = data?.data;
@@ -151,7 +149,7 @@ export default function EditProperty() {
                 setIsPageLoading(false);
             }
         };
-        fetchPropertyData();
+        loadPage();
     }, [id, reset, navigate]);
 
     const handleNewFiles = (e) => {

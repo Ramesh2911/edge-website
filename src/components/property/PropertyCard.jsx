@@ -285,10 +285,10 @@ export default function PropertyCard({
             <div className="p-4 sm:p-5 flex flex-col flex-1">
                 {/* Type + Price */}
                 <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gold-dark bg-gold-light/30 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gold-dark bg-gold-light/30 px-2.5 py-1 rounded-full min-w-0 truncate">
                         {propertyType}
                     </span>
-                    <span className="font-display text-lg text-charcoal-deep font-semibold whitespace-nowrap">
+                    <span className="font-display text-lg text-charcoal-deep font-semibold whitespace-nowrap shrink-0">
                         {formatPrice(price)}
                         {listingType === "Rent" && priceUnit ? (
                             <span className="text-xs font-normal text-stone">/{priceUnit}</span>
