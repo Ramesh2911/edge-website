@@ -17,7 +17,7 @@ export default function RecentProperty({
 
     return (
 
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6">
 
             {/* Header */}
 
@@ -83,13 +83,13 @@ export default function RecentProperty({
 
                                     </th>
 
-                                    <th>
+                                    <th className="hidden sm:table-cell">
 
                                         Type
 
                                     </th>
 
-                                    <th>
+                                    <th className="hidden sm:table-cell">
 
                                         Price
 
@@ -165,7 +165,7 @@ export default function RecentProperty({
 
                                             {/* Type */}
 
-                                            <td>
+                                            <td className="hidden sm:table-cell">
 
                                                 <div>
 
@@ -187,7 +187,7 @@ export default function RecentProperty({
 
                                             {/* Price */}
 
-                                            <td>
+                                            <td className="hidden sm:table-cell">
 
                                                 <div className="flex items-center justify-center">
 

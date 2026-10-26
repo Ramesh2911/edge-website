@@ -36,7 +36,7 @@ export default function Testimonials() {
         {testimonials.map((t) => (
           <div
             key={t.id}
-            className="shrink-0 w-[320px] bg-[#EAF1FB] rounded-2xl p-6 flex flex-col"
+            className="shrink-0 w-[280px] sm:w-[320px] bg-[#EAF1FB] rounded-2xl p-6 flex flex-col"
           >
             <Quote size={22} className="text-[#8BC53F]" />
             <div className="flex gap-0.5 mt-4">

@@ -476,7 +476,7 @@ export default function PropertyList() {
                         <main className="pt-8 lg:pt-0 space-y-6">
                             {/* Toolbar */}
                             <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-charcoal/5 shadow-card px-4 sm:px-5 py-3.5">
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                     <button
                                         onClick={() => setIsMobileFilterOpen(true)}
                                         className="lg:hidden flex items-center gap-2 px-4 py-2 border border-charcoal/12 rounded-xl text-sm font-semibold text-charcoal-soft hover:border-gold transition-colors"

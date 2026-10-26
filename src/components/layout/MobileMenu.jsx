@@ -145,6 +145,10 @@ export default function MobileMenu({
 
                 w-72
 
+                flex
+
+                flex-col
+
                 bg-white
 
                 shadow-xl
@@ -171,7 +175,7 @@ export default function MobileMenu({
 
                 <div className="flex items-center justify-between px-5 h-20 border-b">
 
-                    <h2 className="text-2xl font-bold text-blue-600">
+                    <h2 className="text-lg xl:text-2xl font-bold text-blue-600 truncate">
 
                         Edge Mile Realty
 
@@ -187,7 +191,7 @@ export default function MobileMenu({
 
                 {/* Menu */}
 
-                <div className="py-5">
+                <div className="py-5 flex-1 overflow-y-auto pb-24">
 
                     {
 

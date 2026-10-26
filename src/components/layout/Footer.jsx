@@ -1,6 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { footerLinks } from "../../data/staticData";
+import footerService from "../../services/footer.service";
+
+// Fallback content (matches DB seeds) — used until /footer loads or on API failure
+const DEFAULT_FOOTER = {
+  contact: {
+    phone: "(+91) 8585033913",
+    email: "info@edgemilerealty.com",
+    address: "59/1 Panchanan Tala Road, Howrah- 711101",
+  },
+  links: [
+    { id: 3, label: "Cancellation & Refund Policy", url: "/cancellation-refund-policy" },
+    { id: 4, label: "User Conduct Policy", url: "/user-conduct-policy" },
+    { id: 5, label: "Listing Policy", url: "/listing-policy" },
+    { id: 6, label: "Advertisement Policy", url: "/advertisement-policy" },
+    { id: 7, label: "Anti Fraud Policy", url: "/anti-fraud-policy" },
+    { id: 8, label: "Grievance & Hierarchy", url: "/grievance-hierarchy" },
+  ],
+};
 
 const socials = [
   {
@@ -24,7 +42,28 @@ const socials = [
 export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [footer, setFooter] = useState(DEFAULT_FOOTER);
   const currentYear = new Date().getFullYear();
+
+  // Load footer content from admin panel (site settings + useful links)
+  useEffect(() => {
+    let alive = true;
+    footerService
+      .getFooter()
+      .then((res) => {
+        const data = res?.data?.data;
+        if (alive && data && data.links) {
+          setFooter({
+            contact: { ...DEFAULT_FOOTER.contact, ...(data.contact || {}) },
+            links: data.links,
+          });
+        }
+      })
+      .catch(() => {}); // keep defaults on failure
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -85,9 +124,9 @@ export default function Footer() {
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-5 lg:px-8 pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
 
-          {/* Brand column */}
+          {/* Brand / socials column */}
           <div>
             <div className="flex gap-3">
               {socials.map((item) => (
@@ -110,48 +149,65 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Dynamic Footer Links */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h3 className="text-white font-semibold text-lg mb-5">
-                {title}
-              </h3>
+          {/* Useful Links (admin managed) */}
+          <div>
+            <h3 className="text-white font-semibold text-lg mb-5">
+              Useful Links
+            </h3>
 
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.label}>
+            <ul className="space-y-3">
+              {footer.links.map((link) => (
+                <li key={link.id ?? link.label}>
+                  {String(link.url || "#").startsWith("/") ? (
+                    <Link
+                      to={link.url}
+                      className="text-sm hover:text-[#8BC53F] transition"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
                     <a
-                      href={link.href}
+                      href={link.url || "#"}
                       className="text-sm hover:text-[#8BC53F] transition"
                     >
                       {link.label}
                     </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          {/* Contact */}
+          {/* Contact + Location (admin managed) */}
           <div>
             <h3 className="text-white font-semibold text-lg mb-5">
-              Contact Us
+              Contact
             </h3>
 
             <ul className="space-y-4 text-sm">
               <li className="flex items-start gap-3">
+                <Phone size={18} className="mt-1 shrink-0" />
+                <a
+                  href={`tel:${String(footer.contact.phone).replace(/[^+\d]/g, "")}`}
+                  className="hover:text-[#8BC53F] transition"
+                >
+                  {footer.contact.phone}
+                </a>
+              </li>
+
+              <li className="flex items-start gap-3">
+                <Mail size={18} className="mt-1 shrink-0" />
+                <a
+                  href={`mailto:${footer.contact.email}`}
+                  className="break-all hover:text-[#8BC53F] transition"
+                >
+                  {footer.contact.email}
+                </a>
+              </li>
+
+              <li className="flex items-start gap-3">
                 <MapPin size={18} className="mt-1 shrink-0" />
-                <span>Sector 18, Gurugram, Haryana</span>
-              </li>
-
-              <li className="flex items-center gap-3">
-                <Phone size={18} className="shrink-0" />
-                <span>+91 98765 43210</span>
-              </li>
-
-              <li className="flex items-center gap-3">
-                <Mail size={18} className="shrink-0" />
-                <span>hello@edgemilerealty.in</span>
+                <span className="whitespace-pre-line">{footer.contact.address}</span>
               </li>
             </ul>
           </div>
@@ -160,20 +216,10 @@ export default function Footer() {
 
       {/* Copyright */}
       <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-5 lg:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-3">
+        <div className="max-w-7xl mx-auto px-5 lg:px-8 py-5 flex flex-col md:flex-row justify-center items-center gap-3">
           <p className="text-xs text-[#F7FAFC]/50">
             © {currentYear} Edge Mile Realty. All Rights Reserved.
           </p>
-
-          <div className="flex gap-5 text-xs">
-            <a href="#" className="hover:text-[#8BC53F]">
-              Privacy Policy
-            </a>
-
-            <a href="#" className="hover:text-[#8BC53F]">
-              Terms & Conditions
-            </a>
-          </div>
         </div>
       </div>
     </footer>

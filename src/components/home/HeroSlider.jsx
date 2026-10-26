@@ -21,7 +21,7 @@ export default function HeroSlider({ slides, children }) {
 
   return (
     <section
-      className="relative overflow-hidden h-[300px] sm:h-[380px] lg:h-[440px]"
+      className="relative overflow-hidden min-h-[300px] sm:h-[380px] lg:h-[440px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -47,7 +47,7 @@ export default function HeroSlider({ slides, children }) {
             type="button"
             aria-label="Previous slide"
             onClick={() => go(-1)}
-            className="absolute left-3 bottom-5 sm:left-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+            className="hidden sm:flex absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] items-center justify-center shadow-card transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
@@ -55,7 +55,7 @@ export default function HeroSlider({ slides, children }) {
             type="button"
             aria-label="Next slide"
             onClick={() => go(1)}
-            className="absolute right-3 bottom-5 sm:right-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] flex items-center justify-center shadow-card transition-colors"
+            className="hidden sm:flex absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/85 hover:bg-white border border-[#1E4C8C]/10 text-[#1E4C8C] items-center justify-center shadow-card transition-colors"
           >
             <ChevronRight size={20} />
           </button>
@@ -64,7 +64,7 @@ export default function HeroSlider({ slides, children }) {
 
       {/* Center overlay (search bar) */}
       {children && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-14 pt-12 sm:pt-16">
+        <div className="absolute inset-0 z-10 flex items-end justify-center px-4 sm:px-14 pb-10 sm:pb-16">
           <div className="w-full max-w-4xl">{children}</div>
         </div>
       )}

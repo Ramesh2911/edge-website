@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 import {
     User,
     Mail,
@@ -38,13 +37,14 @@ const ROLES = [
 
 const COMPANY_ROLES = ["broker", "developer"];
 
+const ROLE_IDS = { buyer: 7, broker: 5, developer: 6 };
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_PATTERN = /^[6-9]\d{9}$/;
 const PINCODE_PATTERN = /^\d{6}$/;
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    const { login } = useAuth();
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -99,19 +99,23 @@ export default function RegisterPage() {
     const onSubmit = async (data) => {
         setSubmitting(true);
         try {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === "confirmPassword") return;
-                formData.append(key, value ?? "");
+            await authService.register({
+                role_id: ROLE_IDS[data.role],
+                full_name: data.fullName,
+                email: data.email,
+                mobile: data.mobile,
+                password: data.password,
+                company_name: data.companyName,
+                rera_number: data.reraNumber,
+                address: data.address,
+                city: data.city,
+                state: data.state,
+                country: data.country,
+                pincode: data.pincode,
             });
 
-            const res = await authService.register(formData);
-            const { user, token } = res.data;
-
-            login(user, token);
-
-            toast.success(`Welcome to Edge Mile Realty, ${data.fullName.split(" ")[0]}!`);
-            navigate("/");
+            toast.success("Registration successful! Please log in.");
+            navigate("/login");
         } catch (err) {
             const message =
                 err?.response?.data?.message ||
@@ -123,7 +127,9 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-[100dvh] grid lg:grid-cols-2 overflow-hidden">
+        <>
+            <Toaster position="top-right" />
+            <div className="min-h-[100dvh] grid lg:grid-cols-2 overflow-hidden">
             {/* ============================================================
                 LEFT PANEL — Brand showcase (hidden on mobile)
             ============================================================ */}
@@ -568,6 +574,7 @@ export default function RegisterPage() {
                 /* Never allow horizontal overflow anywhere on the page */
                 html, body, #root { overflow-x: hidden; }
             `}</style>
-        </div>
+            </div>
+        </>
     );
 }

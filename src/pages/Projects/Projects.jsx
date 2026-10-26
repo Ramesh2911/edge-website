@@ -193,17 +193,17 @@ export default function Projects() {
 
                   {/* Card body */}
                   <div className="p-6 space-y-4">
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="bg-slate-50 rounded-xl py-3">
-                        <p className="text-lg font-bold text-slate-800">{project.units}</p>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                      <div className="bg-slate-50 rounded-xl py-3 px-1">
+                        <p className="text-base sm:text-lg font-bold text-slate-800">{project.units}</p>
                         <p className="text-[10px] text-slate-400 uppercase tracking-wider">Units</p>
                       </div>
-                      <div className="bg-slate-50 rounded-xl py-3">
-                        <p className="text-lg font-bold text-[#7CB93D]">{project.sold}</p>
+                      <div className="bg-slate-50 rounded-xl py-3 px-1">
+                        <p className="text-base sm:text-lg font-bold text-[#7CB93D]">{project.sold}</p>
                         <p className="text-[10px] text-slate-400 uppercase tracking-wider">Sold</p>
                       </div>
-                      <div className="bg-slate-50 rounded-xl py-3">
-                        <p className="text-lg font-bold text-[#153964]">{project.value}</p>
+                      <div className="bg-slate-50 rounded-xl py-3 px-1">
+                        <p className="text-sm sm:text-lg font-bold text-[#153964]">{project.value}</p>
                         <p className="text-[10px] text-slate-400 uppercase tracking-wider">Value</p>
                       </div>
                     </div>

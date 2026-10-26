@@ -232,18 +232,18 @@ export default function SiteVisits() {
                   Manage all your site visit appointments in one place. Confirm, reschedule, or track completed visits.
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 text-center">
-                  <p className="text-2xl font-bold text-white">{loading ? "…" : visits.length}</p>
-                  <p className="text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Total</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-3 sm:px-5 py-4 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-white">{loading ? "…" : visits.length}</p>
+                  <p className="text-[10px] sm:text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Total</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 text-center">
-                  <p className="text-2xl font-bold text-[#8BC53F]">{loading ? "…" : confirmedCount}</p>
-                  <p className="text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Confirmed</p>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-3 sm:px-5 py-4 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-[#8BC53F]">{loading ? "…" : confirmedCount}</p>
+                  <p className="text-[10px] sm:text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Confirmed</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 text-center">
-                  <p className="text-2xl font-bold text-white">{loading ? "…" : pendingCount}</p>
-                  <p className="text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Pending</p>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-3 sm:px-5 py-4 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-white">{loading ? "…" : pendingCount}</p>
+                  <p className="text-[10px] sm:text-[11px] text-white/50 uppercase tracking-wider mt-0.5">Pending</p>
                 </div>
               </div>
             </div>

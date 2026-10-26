@@ -30,7 +30,7 @@ export default function ProfileCard({
 
             {/* Profile */}
 
-            <div className="px-8 pb-8">
+            <div className="px-4 sm:px-8 pb-8">
 
                 <div className="-mt-16 flex flex-col lg:flex-row lg:items-end lg:justify-between">
 
@@ -47,8 +47,10 @@ export default function ProfileCard({
                             alt={user.full_name}
 
                             className="
-                                w-32
-                                h-32
+                                w-24
+                                h-24
+                                sm:w-32
+                                sm:h-32
                                 rounded-full
                                 border-4
                                 border-white
@@ -60,7 +62,7 @@ export default function ProfileCard({
 
                         <div>
 
-                            <h2 className="text-3xl font-bold">
+                            <h2 className="text-2xl sm:text-3xl font-bold">
 
                                 {user.full_name}
 

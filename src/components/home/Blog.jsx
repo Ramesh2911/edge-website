@@ -1,7 +1,43 @@
+import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { blogPosts } from "../../data/staticData";
+import blogService from "../../services/blog.service";
+
+const GRADIENTS = [
+  "from-amber-200 to-orange-100",
+  "from-emerald-200 to-teal-100",
+  "from-violet-200 to-purple-100",
+  "from-rose-200 to-red-100",
+];
+
+const fmtDate = (v) => {
+  if (!v) return "";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return String(v);
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+};
 
 export default function Blog() {
+  const [posts, setPosts] = useState(blogPosts);
+
+  useEffect(() => {
+    let alive = true;
+    blogService
+      .getPosts()
+      .then((res) => {
+        const data = res?.data?.data;
+        if (alive && Array.isArray(data) && data.length) {
+          setPosts(data.map((p, i) => ({ ...p, gradient: GRADIENTS[i % GRADIENTS.length] })));
+        }
+      })
+      .catch(() => {}); // keep static fallback
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const visible = posts.slice(0, 4);
+
   return (
     <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-6 sm:pt-8 pb-10 sm:pb-14">
       <div className="text-center max-w-2xl mx-auto">
@@ -23,7 +59,7 @@ export default function Blog() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
-        {blogPosts.map((post) => (
+        {visible.map((post) => (
           <a
             key={post.id}
             href="#"
@@ -31,7 +67,7 @@ export default function Blog() {
           >
             <div className={`h-40 rounded-xl bg-gradient-to-br ${post.gradient} relative overflow-hidden`}>
               <img
-                src={post.image}
+                src={post.image || post.image_url}
                 alt={post.title}
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -43,7 +79,7 @@ export default function Blog() {
             <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#6FA82C] bg-[#EAF6DE] rounded-full px-2.5 py-1 mt-4">
               {post.tag}
             </span>
-            <p className="text-xs text-slate-500 mt-2">{post.date}</p>
+            <p className="text-xs text-slate-500 mt-2">{fmtDate(post.post_date) || post.date}</p>
             <h3 className="font-display text-base text-[#1E4C8C] font-medium mt-1.5 leading-snug group-hover:text-[#6FA82C] transition-colors">
               {post.title}
             </h3>

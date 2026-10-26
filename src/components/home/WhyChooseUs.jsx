@@ -1,17 +1,22 @@
-import { ShieldCheck, BadgePercent, Compass, Scale, Wallet } from "lucide-react";
+import { ShieldCheck, Landmark, Scale, Wallet, Headphones, Eye } from "lucide-react";
 import { excellenceFeatures } from "../../data/staticData";
 
-const iconMap = { ShieldCheck, BadgePercent, Compass, Scale, Wallet };
+const iconMap = { ShieldCheck, Landmark, Scale, Wallet, Headphones, Eye };
 
 function FeatureCard({ f }) {
-  const Icon = iconMap[f.icon];
+  const Icon = iconMap[f.icon] ?? ShieldCheck;
   return (
-    <div className="w-[240px] shrink-0 bg-[#EAF1FB] rounded-2xl p-6 text-center hover:bg-white hover:shadow-card transition-all">
-      <span className="w-12 h-12 rounded-xl bg-[#EAF6DE] flex items-center justify-center mx-auto">
+    <div className="w-[260px] shrink-0 bg-[#EAF1FB] rounded-2xl p-6 hover:bg-white hover:shadow-card transition-all">
+      <span className="w-12 h-12 rounded-xl bg-[#EAF6DE] flex items-center justify-center">
         <Icon size={20} className="text-[#6FA82C]" />
       </span>
-      <p className="font-display text-base text-[#1E4C8C] font-medium mt-4">{f.title}</p>
-      <p className="text-slate-500 text-xs mt-1.5 leading-snug">{f.desc}</p>
+      <p className="text-[11px] font-bold uppercase tracking-widest text-[#6FA82C] mt-4">
+        {f.tag}
+      </p>
+      <p className="font-display text-base text-[#1E4C8C] font-medium mt-1.5 leading-snug">
+        {f.title}
+      </p>
+      <p className="text-slate-500 text-xs mt-2 leading-relaxed">{f.desc}</p>
     </div>
   );
 }

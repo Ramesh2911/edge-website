@@ -201,11 +201,42 @@ export const nearbyPins = [
 ];
 
 export const excellenceFeatures = [
-  { icon: "ShieldCheck", title: "Verified Listings", desc: "Every property is verified for accuracy and ownership" },
-  { icon: "BadgePercent", title: "Best Price Guarantee", desc: "We help you get the best deal on the market" },
-  { icon: "Compass", title: "Expert Guidance", desc: "Our real estate experts are here to help every step" },
-  { icon: "Scale", title: "Legal Support", desc: "Comprehensive legal support at every stage" },
-  { icon: "Wallet", title: "Easy Financing", desc: "Hassle-free home loan options from trusted partners" },
+  {
+    icon: "Landmark",
+    tag: "Bank",
+    title: "Trusted Banking Partners",
+    desc: "Explore home loan options through our partner banks with guidance throughout the process.",
+  },
+  {
+    icon: "ShieldCheck",
+    tag: "Property",
+    title: "Verified Properties, Confident Choices",
+    desc: "Find the right property with support for documentation checks and informed decisions.",
+  },
+  {
+    icon: "Scale",
+    tag: "Legal team",
+    title: "Legal Support You Can Rely On",
+    desc: "Get assistance with property documentation, legal concerns, and understanding your rights.",
+  },
+  {
+    icon: "Wallet",
+    tag: "Loan",
+    title: "Loan Guidance Without the Stress",
+    desc: "Get support navigating loan-related concerns, repayment issues, and the next steps.",
+  },
+  {
+    icon: "Headphones",
+    tag: "Customer service",
+    title: "With You at Every Step",
+    desc: "From property selection to paperwork, receive guidance throughout your journey.",
+  },
+  {
+    icon: "Eye",
+    tag: "Transparency",
+    title: "Clarity in Every Decision",
+    desc: "Straightforward information and honest guidance to help you make informed choices.",
+  },
 ];
 
 export const testimonials = [
@@ -361,7 +392,5 @@ export const footerLinks = {
   ],
   Support: [
     { label: "Help Center", href: "/contact" },
-    { label: "Privacy Policy", href: "/about" },
-    { label: "Terms of Service", href: "/about" },
   ],
 };

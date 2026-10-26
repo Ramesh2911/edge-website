@@ -196,17 +196,17 @@ export default function Deals() {
                   From Offer to Close
                 </h1>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-white">{loading ? "…" : deals.length}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-base sm:text-2xl font-bold text-white">{loading ? "…" : deals.length}</p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Total</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-[#8BC53F]">{loading ? "…" : closedDeals}</p>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-base sm:text-2xl font-bold text-[#8BC53F]">{loading ? "…" : closedDeals}</p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Closed</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-white">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-sm sm:text-2xl font-bold text-white">
                     {loading ? "…" : formatCurrency(pipelineValue)}
                   </p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Pipeline</p>

@@ -159,17 +159,17 @@ export default function ManageUnits() {
                   Management
                 </h1>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-white">{MOCK_UNITS.length}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-base sm:text-2xl font-bold text-white">{MOCK_UNITS.length}</p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Total</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-[#8BC53F]">{available}</p>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-base sm:text-2xl font-bold text-[#8BC53F]">{available}</p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Available</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-3.5 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-white">{sold}</p>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-2 sm:px-4 py-3.5 text-center">
+                  <p className="text-base sm:text-2xl font-bold text-white">{sold}</p>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">Sold</p>
                 </div>
               </div>
