@@ -94,7 +94,22 @@ const STATE_CITIES = {
     "Tripura": ["Agartala", "Dharmanagar", "Udaipur", "Kailshahar"],
     "Uttar Pradesh": ["Lucknow", "Kanpur", "Agra", "Varanasi", "Prayagraj", "Meerut", "Bareilly", "Noida", "Ghaziabad"],
     "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rishikesh"],
-    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Kharagpur", "Malda"],
+    "West Bengal": [
+        "Alipurduar", "Arambag", "Asansol", "Ashoknagar Kalyangarh", "Baduria", "Baharampur", "Baidyabati", "Bally", "Balurghat", "Bangaon",
+        "Bankura", "Bansberia", "Baranagar", "Barasat", "Bardhaman", "Barrackpore", "Baruipur", "Basirhat", "Beldanga", "Bhadreswar",
+        "Bhatpara", "Bidhannagar", "Birnagar", "Bishnupur", "Bolpur", "Budge Budge", "Buniadpur", "Chakdaha", "Champdani", "Chandannagar",
+        "Chandrakona", "Contai", "Cooch Behar", "Cooper's Camp", "Dainhat", "Dalkhola", "Dankuni", "Darjeeling", "Dhulian", "Dhupguri",
+        "Diamond Harbour", "Dinhata", "Domkal", "Dubrajpur", "Dum Dum", "Durgapur", "Egra", "English Bazar", "Falakata", "Gangarampur",
+        "Garulia", "Gayespur", "Ghatal", "Gobardanga", "Guskara", "Habra", "Haldia", "Haldibari", "Halisahar", "Haringhata",
+        "Hooghly-Chinsurah", "Howrah", "Islampur", "Jalpaiguri", "Jangipur", "Jaynagar Majilpur", "Jhalda", "Jhargram", "Jiaganj Azimganj", "Kaliaganj",
+        "Kalimpong", "Kalna", "Kalyani", "Kamarhati", "Kanchrapara", "Kandi", "Katwa", "Kharagpur", "Kharar", "Khardaha",
+        "Khirpai", "Kolkata", "Konnagar", "Krishnanagar", "Kshirpai", "Kurseong", "Madhyamgram", "Maheshtala", "Mainaguri", "Mal",
+        "Malda", "Mathabhanga", "Medinipur", "Mekliganj", "Memari", "Midnapore", "Mirik", "Murshidabad", "Nabadwip", "Naihati",
+        "Nalhati", "New Barrackpur", "North Barrackpur", "North Dumdum", "Old Malda", "Panihati", "Panskura", "Pujali", "Purulia", "Raghunathpur",
+        "Raiganj", "Rajpur Sonarpur", "Ramjibanpur", "Rampurhat", "Ranaghat", "Rishra", "Sainthia", "Santipur", "Serampore", "Siliguri",
+        "Sonamukhi", "South Dumdum", "Suri", "Taherpur", "Taki", "Tamluk", "Tarakeswar", "Titagarh", "Tufanganj", "Uluberia",
+        "Uttarpara Kotrung"
+    ],
 };
 
 export default function RegisterPage() {
