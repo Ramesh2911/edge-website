@@ -1,6 +1,7 @@
 import Hero from "../../components/home/Hero";
 import ExploreMore from "../../components/home/ExploreMore";
 import FeaturedProperties from "../../components/home/FeaturedProperties";
+import PopularProperties from "../../components/home/PopularProperties";
 import PopularLocalities from "../../components/home/PopularLocalities";
 import HomeLoan from "../../components/home/HomeLoan";
 import WhyChooseUs from "../../components/home/WhyChooseUs";
@@ -15,6 +16,7 @@ export default function Home() {
         <>
             <Hero />
             <FeaturedProperties />
+            <PopularProperties />
             <PopularLocalities />
             <HomeLoan />
             {/* <ExploreMore /> */}

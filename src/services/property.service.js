@@ -86,6 +86,9 @@ const propertyService = {
     },
     propertyList(params) {
         return api.get("/properties/list", { params });
+    },
+    popularList() {
+        return api.get("/properties/popular");
     }
 };
 
