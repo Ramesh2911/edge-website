@@ -19,6 +19,7 @@ import {
     Briefcase,
     Building,
     CheckCircle2,
+    ChevronDown,
 } from "lucide-react";
 
 import authService from "../../services/auth.service";
@@ -42,6 +43,59 @@ const ROLE_IDS = { buyer: 7, broker: 5, developer: 6 };
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_PATTERN = /^[6-9]\d{9}$/;
 const PINCODE_PATTERN = /^\d{6}$/;
+const NAME_PATTERN = /^[A-Za-z\s.'-]+$/;
+
+const COUNTRY_OPTIONS = ["India"];
+
+const INDIA_STATES = [
+    "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+    "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
+    "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
+    "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh",
+    "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+    "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim",
+    "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand",
+    "West Bengal",
+];
+
+const STATE_CITIES = {
+    "Andaman and Nicobar Islands": ["Port Blair"],
+    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Tirupati", "Kurnool", "Rajahmundry"],
+    "Arunachal Pradesh": ["Itanagar", "Naharlagun", "Pasighat", "Tawang", "Ziro"],
+    "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia"],
+    "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga", "Purnia"],
+    "Chandigarh": ["Chandigarh"],
+    "Chhattisgarh": ["Raipur", "Bilaspur", "Bhilai", "Korba", "Durg", "Rajnandgaon"],
+    "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Silvassa", "Diu"],
+    "Delhi": ["New Delhi"],
+    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar", "Bhavnagar", "Jamnagar"],
+    "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Hisar", "Karnal", "Rohtak"],
+    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Solan", "Mandi", "Kullu"],
+    "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
+    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro Steel City", "Deoghar"],
+    "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi", "Ballari", "Vijayapura"],
+    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Kannur", "Kottayam"],
+    "Ladakh": ["Leh", "Kargil"],
+    "Lakshadweep": ["Kavaratti"],
+    "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Chhatrapati Sambhajinagar", "Kolhapur", "Solapur"],
+    "Manipur": ["Imphal", "Thoubal", "Bishnupur"],
+    "Meghalaya": ["Shillong", "Tura", "Jowai"],
+    "Mizoram": ["Aizawl", "Lunglei", "Champhai"],
+    "Nagaland": ["Kohima", "Dimapur", "Mokokchung"],
+    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur"],
+    "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam"],
+    "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer", "Alwar"],
+    "Sikkim": ["Gangtok", "Namchi", "Gyalshing"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tiruppur", "Vellore"],
+    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam"],
+    "Tripura": ["Agartala", "Dharmanagar", "Udaipur", "Kailshahar"],
+    "Uttar Pradesh": ["Lucknow", "Kanpur", "Agra", "Varanasi", "Prayagraj", "Meerut", "Bareilly", "Noida", "Ghaziabad"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rishikesh"],
+    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Kharagpur", "Malda"],
+};
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -54,6 +108,7 @@ export default function RegisterPage() {
         register,
         handleSubmit,
         watch,
+        setValue,
         formState: { errors },
     } = useForm({
         mode: "onTouched",
@@ -75,8 +130,22 @@ export default function RegisterPage() {
     });
 
     const selectedRole = watch("role");
+    const selectedState = watch("state");
     const password = watch("password");
     const requiresCompanyFields = COMPANY_ROLES.includes(selectedRole);
+
+    const cityOptions = (selectedState && STATE_CITIES[selectedState]) || [];
+
+    // Fields needing custom onChange (digit filtering / dependent reset) — chain RHF's handler
+    const mobileField = register("mobile", {
+        required: "Mobile number is required",
+        pattern: { value: MOBILE_PATTERN, message: "Enter a valid 10-digit mobile number" },
+    });
+    const pincodeField = register("pincode", {
+        validate: (value) =>
+            !value || PINCODE_PATTERN.test(value) || "Enter a valid 6-digit pincode",
+    });
+    const stateField = register("state");
 
     // Shared input class for premium look
     const inputCls = (hasError) =>
@@ -88,6 +157,13 @@ export default function RegisterPage() {
 
     const pwInputCls = (hasError) =>
         `w-full border-2 rounded-xl pl-11 pr-10 py-2.5 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none transition-all placeholder:text-slate-400 ${
+            hasError
+                ? "border-red-400 focus:ring-4 focus:ring-red-100"
+                : "border-slate-200 focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15"
+        }`;
+
+    const selectCls = (hasError) =>
+        `w-full border-2 rounded-xl pl-11 pr-10 py-2.5 text-sm bg-[#F7FAFC] focus:bg-white focus:outline-none transition-all appearance-none disabled:opacity-60 disabled:cursor-not-allowed ${
             hasError
                 ? "border-red-400 focus:ring-4 focus:ring-red-100"
                 : "border-slate-200 focus:border-[#7CB93D] focus:ring-4 focus:ring-[#7CB93D]/15"
@@ -288,7 +364,9 @@ export default function RegisterPage() {
                             {/* ============== Personal details ============== */}
                             <div className="grid sm:grid-cols-2 gap-3">
                                 <div className="sm:col-span-2">
-                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">Full Name</label>
+                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">
+                                        Full Name<span className="text-red-500 ml-0.5">*</span>
+                                    </label>
                                     <div className="relative">
                                         <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
                                         <input
@@ -298,6 +376,7 @@ export default function RegisterPage() {
                                             {...register("fullName", {
                                                 required: "Full name is required",
                                                 minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                                pattern: { value: NAME_PATTERN, message: "Full name must contain only letters" },
                                             })}
                                             className={inputCls(errors.fullName)}
                                         />
@@ -306,7 +385,9 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">Email Address</label>
+                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">
+                                        Email Address<span className="text-red-500 ml-0.5">*</span>
+                                    </label>
                                     <div className="relative">
                                         <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
                                         <input
@@ -324,17 +405,22 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">Mobile Number</label>
+                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">
+                                        Mobile Number<span className="text-red-500 ml-0.5">*</span>
+                                    </label>
                                     <div className="relative">
                                         <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
                                         <input
                                             type="tel"
                                             autoComplete="tel"
-                                            placeholder="98765 43210"
-                                            {...register("mobile", {
-                                                required: "Mobile number is required",
-                                                pattern: { value: MOBILE_PATTERN, message: "Enter a valid 10-digit mobile number" },
-                                            })}
+                                            inputMode="numeric"
+                                            maxLength={10}
+                                            placeholder="9876543210"
+                                            {...mobileField}
+                                            onChange={(e) => {
+                                                e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                                mobileField.onChange(e);
+                                            }}
                                             className={inputCls(errors.mobile)}
                                         />
                                     </div>
@@ -342,7 +428,9 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">Password</label>
+                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">
+                                        Password<span className="text-red-500 ml-0.5">*</span>
+                                    </label>
                                     <div className="relative">
                                         <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
                                         <input
@@ -368,7 +456,9 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">Confirm Password</label>
+                                    <label className="block text-[13px] font-medium text-[#153964] mb-1">
+                                        Confirm Password<span className="text-red-500 ml-0.5">*</span>
+                                    </label>
                                     <div className="relative">
                                         <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
                                         <input
@@ -412,9 +502,7 @@ export default function RegisterPage() {
                                             <input
                                                 type="text"
                                                 placeholder="Your company name"
-                                                {...register("companyName", {
-                                                    required: requiresCompanyFields ? "Company name is required" : false,
-                                                })}
+                                                {...register("companyName")}
                                                 className={inputCls(errors.companyName).replace("bg-[#F7FAFC]", "bg-white")}
                                             />
                                         </div>
@@ -430,9 +518,7 @@ export default function RegisterPage() {
                                             <input
                                                 type="text"
                                                 placeholder="e.g. WB/RERA/2026/00123"
-                                                {...register("reraNumber", {
-                                                    required: requiresCompanyFields ? "RERA number is required" : false,
-                                                })}
+                                                {...register("reraNumber")}
                                                 className={inputCls(errors.reraNumber).replace("bg-[#F7FAFC]", "bg-white")}
                                             />
                                         </div>
@@ -453,7 +539,7 @@ export default function RegisterPage() {
                                             <input
                                                 type="text"
                                                 placeholder="Street address"
-                                                {...register("address", { required: "Address is required" })}
+                                                {...register("address")}
                                                 className={inputCls(errors.address)}
                                             />
                                         </div>
@@ -463,38 +549,56 @@ export default function RegisterPage() {
                                     <div>
                                         <div className="relative">
                                             <Landmark size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
-                                            <input
-                                                type="text"
-                                                placeholder="City"
-                                                {...register("city", { required: "City is required" })}
-                                                className={inputCls(errors.city)}
-                                            />
-                                        </div>
-                                        {errors.city && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.city.message}</p>}
-                                    </div>
-
-                                    <div>
-                                        <div className="relative">
-                                            <Landmark size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
-                                            <input
-                                                type="text"
-                                                placeholder="State"
-                                                {...register("state", { required: "State is required" })}
-                                                className={inputCls(errors.state)}
-                                            />
+                                            <select
+                                                {...stateField}
+                                                onChange={(e) => {
+                                                    stateField.onChange(e);
+                                                    setValue("city", "");
+                                                }}
+                                                className={selectCls(errors.state)}
+                                            >
+                                                <option value="">Select state</option>
+                                                {INDIA_STATES.map((s) => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#153964]/40 pointer-events-none" />
                                         </div>
                                         {errors.state && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.state.message}</p>}
                                     </div>
 
                                     <div>
                                         <div className="relative">
+                                            <Building size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
+                                            <select
+                                                {...register("city")}
+                                                disabled={!selectedState}
+                                                className={selectCls(errors.city)}
+                                            >
+                                                <option value="">
+                                                    {selectedState ? "Select city" : "Select state first"}
+                                                </option>
+                                                {cityOptions.map((c) => (
+                                                    <option key={c} value={c}>{c}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#153964]/40 pointer-events-none" />
+                                        </div>
+                                        {errors.city && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.city.message}</p>}
+                                    </div>
+
+                                    <div>
+                                        <div className="relative">
                                             <Globe2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#153964]/40" />
-                                            <input
-                                                type="text"
-                                                placeholder="Country"
-                                                {...register("country", { required: "Country is required" })}
-                                                className={inputCls(errors.country)}
-                                            />
+                                            <select
+                                                {...register("country")}
+                                                className={selectCls(errors.country)}
+                                            >
+                                                {COUNTRY_OPTIONS.map((c) => (
+                                                    <option key={c} value={c}>{c}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#153964]/40 pointer-events-none" />
                                         </div>
                                         {errors.country && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.country.message}</p>}
                                     </div>
@@ -505,11 +609,13 @@ export default function RegisterPage() {
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
+                                                maxLength={6}
                                                 placeholder="Pincode"
-                                                {...register("pincode", {
-                                                    required: "Pincode is required",
-                                                    pattern: { value: PINCODE_PATTERN, message: "Enter a valid 6-digit pincode" },
-                                                })}
+                                                {...pincodeField}
+                                                onChange={(e) => {
+                                                    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                                                    pincodeField.onChange(e);
+                                                }}
                                                 className={inputCls(errors.pincode)}
                                             />
                                         </div>
