@@ -159,11 +159,26 @@ export default function PropertyDetails() {
                     },
 
                     description: rawProperty.description,
-                    floorPlan: rawProperty.floor_plan_url
-                        ? resolveImageUrl(rawProperty.floor_plan_url)
-                        : rawProperty.floor_plan
-                          ? resolveImageUrl(`/uploads/property/floor-plans/${rawProperty.floor_plan}`)
-                          : null,
+                    floorPlans: (() => {
+                        const plans = Array.isArray(rawProperty.floor_plans) && rawProperty.floor_plans.length
+                            ? rawProperty.floor_plans
+                            : rawProperty.floor_plan_url
+                              ? [rawProperty.floor_plan_url]
+                              : rawProperty.floor_plan
+                                ? [`/uploads/property/floor-plans/${rawProperty.floor_plan}`]
+                                : [];
+                        return plans.map(resolveImageUrl).filter(Boolean);
+                    })(),
+                    floorPlan: (() => {
+                        const plans = Array.isArray(rawProperty.floor_plans) && rawProperty.floor_plans.length
+                            ? rawProperty.floor_plans
+                            : rawProperty.floor_plan_url
+                              ? [rawProperty.floor_plan_url]
+                              : rawProperty.floor_plan
+                                ? [`/uploads/property/floor-plans/${rawProperty.floor_plan}`]
+                                : [];
+                        return plans[0] ? resolveImageUrl(plans[0]) : null;
+                    })(),
                     amenities: rawProperty.amenities?.length
                         ? rawProperty.amenities
                         : ['Parking', 'Ownership Transferable'],
@@ -471,7 +486,7 @@ export default function PropertyDetails() {
 
                                 <PropertyAmenities amenities={property.amenities} />
 
-                                {property.floorPlan && (
+                                {(property.floorPlans?.length || property.floorPlan) && (
                                     <>
                                         <div className="my-8 border-b border-charcoal-deep/10 border-opacity-60"></div>
                                         <section>
@@ -480,17 +495,31 @@ export default function PropertyDetails() {
                                                     <FileText size={17} className="text-gold-dark" />
                                                 </span>
                                                 <div>
-                                                    <h3 className="font-display text-xl text-charcoal-deep font-medium">Floor Plan</h3>
+                                                    <h3 className="font-display text-xl text-charcoal-deep font-medium">
+                                                        Floor Plan{(property.floorPlans?.length || 0) > 1 ? "s" : ""}
+                                                    </h3>
                                                     <p className="text-xs text-stone mt-0.5">Layout blueprint of this property</p>
                                                 </div>
                                             </div>
-                                            <div className="rounded-2xl border border-charcoal/8 bg-cream/60 overflow-hidden">
-                                                <img
-                                                    src={property.floorPlan}
-                                                    alt={`${property.title} floor plan`}
-                                                    className="w-full h-auto max-h-[480px] object-contain bg-white p-4"
-                                                    loading="lazy"
-                                                />
+                                            <div className="grid sm:grid-cols-2 gap-4">
+                                                {(property.floorPlans?.length
+                                                    ? property.floorPlans
+                                                    : property.floorPlan
+                                                      ? [property.floorPlan]
+                                                      : []
+                                                ).map((src, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="rounded-2xl border border-charcoal/8 bg-cream/60 overflow-hidden"
+                                                    >
+                                                        <img
+                                                            src={src}
+                                                            alt={`${property.title} floor plan ${index + 1}`}
+                                                            className="w-full h-auto max-h-[480px] object-contain bg-white p-4"
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                ))}
                                             </div>
                                         </section>
                                     </>

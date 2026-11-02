@@ -23,6 +23,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import SEO from "../../components/Contact/SEO";
 import propertyService from "../../services/property.service";
+import { compressImages } from "../../utils/compressImage";
 import {
     COUNTRY_OPTIONS,
     INDIA_STATES,
@@ -84,8 +85,8 @@ export default function AddProperty() {
     const [isLoadingLookups, setIsLoadingLookups] = useState(true);
     const [rawImages, setRawImages] = useState([]);
     const [imgPreviews, setImgPreviews] = useState([]);
-    const [floorPlanFile, setFloorPlanFile] = useState(null);
-    const [floorPlanPreview, setFloorPlanPreview] = useState("");
+    const [floorPlanFiles, setFloorPlanFiles] = useState([]);
+    const [floorPlanPreviews, setFloorPlanPreviews] = useState([]);
     const [voiceListening, setVoiceListening] = useState(false);
     const [activeVoiceField, setActiveVoiceField] = useState(null);
     const recognitionRef = useRef(null);
@@ -224,17 +225,27 @@ export default function AddProperty() {
     };
 
     const handleFloorPlanChange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (floorPlanPreview) URL.revokeObjectURL(floorPlanPreview);
-        setFloorPlanFile(file);
-        setFloorPlanPreview(URL.createObjectURL(file));
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        const urls = files.map((file) => URL.createObjectURL(file));
+        setFloorPlanFiles((prev) => [...prev, ...files]);
+        setFloorPlanPreviews((prev) => [...prev, ...urls]);
+        e.target.value = "";
     };
 
-    const removeFloorPlan = () => {
-        if (floorPlanPreview) URL.revokeObjectURL(floorPlanPreview);
-        setFloorPlanFile(null);
-        setFloorPlanPreview("");
+    const removeFloorPlan = (index = null) => {
+        setFloorPlanPreviews((prev) => {
+            if (index == null) {
+                prev.forEach((url) => URL.revokeObjectURL(url));
+                return [];
+            }
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
+        setFloorPlanFiles((prev) => {
+            if (index == null) return [];
+            return prev.filter((_, i) => i !== index);
+        });
     };
 
     const onSubmitPipeline = async (data) => {
@@ -263,8 +274,15 @@ export default function AddProperty() {
             fd.append("country", data.country);
             fd.append("pincode", data.pincode);
             fd.append("amenities", JSON.stringify((data.amenities || []).map((id) => parseInt(id, 10))));
-            rawImages.forEach((file) => fd.append("property_images", file));
-            if (floorPlanFile) fd.append("floor_plan", floorPlanFile);
+
+            // Shrink images client-side to avoid proxy/nginx 413 on large payloads.
+            const [compressedImages, compressedPlans] = await Promise.all([
+                compressImages(rawImages),
+                compressImages(floorPlanFiles, { maxWidth: 2000, maxHeight: 2000, quality: 0.85 }),
+            ]);
+
+            compressedImages.forEach((file) => fd.append("property_images", file));
+            compressedPlans.forEach((file) => fd.append("floor_plan", file));
 
             await propertyService.createProperty(fd);
             toast.success("Property listing created successfully!");
@@ -627,7 +645,7 @@ export default function AddProperty() {
                                     Drop images here or click to browse
                                 </p>
                                 <p className="text-xs text-slate-400 mt-1">
-                                    Supports PNG, JPG up to 10MB each
+                                    Supports PNG, JPG · auto-compressed before upload
                                 </p>
                             </div>
 
@@ -661,34 +679,39 @@ export default function AddProperty() {
                                 <div className="flex items-center gap-2 mb-3">
                                     <FileText size={15} className="text-[#153964]" />
                                     <p className="text-[13px] font-bold text-[#153964]">Floor Plan</p>
-                                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Optional · 1 image</span>
+                                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Optional · Up to 10 images</span>
                                 </div>
 
-                                {!floorPlanPreview ? (
-                                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50/50 relative group hover:border-[#7CB93D] hover:bg-[#7CB93D]/5 transition-all cursor-pointer max-w-md">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            onChange={handleFloorPlanChange}
-                                        />
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#153964] to-[#1E4C8C] flex items-center justify-center text-white mx-auto shadow-md group-hover:scale-105 transition-transform">
-                                            <FileText size={18} />
-                                        </div>
-                                        <p className="text-sm font-bold text-slate-700 mt-3">Upload floor plan</p>
-                                        <p className="text-xs text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
+                                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50/50 relative group hover:border-[#7CB93D] hover:bg-[#7CB93D]/5 transition-all cursor-pointer max-w-md">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={handleFloorPlanChange}
+                                    />
+                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#153964] to-[#1E4C8C] flex items-center justify-center text-white mx-auto shadow-md group-hover:scale-105 transition-transform">
+                                        <FileText size={18} />
                                     </div>
-                                ) : (
-                                    <div className="relative inline-block rounded-xl overflow-hidden border-2 border-[#7CB93D]/40 bg-[#7CB93D]/5 max-w-md">
-                                        <img src={floorPlanPreview} alt="Floor plan preview" className="w-full h-48 object-contain bg-white p-2" />
-                                        <button
-                                            type="button"
-                                            onClick={removeFloorPlan}
-                                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                        <span className="absolute bottom-2 left-2 text-[10px] font-bold bg-[#153964] text-white px-2 py-0.5 rounded-full">FLOOR PLAN</span>
+                                    <p className="text-sm font-bold text-slate-700 mt-3">Upload floor plans</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">PNG, JPG · multiple allowed · up to 10MB each</p>
+                                </div>
+
+                                {floorPlanPreviews.length > 0 && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-5">
+                                        {floorPlanPreviews.map((src, index) => (
+                                            <div key={index} className="relative rounded-xl overflow-hidden border-2 border-[#7CB93D]/40 bg-[#7CB93D]/5 group">
+                                                <img src={src} alt={`Floor plan ${index + 1}`} className="w-full h-36 object-contain bg-white p-2" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFloorPlan(index)}
+                                                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-[#153964] text-white px-1.5 py-0.5 rounded">FP {index + 1}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

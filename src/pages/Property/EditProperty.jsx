@@ -26,6 +26,7 @@ import toast, { Toaster } from "react-hot-toast";
 import SEO from "../../components/Contact/SEO";
 import propertyService from "../../services/property.service";
 import { resolveImageUrl } from "../../utils/imageUrl";
+import { compressImages } from "../../utils/compressImage";
 
 const FURNISHING_OPTIONS = ["Unfurnished", "Semi Furnished", "Fully Furnished"];
 const OWNERSHIP_OPTIONS = ["Freehold", "Leasehold", "Co-operative Society"];
@@ -76,10 +77,10 @@ export default function EditProperty() {
     const [newRawFiles, setNewRawFiles] = useState([]);
     const [newImgPreviews, setNewImgPreviews] = useState([]);
 
-    const [existingFloorPlan, setExistingFloorPlan] = useState("");
+    const [existingFloorPlans, setExistingFloorPlans] = useState([]);
     const [removeFloorPlan, setRemoveFloorPlan] = useState(false);
-    const [floorPlanFile, setFloorPlanFile] = useState(null);
-    const [floorPlanPreview, setFloorPlanPreview] = useState("");
+    const [floorPlanFiles, setFloorPlanFiles] = useState([]);
+    const [floorPlanPreviews, setFloorPlanPreviews] = useState([]);
 
     const {
         register,
@@ -134,14 +135,15 @@ export default function EditProperty() {
                 });
 
                 setExistingImages(listing.images || []);
-                if (listing.floor_plan_url || listing.floor_plan) {
-                    setExistingFloorPlan(
-                        listing.floor_plan_url ||
-                            (listing.floor_plan ? `/uploads/property/floor-plans/${listing.floor_plan}` : "")
-                    );
-                } else {
-                    setExistingFloorPlan("");
-                }
+                const plans = Array.isArray(listing.floor_plans) && listing.floor_plans.length
+                    ? listing.floor_plans
+                    : listing.floor_plan_url
+                      ? [listing.floor_plan_url]
+                      : listing.floor_plan
+                        ? [`/uploads/property/floor-plans/${listing.floor_plan}`]
+                        : [];
+                setExistingFloorPlans(plans);
+                setRemoveFloorPlan(false);
             } catch (err) {
                 toast.error(err?.response?.data?.message || err.message || "Failed to load property.");
                 navigate("/properties");
@@ -171,23 +173,32 @@ export default function EditProperty() {
     };
 
     const handleFloorPlanChange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (floorPlanPreview) URL.revokeObjectURL(floorPlanPreview);
-        setFloorPlanFile(file);
-        setFloorPlanPreview(URL.createObjectURL(file));
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        setFloorPlanFiles((prev) => [...prev, ...files]);
+        setFloorPlanPreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
         setRemoveFloorPlan(false);
         e.target.value = "";
     };
 
-    const clearNewFloorPlan = () => {
-        if (floorPlanPreview) URL.revokeObjectURL(floorPlanPreview);
-        setFloorPlanFile(null);
-        setFloorPlanPreview("");
+    const clearNewFloorPlan = (index = null) => {
+        setFloorPlanPreviews((prev) => {
+            if (index == null) {
+                prev.forEach((url) => URL.revokeObjectURL(url));
+                return [];
+            }
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
+        setFloorPlanFiles((prev) => (index == null ? [] : prev.filter((_, i) => i !== index)));
     };
 
-    const clearExistingFloorPlan = () => {
-        setExistingFloorPlan("");
+    const clearExistingFloorPlan = (index = null) => {
+        if (index == null) {
+            setExistingFloorPlans([]);
+        } else {
+            setExistingFloorPlans((prev) => prev.filter((_, i) => i !== index));
+        }
         setRemoveFloorPlan(true);
     };
 
@@ -219,13 +230,19 @@ export default function EditProperty() {
             if (data.latitude) fd.append("latitude", data.latitude);
             if (data.longitude) fd.append("longitude", data.longitude);
 
-            if (floorPlanFile) {
-                fd.append("floor_plan", floorPlanFile);
+            // Shrink images client-side to avoid proxy/nginx 413 on large payloads.
+            const [compressedImages, compressedPlans] = await Promise.all([
+                compressImages(newRawFiles),
+                compressImages(floorPlanFiles, { maxWidth: 2000, maxHeight: 2000, quality: 0.85 }),
+            ]);
+
+            if (compressedPlans.length > 0) {
+                compressedPlans.forEach((file) => fd.append("floor_plan", file));
             } else if (removeFloorPlan) {
                 fd.append("remove_floor_plan", "1");
-            } else if (existingFloorPlan) {
-                const base = existingFloorPlan.split("/").pop();
-                fd.append("floor_plan", base);
+            } else if (existingFloorPlans.length > 0) {
+                const names = existingFloorPlans.map((u) => String(u).split("/").pop()).filter(Boolean);
+                if (names.length) fd.append("floor_plan", names.join(","));
             }
 
             if (imagesToDelete.length > 0) {
@@ -233,7 +250,7 @@ export default function EditProperty() {
                 fd.append("deleted_images", JSON.stringify(names));
             }
 
-            newRawFiles.forEach((file) => fd.append("property_images", file));
+            compressedImages.forEach((file) => fd.append("property_images", file));
 
             await propertyService.updateProperty(id, fd);
             toast.success("Property updated successfully!");
@@ -528,7 +545,7 @@ export default function EditProperty() {
                                     <UploadCloud size={20} />
                                 </div>
                                 <p className="text-sm font-bold text-slate-700 mt-3">Drop images here or click to browse</p>
-                                <p className="text-xs text-slate-400 mt-0.5">Supports PNG, JPG up to 10MB each</p>
+                                <p className="text-xs text-slate-400 mt-0.5">Supports PNG, JPG · auto-compressed before upload</p>
                             </div>
 
                             {newImgPreviews.length > 0 && (
@@ -554,45 +571,52 @@ export default function EditProperty() {
                                 <div className="flex items-center gap-2 mb-3">
                                     <FileText size={15} className="text-[#153964]" />
                                     <p className="text-[13px] font-bold text-[#153964]">Floor Plan</p>
-                                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Optional · 1 image</span>
+                                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Optional · Up to 10 images</span>
                                 </div>
 
-                                {!floorPlanPreview && !existingFloorPlan && (
-                                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50/50 relative group hover:border-[#7CB93D] hover:bg-[#7CB93D]/5 transition-all cursor-pointer max-w-md">
-                                        <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFloorPlanChange} />
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#153964] to-[#1E4C8C] flex items-center justify-center text-white mx-auto shadow-md group-hover:scale-105 transition-transform">
-                                            <FileText size={18} />
-                                        </div>
-                                        <p className="text-sm font-bold text-slate-700 mt-3">Upload floor plan</p>
-                                        <p className="text-xs text-slate-400 mt-0.5">PNG, JPG up to 10MB</p>
+                                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50/50 relative group hover:border-[#7CB93D] hover:bg-[#7CB93D]/5 transition-all cursor-pointer max-w-md">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={handleFloorPlanChange}
+                                    />
+                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#153964] to-[#1E4C8C] flex items-center justify-center text-white mx-auto shadow-md group-hover:scale-105 transition-transform">
+                                        <FileText size={18} />
                                     </div>
-                                )}
+                                    <p className="text-sm font-bold text-slate-700 mt-3">Upload floor plans</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">PNG, JPG · multiple allowed · auto-compressed</p>
+                                </div>
 
-                                {floorPlanPreview && (
-                                    <div className="relative inline-block rounded-xl overflow-hidden border-2 border-[#7CB93D]/40 bg-[#7CB93D]/5 max-w-md">
-                                        <img src={floorPlanPreview} alt="New floor plan" className="w-full h-48 object-contain bg-white p-2" />
-                                        <button
-                                            type="button"
-                                            onClick={clearNewFloorPlan}
-                                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                        <span className="absolute bottom-2 left-2 text-[10px] font-bold bg-[#153964] text-white px-2 py-0.5 rounded-full">NEW FLOOR PLAN</span>
-                                    </div>
-                                )}
-
-                                {!floorPlanPreview && existingFloorPlan && (
-                                    <div className="relative inline-block rounded-xl overflow-hidden border-2 border-slate-200 bg-slate-50 max-w-md">
-                                        <img src={resolveImageUrl(existingFloorPlan)} alt="Current floor plan" className="w-full h-48 object-contain bg-white p-2" />
-                                        <button
-                                            type="button"
-                                            onClick={clearExistingFloorPlan}
-                                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                        <span className="absolute bottom-2 left-2 text-[10px] font-bold bg-slate-600 text-white px-2 py-0.5 rounded-full">CURRENT FLOOR PLAN</span>
+                                {(floorPlanPreviews.length > 0 || existingFloorPlans.length > 0) && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-5">
+                                        {floorPlanPreviews.map((src, index) => (
+                                            <div key={`new-${index}`} className="relative rounded-xl overflow-hidden border-2 border-[#7CB93D]/40 bg-[#7CB93D]/5 group">
+                                                <img src={src} alt={`New floor plan ${index + 1}`} className="w-full h-36 object-contain bg-white p-2" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => clearNewFloorPlan(index)}
+                                                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-[#7CB93D] text-white px-1.5 py-0.5 rounded">NEW</span>
+                                            </div>
+                                        ))}
+                                        {existingFloorPlans.map((url, index) => (
+                                            <div key={`existing-${index}`} className="relative rounded-xl overflow-hidden border-2 border-slate-200 bg-slate-50 group">
+                                                <img src={resolveImageUrl(url)} alt={`Floor plan ${index + 1}`} className="w-full h-36 object-contain bg-white p-2" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => clearExistingFloorPlan(index)}
+                                                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-slate-600 text-white px-1.5 py-0.5 rounded">CURRENT</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
