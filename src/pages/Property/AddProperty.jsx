@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
     Loader2,
-    Save,
     Plus,
     UploadCloud,
     Building2,
@@ -19,10 +18,17 @@ import {
     Sofa,
     FileText,
     ChevronRight,
+    Mic,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import SEO from "../../components/Contact/SEO";
 import propertyService from "../../services/property.service";
+import {
+    COUNTRY_OPTIONS,
+    INDIA_STATES,
+    STATE_CITIES,
+    PINCODE_PATTERN,
+} from "../../data/indiaLocations";
 
 const FURNISHING_OPTIONS = ["Unfurnished", "Semi Furnished", "Fully Furnished"];
 const OWNERSHIP_OPTIONS = ["Freehold", "Leasehold", "Co-operative Society"];
@@ -65,6 +71,12 @@ const inputCls = (hasError) =>
 
 const selectCls = inputCls(false);
 
+const VOICE_FIELD_LABELS = {
+    property_title: "Property Title",
+    description: "Description",
+    address: "Address",
+};
+
 export default function AddProperty() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [dynamicCategories, setDynamicCategories] = useState([]);
@@ -74,12 +86,17 @@ export default function AddProperty() {
     const [imgPreviews, setImgPreviews] = useState([]);
     const [floorPlanFile, setFloorPlanFile] = useState(null);
     const [floorPlanPreview, setFloorPlanPreview] = useState("");
+    const [voiceListening, setVoiceListening] = useState(false);
+    const [activeVoiceField, setActiveVoiceField] = useState(null);
+    const recognitionRef = useRef(null);
 
     const {
         register,
         handleSubmit,
         reset,
         watch,
+        setValue,
+        getValues,
         formState: { errors },
     } = useForm({
         defaultValues: {
@@ -104,13 +121,75 @@ export default function AddProperty() {
             state: "",
             country: "India",
             pincode: "",
-            latitude: "",
-            longitude: "",
             amenities: [],
         },
     });
 
     const propertyType = watch("property_type");
+    const selectedState = watch("state");
+    const cityOptions = (selectedState && STATE_CITIES[selectedState]) || [];
+
+    const SpeechAPI = useMemo(
+        () =>
+            typeof window !== "undefined"
+                ? window.SpeechRecognition || window.webkitSpeechRecognition
+                : null,
+        []
+    );
+    const voiceSupported = Boolean(SpeechAPI);
+
+    const focusVoiceField = (name) => setActiveVoiceField(name);
+
+    const handleVoiceToggle = () => {
+        if (!voiceSupported) {
+            toast.error("Voice input is not supported in your browser");
+            return;
+        }
+
+        if (voiceListening) {
+            recognitionRef.current?.stop();
+            return;
+        }
+
+        if (!activeVoiceField) {
+            toast.error("Click Title, Description, or Address first, then use the mic");
+            return;
+        }
+
+        try {
+            const rec = new SpeechAPI();
+            recognitionRef.current = rec;
+            rec.lang = "en-IN";
+            rec.interimResults = false;
+            rec.maxAlternatives = 1;
+
+            rec.onstart = () => setVoiceListening(true);
+            rec.onend = () => setVoiceListening(false);
+            rec.onerror = () => setVoiceListening(false);
+            rec.onresult = (event) => {
+                const transcript = event.results[0][0].transcript?.trim();
+                if (!transcript || !activeVoiceField) return;
+                const prev = String(getValues(activeVoiceField) || "").trim();
+                setValue(
+                    activeVoiceField,
+                    prev ? `${prev} ${transcript}` : transcript,
+                    { shouldValidate: true, shouldDirty: true }
+                );
+                toast.success(`Filled ${VOICE_FIELD_LABELS[activeVoiceField] || "field"} by voice`);
+            };
+
+            rec.start();
+        } catch {
+            setVoiceListening(false);
+            toast.error("Could not start voice input");
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            recognitionRef.current?.abort?.();
+        };
+    }, []);
 
     useEffect(() => {
         const fetchLookups = async () => {
@@ -166,8 +245,8 @@ export default function AddProperty() {
             fd.append("property_title", data.property_title);
             fd.append("property_for", data.property_for);
             fd.append("property_type", data.property_type);
-            fd.append("price", String(parseFloat(data.price)));
-            fd.append("area", String(parseFloat(data.area)));
+            fd.append("price", String(data.price ?? "").trim());
+            fd.append("area", String(data.area ?? "").trim());
             fd.append("area_unit", data.area_unit);
             fd.append("bedroom", String(parseInt(data.bedroom, 10) || 0));
             fd.append("bathroom", String(parseInt(data.bathroom, 10) || 0));
@@ -183,8 +262,6 @@ export default function AddProperty() {
             fd.append("state", data.state);
             fd.append("country", data.country);
             fd.append("pincode", data.pincode);
-            if (data.latitude) fd.append("latitude", data.latitude);
-            if (data.longitude) fd.append("longitude", data.longitude);
             fd.append("amenities", JSON.stringify((data.amenities || []).map((id) => parseInt(id, 10))));
             rawImages.forEach((file) => fd.append("property_images", file));
             if (floorPlanFile) fd.append("floor_plan", floorPlanFile);
@@ -252,6 +329,7 @@ export default function AddProperty() {
                                     <input
                                         type="text"
                                         {...register("property_title", { required: "Title is required" })}
+                                        onFocus={() => focusVoiceField("property_title")}
                                         placeholder="e.g. Skyline Luxury 3BHK Apartment"
                                         className={inputCls(errors.property_title)}
                                     />
@@ -287,10 +365,11 @@ export default function AddProperty() {
 
                                 <Field label="Price (₹)" required error={errors.price}>
                                     <input
-                                        type="number"
-                                        step="0.01"
-                                        {...register("price", { required: "Price is required" })}
-                                        placeholder="e.g. 8500000"
+                                        type="text"
+                                        {...register("price", {
+                                            required: "Price is required",
+                                        })}
+                                        placeholder="e.g. 65 Lakh - 1.24 Cr"
                                         className={inputCls(errors.price)}
                                     />
                                 </Field>
@@ -299,6 +378,7 @@ export default function AddProperty() {
                                     <textarea
                                         rows="3"
                                         {...register("description", { required: "Description is required" })}
+                                        onFocus={() => focusVoiceField("description")}
                                         placeholder="Describe the property features, layout, nearby landmarks..."
                                         className={`${inputCls(errors.description)} resize-none`}
                                     />
@@ -318,10 +398,9 @@ export default function AddProperty() {
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                 <Field label="Area" required error={errors.area}>
                                     <input
-                                        type="number"
-                                        step="0.01"
+                                        type="text"
                                         {...register("area", { required: "Area is required" })}
-                                        placeholder="e.g. 1250"
+                                        placeholder="e.g. 1250 or 900-1100"
                                         className={inputCls(errors.area)}
                                     />
                                 </Field>
@@ -332,6 +411,8 @@ export default function AddProperty() {
                                         <option value="sq.yd">sq.yd</option>
                                         <option value="acre">acre</option>
                                         <option value="hectare">hectare</option>
+                                        <option value="Katha">Katha</option>
+                                        <option value="Bigha">Bigha</option>
                                     </select>
                                 </Field>
                                 <Field label="Bedrooms">
@@ -457,60 +538,66 @@ export default function AddProperty() {
                                         <textarea
                                             rows="2"
                                             {...register("address", { required: "Address is required" })}
+                                            onFocus={() => focusVoiceField("address")}
                                             placeholder="Street address, locality, landmark"
                                             className={`${inputCls(errors.address)} pl-10 resize-none`}
                                         />
                                     </div>
                                 </Field>
-                                <Field label="City" required error={errors.city}>
-                                    <input
-                                        type="text"
-                                        {...register("city", { required: "City is required" })}
-                                        placeholder="e.g. Mumbai"
-                                        className={inputCls(errors.city)}
-                                    />
-                                </Field>
                                 <Field label="State" required error={errors.state}>
-                                    <input
-                                        type="text"
+                                    <select
                                         {...register("state", { required: "State is required" })}
-                                        placeholder="e.g. Maharashtra"
-                                        className={inputCls(errors.state)}
-                                    />
+                                        onChange={(e) => {
+                                            register("state").onChange(e);
+                                            setValue("city", "");
+                                        }}
+                                        className={`${selectCls} ${errors.state ? "border-red-400" : ""}`}
+                                    >
+                                        <option value="">Select state</option>
+                                        {INDIA_STATES.map((s) => (
+                                            <option key={s} value={s}>{s}</option>
+                                        ))}
+                                    </select>
+                                </Field>
+                                <Field label="City" required error={errors.city}>
+                                    <select
+                                        {...register("city", { required: "City is required" })}
+                                        disabled={!selectedState}
+                                        className={`${selectCls} ${errors.city ? "border-red-400" : ""}`}
+                                    >
+                                        <option value="">
+                                            {selectedState ? "Select city" : "Select state first"}
+                                        </option>
+                                        {cityOptions.map((c) => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
                                 </Field>
                                 <Field label="Country" required error={errors.country}>
-                                    <input
-                                        type="text"
+                                    <select
                                         {...register("country", { required: "Country is required" })}
-                                        className={inputCls(errors.country)}
-                                    />
+                                        className={`${selectCls} ${errors.country ? "border-red-400" : ""}`}
+                                    >
+                                        {COUNTRY_OPTIONS.map((c) => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
                                 </Field>
                                 <Field label="Pincode" required error={errors.pincode}>
                                     <input
                                         type="text"
                                         inputMode="numeric"
+                                        maxLength={6}
                                         {...register("pincode", {
                                             required: "Pincode is required",
-                                            pattern: { value: /^\d{4,10}$/, message: "Enter a valid pincode" },
+                                            pattern: { value: PINCODE_PATTERN, message: "Enter a valid 6-digit pincode" },
                                         })}
+                                        onChange={(e) => {
+                                            e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                                            register("pincode").onChange(e);
+                                        }}
                                         placeholder="e.g. 400001"
                                         className={inputCls(errors.pincode)}
-                                    />
-                                </Field>
-                                <Field label="Latitude (optional)">
-                                    <input
-                                        type="text"
-                                        {...register("latitude")}
-                                        placeholder="e.g. 19.0760"
-                                        className={inputCls(false)}
-                                    />
-                                </Field>
-                                <Field label="Longitude (optional)">
-                                    <input
-                                        type="text"
-                                        {...register("longitude")}
-                                        placeholder="e.g. 72.8777"
-                                        className={inputCls(false)}
                                     />
                                 </Field>
                             </div>
@@ -623,15 +710,6 @@ export default function AddProperty() {
                                     type="button"
                                     disabled={isSubmitting || isLoadingLookups}
                                     onClick={handleSubmit(onSubmitPipeline)}
-                                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50"
-                                >
-                                    <Save size={16} />
-                                    Save Draft
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={isSubmitting || isLoadingLookups}
-                                    onClick={handleSubmit(onSubmitPipeline)}
                                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#153964] to-[#1E4C8C] hover:from-[#0F2D52] hover:to-[#153964] text-white text-sm font-bold rounded-xl shadow-[0_8px_24px_-6px_rgba(21,57,100,0.4)] transition-all active:scale-[0.98] disabled:opacity-50"
                                 >
                                     {isSubmitting ? (
@@ -645,6 +723,40 @@ export default function AddProperty() {
                         </div>
                     </form>
                 </div>
+            </div>
+
+            {/* Voice fill — floating mic above ChatWidget */}
+            <div className="fixed bottom-24 right-5 z-[60] flex flex-col items-end gap-2">
+                {voiceListening && (
+                    <div className="bg-[#153964] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg">
+                        Listening… speak for{" "}
+                        {VOICE_FIELD_LABELS[activeVoiceField] || "field"}
+                    </div>
+                )}
+                <button
+                    type="button"
+                    onClick={handleVoiceToggle}
+                    disabled={!voiceSupported}
+                    title={
+                        voiceSupported
+                            ? voiceListening
+                                ? "Stop voice input"
+                                : "Voice fill — click Title/Description/Address first"
+                            : "Voice input not supported in this browser"
+                    }
+                    aria-label="Voice fill"
+                    className={`w-14 h-14 rounded-full shadow-[0_8px_24px_-6px_rgba(21,57,100,0.45)] flex items-center justify-center transition-all ${
+                        voiceListening
+                            ? "bg-red-500 text-white animate-pulse"
+                            : voiceSupported
+                                ? activeVoiceField
+                                    ? "bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white hover:scale-105"
+                                    : "bg-white border-2 border-slate-200 text-slate-400"
+                                : "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
+                    }`}
+                >
+                    <Mic size={22} />
+                </button>
             </div>
         </>
     );

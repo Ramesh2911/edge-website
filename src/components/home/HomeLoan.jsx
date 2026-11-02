@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
-import { Check, Home } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+import { Check, Home, X } from "lucide-react";
+import loanService from "../../services/loan.service";
 
 const formatInr = (n) =>
   `₹ ${Math.round(n).toLocaleString("en-IN")}`;
@@ -29,6 +31,11 @@ export default function HomeLoan() {
   const [years, setYears] = useState(20);
   const [rate, setRate] = useState(8.5);
 
+  const [showModal, setShowModal] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ name: "", phone: "", email: "", amount: "" });
+
   const { emi, totalInterest, totalPayment } = useMemo(() => {
     const n = years * 12;
     const r = rate / 12 / 100;
@@ -42,8 +49,65 @@ export default function HomeLoan() {
     };
   }, [amount, years, rate]);
 
+  const openModal = () => {
+    setSubmitted(false);
+    setForm({ name: "", phone: "", email: "", amount: String(amount) });
+    setShowModal(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "name") {
+      const cleaned = value.replace(/[^A-Za-z ]/g, "");
+      if (cleaned !== value) toast.error("Name can only contain letters");
+      setForm((f) => ({ ...f, name: cleaned }));
+      return;
+    }
+    if (name === "phone") {
+      const cleaned = value.replace(/[^0-9]/g, "").slice(0, 15);
+      if (cleaned !== value) toast.error("Phone can only contain numbers");
+      setForm((f) => ({ ...f, phone: cleaned }));
+      return;
+    }
+    if (name === "amount") {
+      const cleaned = value.replace(/[^0-9]/g, "");
+      setForm((f) => ({ ...f, amount: cleaned }));
+      return;
+    }
+    setForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.phone.trim()) {
+      toast.error("Name and phone are required");
+      return;
+    }
+    if (!form.amount || Number(form.amount) <= 0) {
+      toast.error("Please enter a valid loan amount");
+      return;
+    }
+    setLoading(true);
+    try {
+      await loanService.createLoanApplication({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim() || null,
+        amount: Number(form.amount),
+      });
+      toast.success("Loan application submitted successfully!");
+      setSubmitted(true);
+      setTimeout(() => setShowModal(false), 2000);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Submission failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="max-w-7xl mx-auto px-5 lg:px-8 pt-6 sm:pt-8 pb-10 sm:pb-14">
+      <Toaster position="top-right" />
       <div className="bg-gradient-to-br from-[#153964] to-[#1E4C8C] rounded-3xl overflow-hidden grid sm:grid-cols-2 shadow-xl shadow-[#153964]/20">
         {/* Left — content */}
         <div className="p-8 sm:p-10 flex flex-col justify-center">
@@ -75,7 +139,10 @@ export default function HomeLoan() {
               </li>
             ))}
           </ul>
-          <button className="mt-7 self-start bg-[#7CB93D] hover:bg-[#6FA82C] transition-colors text-white font-semibold text-sm rounded-xl px-6 py-3">
+          <button
+            onClick={openModal}
+            className="mt-7 self-start bg-[#7CB93D] hover:bg-[#6FA82C] transition-colors text-white font-semibold text-sm rounded-xl px-6 py-3"
+          >
             Apply for Loan
           </button>
         </div>
@@ -156,6 +223,130 @@ export default function HomeLoan() {
           </div>
         </div>
       </div>
+
+      {/* Loan application modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowModal(false)}
+          />
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-[#1E4C8C]/10">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1E4C8C]/10 text-[#1E4C8C] hover:bg-[#EAF1FB] transition-colors"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="p-6 sm:p-8">
+              {submitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#EAF6DE] flex items-center justify-center">
+                    <Check size={30} className="text-[#6FA82C]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-[#1E4C8C] mb-2">
+                    Application Submitted!
+                  </h3>
+                  <p className="text-slate-500">
+                    Our loan team will contact you shortly.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <span className="text-xs font-semibold tracking-[0.2em] text-[#6FA82C] uppercase">
+                      Home Loan
+                    </span>
+                    <h2 className="text-2xl font-bold text-[#1E4C8C] mt-1.5">
+                      Apply for Loan
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Fill in your details and our team will reach out to you.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E4C8C] mb-1">
+                        Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="Your full name"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#1E4C8C]/15 bg-[#F7FAFC] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D] transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E4C8C] mb-1">
+                        Phone *
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        required
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="Your phone number"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#1E4C8C]/15 bg-[#F7FAFC] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D] transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E4C8C] mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="Your email address"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#1E4C8C]/15 bg-[#F7FAFC] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D] transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E4C8C] mb-1">
+                        Loan Amount (₹) *
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        name="amount"
+                        required
+                        value={form.amount}
+                        onChange={handleChange}
+                        placeholder="e.g. 5000000"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#1E4C8C]/15 bg-[#F7FAFC] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB93D]/40 focus:border-[#7CB93D] transition"
+                      />
+                      {form.amount ? (
+                        <p className="text-xs text-slate-500 mt-1.5">
+                          {formatInr(Number(form.amount))}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3 rounded-lg bg-[#7CB93D] hover:bg-[#6FA82C] text-white font-semibold text-base transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {loading ? "Submitting..." : "Submit Application"}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

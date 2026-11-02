@@ -54,9 +54,18 @@ const formatPossessionDate = (dateStr) => {
 
 // Guard against dirty area-unit values stored in the DB (e.g. a stray number).
 const isValidAreaUnit = (u) =>
-    /^(sq\.?\s?ft|sq\.?\s?m|sq\.?\s?yard|acres?|hectare|marla|guntha|cent)/i.test(
+    /^(sq\.?\s?ft|sq\.?\s?m|sq\.?\s?yard|acres?|hectare|marla|guntha|cent|katha|bigha)/i.test(
         String(u || '').trim()
     );
+
+const fmtArea = (a) => {
+    if (a == null || a === '') return null;
+    const s = String(a).trim();
+    const n = Number(s);
+    return Number.isFinite(n) && s !== '' && !/[^\d.]/.test(s)
+        ? n.toLocaleString('en-IN')
+        : s;
+};
 
 // Raw DB row → PropertyCard shape (similar listings)
 const toCard = (r) => ({
@@ -68,11 +77,11 @@ const toCard = (r) => ({
     title: r.property_title,
     propertyType: r.property_type,
     listingType: (r.property_for || 'Sale') === 'Rent' ? 'Rent' : 'Sale',
-    price: parseFloat(r.price || 0),
+    price: r.price,
     address:
         [r.address, r.city].filter(Boolean).join(', ') ||
         [r.city, r.state].filter(Boolean).join(', '),
-    area: r.area != null ? parseFloat(r.area) : null,
+    area: fmtArea(r.area),
     areaUnit: r.area_unit || 'sq.ft',
     bedrooms: r.bedroom ?? null,
     bathrooms: r.bathroom ?? null,
@@ -117,7 +126,7 @@ export default function PropertyDetails() {
                     title: rawProperty.property_title,
                     purpose: (rawProperty.property_for || 'Sale').toLowerCase(),
                     type: rawProperty.property_type,
-                    price: parseFloat(rawProperty.price || 0),
+                    price: rawProperty.price,
                     address: rawProperty.address,
                     city: rawProperty.city,
                     state: rawProperty.state,
@@ -132,7 +141,7 @@ export default function PropertyDetails() {
                     images: rawImages.map(resolveImageUrl),
 
                     overview: {
-                        area: rawProperty.area != null ? parseFloat(rawProperty.area) : null,
+                        area: fmtArea(rawProperty.area),
                         areaUnit: rawProperty.area_unit || 'sq.ft',
                         bedrooms: rawProperty.bedroom,
                         bathrooms: rawProperty.bathroom,
@@ -288,7 +297,9 @@ export default function PropertyDetails() {
     const ov = property.overview;
     const areaUnit = isValidAreaUnit(ov.areaUnit) ? ov.areaUnit : 'sq.ft';
     const areaLabel =
-        ov.area != null ? `${ov.area.toLocaleString('en-IN')} ${areaUnit}` : null;
+        ov.area != null && String(ov.area).trim() !== ''
+            ? `${fmtArea(ov.area)} ${areaUnit}`
+            : null;
 
     const facts = [
         { icon: Ruler, label: 'Area', value: areaLabel },
@@ -376,11 +387,12 @@ export default function PropertyDetails() {
                                             Price
                                         </p>
                                         <p className="font-display text-3xl sm:text-[2.5rem] text-white font-semibold leading-tight drop-shadow-lg">
-                                            {property.price > 0
+                                            {property.price != null && String(property.price).trim() !== ""
                                                 ? formatPrice(property.price)
                                                 : 'Price on Request'}
                                             {property.purpose === 'rent' &&
-                                                property.price > 0 && (
+                                                property.price != null &&
+                                                String(property.price).trim() !== "" && (
                                                     <span className="text-base font-normal text-white/70">
                                                         {' '}
                                                         /mo
@@ -446,9 +458,9 @@ export default function PropertyDetails() {
                         </section>
                     )}
 
-                    {/* ================= Two-column body with divided card ================= */}
-                    <div className="grid lg:grid-cols-12 gap-6 mt-6 items-start">
-                        <div className="lg:col-span-8">
+                    {/* ================= Two-column body — left scrolls, right sticky ================= */}
+                    <div className="grid lg:grid-cols-12 gap-6 mt-6">
+                        <div className="lg:col-span-8 min-w-0">
                             <div className="bg-white rounded-2xl border bg-gradient-to-b from-charcoal-deep/5 to-transparent shadow-2xl shadow-charcoal-deep/5 p-8 sm:p-10">
                                 <PropertyOverview
                                     overview={{ ...ov, areaUnit }}
@@ -495,7 +507,7 @@ export default function PropertyDetails() {
                             </div>
                         </div>
 
-                        <div className="lg:col-span-4">
+                        <div className="lg:col-span-4 min-w-0">
                             <PropertyContact
                                 contact={property.agent}
                                 propertyTitle={property.title}

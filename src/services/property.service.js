@@ -4,6 +4,7 @@ const propertyService = {
     // Lookups
     getAmenities() { return api.get("/properties/amenities"); },
     getCategories() { return api.get("/properties/categories"); },
+    getCities() { return api.get("/properties/cities"); },
 
     // Core CRUD & Fetch Operators
     createProperty(formData) {

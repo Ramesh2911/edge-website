@@ -33,9 +33,18 @@ const PLACEHOLDER =
 
 // Guard against dirty area-unit values stored in the DB (e.g. a stray number).
 const isValidAreaUnit = (u) =>
-    /^(sq\.?\s?ft|sq\.?\s?m|sq\.?\s?yard|acres?|hectare|marla|guntha|cent)/i.test(
+    /^(sq\.?\s?ft|sq\.?\s?m|sq\.?\s?yard|acres?|hectare|marla|guntha|cent|katha|bigha)/i.test(
         String(u || '').trim()
     );
+
+const fmtArea = (a) => {
+    if (a == null || a === '') return null;
+    const s = String(a).trim();
+    const n = Number(s);
+    return Number.isFinite(n) && s !== '' && !/[^\d.]/.test(s)
+        ? n.toLocaleString('en-IN')
+        : s;
+};
 
 // Raw DB row → camelCase shape expected by PropertyCard.
 const toCard = (r) => ({
@@ -46,12 +55,12 @@ const toCard = (r) => ({
     title: r.property_title,
     propertyType: r.property_type,
     listingType: (r.property_for || 'Sale') === 'Rent' ? 'Rent' : 'Sale',
-    price: parseFloat(r.price || 0),
+    price: r.price,
     priceUnit: 'mo',
     address:
         [r.address, r.city].filter(Boolean).join(', ') ||
         [r.city, r.state].filter(Boolean).join(', '),
-    area: r.area != null ? parseFloat(r.area) : null,
+    area: fmtArea(r.area),
     areaUnit: isValidAreaUnit(r.area_unit) ? r.area_unit : 'sq.ft',
     bedrooms: r.bedroom ?? null,
     bathrooms: r.bathroom ?? null,

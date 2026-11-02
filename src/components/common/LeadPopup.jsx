@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { createBuyerRequirement } from "../../services/lead.service";
 
 export default function LeadPopup() {
@@ -20,7 +21,20 @@ export default function LeadPopup() {
   }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "name") {
+      const cleaned = value.replace(/[^A-Za-z ]/g, "");
+      if (cleaned !== value) toast.error("Name can only contain letters");
+      setForm((f) => ({ ...f, name: cleaned }));
+      return;
+    }
+    if (name === "phone") {
+      const cleaned = value.replace(/[^0-9]/g, "").slice(0, 15);
+      if (cleaned !== value) toast.error("Phone can only contain numbers");
+      setForm((f) => ({ ...f, phone: cleaned }));
+      return;
+    }
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
   const handleClose = () => {
@@ -30,22 +44,28 @@ export default function LeadPopup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.name.trim() || !form.phone.trim()) {
+      toast.error("Name and phone are required");
+      return;
+    }
     setLoading(true);
     try {
       await createBuyerRequirement(form);
+      toast.success("Requirements submitted successfully!");
       setSubmitted(true);
       sessionStorage.setItem("lead_popup_shown", "true");
       setTimeout(() => setVisible(false), 2000);
     } catch (err) {
-      console.error("Lead submission failed:", err);
+      toast.error(err?.response?.data?.message || "Submission failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!visible) return null;
-
   return (
+    <>
+      <Toaster position="top-right" />
+      {visible && (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
@@ -140,5 +160,7 @@ export default function LeadPopup() {
         </div>
       </div>
     </div>
+      )}
+    </>
   );
 }

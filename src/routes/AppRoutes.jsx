@@ -17,6 +17,8 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 
 import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
+import BlogPage from "../pages/Blog/BlogPage";
+import BlogDetailPage from "../pages/Blog/BlogDetailPage";
 import FooterContentPage from "../pages/FooterContent/FooterContentPage";
 import LegalPage from "../pages/Legal/LegalPage";
 
@@ -81,6 +83,11 @@ export default function AppRoutes() {
                     <Route path="/about" element={<About />} />
 
                     <Route path="/contact" element={<Contact />} />
+
+                    {/* Blog (must be registered before /:slug catch-all) */}
+                    <Route path="/blog" element={<BlogPage />} />
+
+                    <Route path="/blog/:slug" element={<BlogDetailPage />} />
 
                     {/* Legal pages (admin-managed via Page Content → Legal) */}
                     <Route path="/privacy-policy" element={<LegalPage kind="privacy" />} />

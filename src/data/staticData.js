@@ -5,6 +5,7 @@ import slideConstruction from "../assets/Construction Site at Blue Hour.png";
 export const navLinks = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
+  { label: "Blog", href: "/blog" },
   { label: "Properties", href: "/properties" },
   {
     label: "Service",
@@ -388,7 +389,7 @@ export const footerLinks = {
   ],
   Resources: [
     { label: "Price Trends", href: "/properties" },
-    { label: "Blog", href: "/properties" },
+    { label: "Blog", href: "/blog" },
   ],
   Support: [
     { label: "Help Center", href: "/contact" },

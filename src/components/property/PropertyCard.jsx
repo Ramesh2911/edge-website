@@ -24,8 +24,12 @@ import {
 import { formatPrice } from "../../utils/formatPrice";
 
 const formatArea = (value, unit = "sq.ft") => {
-    if (value == null) return "—";
-    return `${value.toLocaleString("en-IN")} ${unit}`;
+    if (value == null || String(value).trim() === "") return "—";
+    const s = String(value).trim();
+    const n = Number(s);
+    const label =
+        Number.isFinite(n) && !/[^\d.]/.test(s) ? n.toLocaleString("en-IN") : s;
+    return `${label} ${unit}`;
 };
 
 // ============================================================

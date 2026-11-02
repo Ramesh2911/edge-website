@@ -131,9 +131,9 @@ export default function MyProperties() {
         }
 
         if (sortKey === "price-high") {
-            list.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
+            list.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
         } else if (sortKey === "price-low") {
-            list.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
+            list.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
         } else if (sortKey === "oldest") {
             list.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
         } else {
@@ -516,10 +516,16 @@ export default function MyProperties() {
                                             </p>
 
                                             <div className="flex flex-wrap gap-x-3.5 gap-y-1.5 mt-3 text-[11px] font-semibold text-slate-500">
-                                                {prop.area != null && (
+                                                {prop.area != null && String(prop.area).trim() !== "" && (
                                                     <span className="inline-flex items-center gap-1">
                                                         <Ruler size={12} className="text-[#7CB93D]" />
-                                                        {Number(prop.area).toLocaleString("en-IN")}{" "}
+                                                        {(() => {
+                                                            const s = String(prop.area).trim();
+                                                            const n = Number(s);
+                                                            return Number.isFinite(n) && !/[^\d.]/.test(s)
+                                                                ? n.toLocaleString("en-IN")
+                                                                : s;
+                                                        })()}{" "}
                                                         {prop.area_unit || "sq.ft"}
                                                     </span>
                                                 )}

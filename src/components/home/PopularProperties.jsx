@@ -1,18 +1,31 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Heart, BedDouble, Ruler, CalendarCheck, Loader2 } from "lucide-react";
 import propertyService from '../../services/property.service';
 import { useWishlist } from '../../context/WishlistContext';
 import { formatPrice } from '../../utils/formatPrice';
 
+const DUMMY_IMAGE = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80";
+
+const resolvePropertyImage = (p) => {
+  const apiImage =
+    p?.image_url ||
+    p?.cover_image ||
+    (Array.isArray(p?.images) && p.images[0]) ||
+    "";
+  return apiImage || DUMMY_IMAGE;
+};
+
 export default function PopularProperties() {
   const [categories, setCategories] = useState(["All Properties"]);
-  const [categoryMap, setCategoryMap] = useState({}); 
+  const [categoryMap, setCategoryMap] = useState({});
   const [filter, setFilter] = useState("All Properties");
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isWishlisted, toggle } = useWishlist();
   const trackRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,16 +143,26 @@ export default function PopularProperties() {
             const rawPrice = parseFloat(p.price || 0);
             const formattedPrice = formatPrice(rawPrice);
             
-            const imageSrc = p.image_url || p.cover_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80";
+            const imageSrc = resolvePropertyImage(p);
             const badgeLabel = p.construction_status || p.property_for || "For Sale";
             const bedsLabel = p.bedroom ? `${p.bedroom} BHK` : "N/A";
             const areaLabel = p.area ? `${p.area} sq.ft.` : "N/A";
             const possessionLabel = p.construction_status || "Ready to Move";
+            const detailsPath = `/properties/details/${p.id}`;
 
             return (
               <div
                 key={p.id}
-                className="group shrink-0 w-[260px] bg-white rounded-2xl border border-[#1E4C8C]/10 overflow-hidden shadow-card hover:shadow-lift hover:-translate-y-1.5 transition-all duration-300"
+                role="link"
+                tabIndex={0}
+                onClick={() => navigate(detailsPath)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(detailsPath);
+                  }
+                }}
+                className="group shrink-0 w-[260px] bg-white rounded-2xl border border-[#1E4C8C]/10 overflow-hidden shadow-card hover:shadow-lift hover:-translate-y-1.5 transition-all duration-300 cursor-pointer"
               >
                 <div className="relative h-36 bg-slate-100 overflow-hidden">
                   <img
@@ -148,14 +171,19 @@ export default function PopularProperties() {
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80";
+                      if (e.currentTarget.src !== DUMMY_IMAGE) {
+                        e.currentTarget.src = DUMMY_IMAGE;
+                      }
                     }}
                   />
                   <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full bg-[#1E4C8C] text-white">
                     {badgeLabel}
                   </span>
                   <button
-                    onClick={() => toggle(p.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggle(p.id);
+                    }}
                     className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm scale-90 opacity-90 group-hover:scale-100 group-hover:opacity-100 transition-all"
                     aria-label={isWishlisted(p.id) ? "Remove from wishlist" : "Save to wishlist"}
                     aria-pressed={isWishlisted(p.id)}
@@ -194,12 +222,15 @@ export default function PopularProperties() {
                     </span>
                   </div>
 
-                  <a
-                    href={`/properties/details/${p.id}`}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(detailsPath);
+                    }}
                     className="block text-center w-full mt-2.5 border border-[#7CB93D] text-[#6FA82C] hover:bg-[#7CB93D] hover:text-white transition-colors font-semibold text-sm rounded-xl py-2"
                   >
                     View Details
-                  </a>
+                  </span>
                 </div>
               </div>
             );

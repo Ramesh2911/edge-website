@@ -10,7 +10,6 @@ import {
   UserRound,
   Building2,
   LogOut,
-  Lock,
 } from "lucide-react";
 import { navLinks } from "../../data/staticData";
 import { getMenusForRole } from "../../data/roleMenus";
@@ -33,8 +32,17 @@ const GUEST_MENU = [
 const ROLE_BADGE = {
   Buyer: "bg-[#EAF6DE] text-[#6FA82C] border-[#8BC53F]/40",
   Owner: "bg-[#EAF0F8] text-[#1E4C8C] border-[#1E4C8C]/25",
+  Seller: "bg-[#EAF0F8] text-[#1E4C8C] border-[#1E4C8C]/25",
   Broker: "bg-[#FCF3DC] text-[#C8972E] border-[#C8972E]/30",
   Developer: "bg-[#F0EAF8] text-[#6B4C9A] border-[#6B4C9A]/30",
+};
+
+const ROLE_LABEL = {
+  buyer: "BUYER",
+  owner: "SELLER",
+  seller: "SELLER",
+  broker: "BROKER",
+  developer: "DEVELOPER",
 };
 
 const menuItemClass =
@@ -48,7 +56,6 @@ export default function Header() {
   const { user, logout } = useAuth();
 
   const role = (user?.role_name || "").toLowerCase();
-  const isBuyer = role === "buyer";
   const firstName = user?.full_name?.split(" ")[0] || "there";
   const initials =
     user?.full_name
@@ -59,6 +66,11 @@ export default function Header() {
       .toUpperCase() || "U";
 
   const accountLinks = getMenusForRole(role);
+  const roleLabel = ROLE_LABEL[role] || (user?.role_name || "MEMBER").toUpperCase();
+  const roleBadgeClass =
+    ROLE_BADGE[user?.role_name] ||
+    ROLE_BADGE[role.charAt(0).toUpperCase() + role.slice(1)] ||
+    ROLE_BADGE.Buyer;
 
   const activeClass = ({ isActive }) =>
     isActive ? "text-[#6FA82C]" : "hover:text-[#6FA82C] transition-colors";
@@ -127,11 +139,9 @@ export default function Header() {
                   Hi, {firstName}
                 </p>
                 <span
-                  className={`mt-1 inline-block text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
-                    ROLE_BADGE[user?.role_name] || ROLE_BADGE.Buyer
-                  }`}
+                  className={`mt-1 inline-block text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${roleBadgeClass}`}
                 >
-                  {user?.role_name || "Member"}
+                  {roleLabel}
                 </span>
               </div>
 
@@ -143,11 +153,6 @@ export default function Header() {
               ))}
 
               <div className="my-1.5 border-t border-[#1E4C8C]/10" />
-
-              <Link to="/change-password" className={menuItemClass}>
-                <Lock size={16} className="shrink-0" />
-                Change Password
-              </Link>
 
               <button
                 type="button"
@@ -229,15 +234,13 @@ export default function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">
-          {(!user || !isBuyer) && (
-            <Link
-              to="/add-property"
-              className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
-            >
-              List Property
-              <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
-            </Link>
-          )}
+          <Link
+            to="/add-property"
+            className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
+          >
+            List Property
+            <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
+          </Link>
           <DesktopAccount />
         </div>
 
@@ -315,15 +318,11 @@ export default function Header() {
               <div className="pl-4 mt-1 flex flex-col gap-2 border-l border-[#1E4C8C]/10 ml-1">
                 {user ? (
                   <>
-                    {user?.role_name && (
-                      <span
-                        className={`self-start text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
-                          ROLE_BADGE[user.role_name] || ROLE_BADGE.Buyer
-                        }`}
-                      >
-                        {user.role_name}
-                      </span>
-                    )}
+                    <span
+                      className={`self-start text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${roleBadgeClass}`}
+                    >
+                      {roleLabel}
+                    </span>
                     {accountLinks.map(({ to, icon: Icon, label }) => (
                       <Link
                         key={to}
@@ -335,14 +334,6 @@ export default function Header() {
                         {label}
                       </Link>
                     ))}
-                    <Link
-                      to="/change-password"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2 text-slate-500 text-sm py-0.5 hover:text-[#6FA82C]"
-                    >
-                      <Lock size={14} />
-                      Change Password
-                    </Link>
                     <button
                       type="button"
                       onClick={() => {
@@ -382,15 +373,14 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-3 pt-1">
-            {(!user || !isBuyer) && (
-              <Link
-                to="/add-property"
-                className="flex items-center gap-1.5 text-xs font-semibold text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
-              >
-                List Property
-                <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
-              </Link>
-            )}
+            <Link
+              to="/add-property"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1E4C8C] bg-[#EAF6DE] border border-[#8BC53F] px-3 py-1.5 rounded-full"
+            >
+              List Property
+              <span className="bg-[#7CB93D] text-white text-[10px] px-1.5 py-0.5 rounded-full">FREE</span>
+            </Link>
             {!user && (
               <button
                 onClick={() => {

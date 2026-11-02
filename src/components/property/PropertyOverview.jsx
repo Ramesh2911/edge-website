@@ -41,8 +41,14 @@ export default function PropertyOverview({
 
     const rows = DETAIL_ROWS.map((r) => {
         let value = overview[r.key];
-        if (r.key === "area" && value != null) {
-            value = `${value.toLocaleString("en-IN")} ${overview.areaUnit || "sq.ft"}`;
+        if (r.key === "area" && value != null && String(value).trim() !== "") {
+            const s = String(value).trim();
+            const n = Number(s);
+            const label =
+                Number.isFinite(n) && !/[^\d.]/.test(s)
+                    ? n.toLocaleString("en-IN")
+                    : s;
+            value = `${label} ${overview.areaUnit || "sq.ft"}`;
         }
         if (r.key === "floor" && value != null && overview.totalFloors) {
             value = `${value} of ${overview.totalFloors}`;

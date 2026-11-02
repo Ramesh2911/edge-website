@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { blogPosts } from "../../data/staticData";
 import blogService from "../../services/blog.service";
+import { slugify } from "../../pages/Blog/BlogPage";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 const GRADIENTS = [
   "from-amber-200 to-orange-100",
@@ -50,24 +53,24 @@ export default function Blog() {
         <p className="text-slate-500 mt-2 text-[15px]">
           Insights, tips and trends in real estate
         </p>
-        <a
-          href="#"
+        <Link
+          to="/blog"
           className="inline-block text-sm font-semibold text-[#6FA82C] hover:underline mt-3"
         >
           View All Articles →
-        </a>
+        </Link>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
         {visible.map((post) => (
-          <a
+          <Link
             key={post.id}
-            href="#"
+            to={`/blog/${post.slug || slugify(post.title)}`}
             className="group block bg-white rounded-2xl border border-[#1E4C8C]/10 p-3 hover:shadow-lift hover:-translate-y-1 transition-all"
           >
             <div className={`h-40 rounded-xl bg-gradient-to-br ${post.gradient} relative overflow-hidden`}>
               <img
-                src={post.image || post.image_url}
+                src={resolveImageUrl(post.image || post.image_url)}
                 alt={post.title}
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -87,7 +90,7 @@ export default function Blog() {
             <span className="inline-flex items-center gap-1 text-[#1E4C8C] text-xs font-semibold mt-3">
               Read More <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
             </span>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

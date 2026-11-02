@@ -112,8 +112,8 @@ export default function EditProperty() {
                     property_title: listing.property_title || "",
                     property_for: listing.property_for || "Sale",
                     property_type: listing.property_type || "Residential",
-                    price: listing.price != null ? String(parseFloat(listing.price)) : "",
-                    area: listing.area != null ? String(parseFloat(listing.area)) : "",
+                    price: listing.price != null ? String(listing.price) : "",
+                    area: listing.area != null ? String(listing.area) : "",
                     area_unit: listing.area_unit || "sq.ft",
                     bedroom: String(listing.bedroom ?? 0),
                     bathroom: String(listing.bathroom ?? 0),
@@ -199,8 +199,8 @@ export default function EditProperty() {
             fd.append("property_title", data.property_title);
             fd.append("property_for", data.property_for);
             fd.append("property_type", data.property_type);
-            fd.append("price", String(parseFloat(data.price)));
-            fd.append("area", String(parseFloat(data.area)));
+            fd.append("price", String(data.price ?? "").trim());
+            fd.append("area", String(data.area ?? "").trim());
             fd.append("area_unit", data.area_unit);
             fd.append("bedroom", String(parseInt(data.bedroom, 10) || 0));
             fd.append("bathroom", String(parseInt(data.bathroom, 10) || 0));
@@ -339,10 +339,9 @@ export default function EditProperty() {
                                 </Field>
                                 <Field label="Price (₹)" required error={errors.price}>
                                     <input
-                                        type="number"
-                                        step="0.01"
+                                        type="text"
                                         {...register("price", { required: "Price is required" })}
-                                        placeholder="e.g. 8500000"
+                                        placeholder="e.g. 8500000 or 85 Lakh"
                                         className={inputCls(errors.price)}
                                     />
                                 </Field>
@@ -363,10 +362,9 @@ export default function EditProperty() {
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                 <Field label="Area" required error={errors.area}>
                                     <input
-                                        type="number"
-                                        step="0.01"
+                                        type="text"
                                         {...register("area", { required: "Area is required" })}
-                                        placeholder="e.g. 1250"
+                                        placeholder="e.g. 1250 or 900-1100"
                                         className={inputCls(errors.area)}
                                     />
                                 </Field>
@@ -377,6 +375,8 @@ export default function EditProperty() {
                                         <option value="sq.yd">sq.yd</option>
                                         <option value="acre">acre</option>
                                         <option value="hectare">hectare</option>
+                                        <option value="Katha">Katha</option>
+                                        <option value="Bigha">Bigha</option>
                                     </select>
                                 </Field>
                                 <Field label="Bedrooms">
