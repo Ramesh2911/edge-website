@@ -23,6 +23,12 @@ const INTENT_REPLIES = [
     text: "Hello! 👋 Welcome to EDGE MILE REALTY. How can I help you today?",
     kind: "text",
   },
+  // Small talk
+  {
+    words: ["how are you", "how r u", "how are u", "how do you do", "whats up", "what's up", "how's it going", "how is it going", "you okay", "you ok"],
+    text: "I'm doing great, thanks for asking! 😊\nHow can I help you — looking for a property, or something else?",
+    kind: "text",
+  },
   // Farewell
   {
     words: ["bye", "goodbye", "see you", "take care", "good night", "gtg"],
@@ -77,13 +83,19 @@ const INTENT_REPLIES = [
     text: "EDGE MILE REALTY is a premium real estate platform for verified residential and commercial properties — focused on zero-brokerage listings and a smooth buy/rent experience.",
     kind: "text",
   },
+  // Jokes / fun
+  {
+    words: ["joke", "funny", "make me laugh"],
+    text: "Why did the house go to therapy? 🏠\nBecause it had too many unresolved foundation issues! 😄\n\nOkay — back to real estate. Need help finding a property?",
+    kind: "text",
+  },
 ];
 
 const GREETING =
   "Hello! Welcome to EDGE MILE REALTY. Ask me anything about properties, or tap a category below to explore.";
 
 const FALLBACK_HELP =
-  "I'm not sure I understood that. Could you rephrase? You can also ask about properties (e.g. \"2 BHK apartment\", \"Villa in Pune\"), listing, or contact details.";
+  "Hmm, I didn't quite catch that 🤔\n\nYou can ask me things like:\n• \"2 BHK in Mumbai\"\n• \"Villa for rent\"\n• \"How do I list a property?\"\n• \"Contact support\"";
 
 // Words that mean the user is looking for a property
 const PROPERTY_WORDS =
@@ -398,13 +410,13 @@ export default function ChatWidget() {
                 }`}
               >
                 <div
-                  className={`max-w-[85%] px-3.5 py-2.5 text-sm rounded-2xl leading-relaxed ${
+                  className={`max-w-[88%] px-3.5 py-2.5 text-sm rounded-2xl leading-relaxed whitespace-pre-line break-words ${
                     msg.sender === "user"
                       ? "bg-[#7CB93D] text-white rounded-br-md"
                       : "bg-white text-slate-700 border border-slate-200 rounded-bl-md shadow-sm"
                   }`}
                 >
-                  <span>{msg.text}</span>
+                  {msg.text}
                   {msg.kind === "properties" && msg.properties && (
                     <div className="mt-2 space-y-2">
                       {msg.properties.map((p) => (
