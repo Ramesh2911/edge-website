@@ -544,13 +544,14 @@ export default function PropertyList() {
                                     </p>
                                 </div>
 
-                                <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-2">
                                     {/* Sort */}
-                                    <div className="relative">
+                                    <div className="relative group">
                                         <select
                                             value={filters.sort}
                                             onChange={(e) => handleSortChange(e.target.value)}
-                                            className="appearance-none bg-[#F7FAFC] border border-[#1E4C8C]/10 rounded-xl pl-3.5 pr-9 py-2.5 text-sm font-semibold text-[#1E4C8C] hover:border-[#7CB93D] focus:outline-none focus:border-[#7CB93D] focus:ring-2 focus:ring-[#7CB93D]/25 transition-all cursor-pointer"
+                                            aria-label="Sort properties"
+                                            className="appearance-none bg-white border border-[#1E4C8C]/12 rounded-xl pl-3.5 pr-9 py-2.5 text-[13px] font-semibold text-[#1E4C8C] hover:border-[#7CB93D] focus:outline-none focus:border-[#7CB93D] focus:ring-2 focus:ring-[#7CB93D]/20 transition-all cursor-pointer shadow-sm"
                                         >
                                             {SORT_OPTIONS.map((o) => (
                                                 <option key={o.value} value={o.value}>
@@ -560,19 +561,20 @@ export default function PropertyList() {
                                         </select>
                                         <ChevronRight
                                             size={14}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-stone pointer-events-none"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-[#1E4C8C]/50 group-hover:text-[#6FA82C] pointer-events-none transition-colors"
                                         />
                                     </div>
 
                                     {/* View toggle */}
-                                    <div className="flex items-center gap-1 border border-[#1E4C8C]/10 p-1 rounded-xl bg-[#F7FAFC]">
+                                    <div className="flex items-center gap-0.5 bg-white border border-[#1E4C8C]/12 p-1 rounded-xl shadow-sm">
                                         <button
                                             onClick={() => setViewMode('grid')}
                                             aria-label="Grid view"
-                                            className={`p-2.5 rounded-lg transition-all ${
+                                            aria-pressed={viewMode === 'grid'}
+                                            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                                                 viewMode === 'grid'
-                                                    ? 'bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white shadow-[0_4px_12px_-4px_rgba(21,57,100,0.45)]'
-                                                    : 'text-stone hover:text-[#153964] hover:bg-white'
+                                                    ? 'bg-[#153964] text-white shadow-[0_3px_10px_-3px_rgba(21,57,100,0.5)]'
+                                                    : 'text-[#1E4C8C]/45 hover:text-[#1E4C8C] hover:bg-[#F7FAFC]'
                                             }`}
                                         >
                                             <Grid className="w-4 h-4" />
@@ -580,10 +582,11 @@ export default function PropertyList() {
                                         <button
                                             onClick={() => setViewMode('list')}
                                             aria-label="List view"
-                                            className={`p-2.5 rounded-lg transition-all ${
+                                            aria-pressed={viewMode === 'list'}
+                                            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                                                 viewMode === 'list'
-                                                    ? 'bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white shadow-[0_4px_12px_-4px_rgba(21,57,100,0.45)]'
-                                                    : 'text-stone hover:text-[#153964] hover:bg-white'
+                                                    ? 'bg-[#153964] text-white shadow-[0_3px_10px_-3px_rgba(21,57,100,0.5)]'
+                                                    : 'text-[#1E4C8C]/45 hover:text-[#1E4C8C] hover:bg-[#F7FAFC]'
                                             }`}
                                         >
                                             <List className="w-4 h-4" />
