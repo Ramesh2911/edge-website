@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
     Loader2,
@@ -89,6 +90,7 @@ export default function AddProperty() {
     const [floorPlanPreviews, setFloorPlanPreviews] = useState([]);
     const [voiceListening, setVoiceListening] = useState(false);
     const [activeVoiceField, setActiveVoiceField] = useState(null);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const recognitionRef = useRef(null);
 
     const {
@@ -249,6 +251,10 @@ export default function AddProperty() {
     };
 
     const onSubmitPipeline = async (data) => {
+        if (!agreedToTerms) {
+            toast.error("Please accept the Terms & Conditions and Privacy Policy");
+            return;
+        }
         setIsSubmitting(true);
         try {
             const fd = new FormData();
@@ -717,6 +723,46 @@ export default function AddProperty() {
                             </div>
                         </section>
 
+                        {/* ========== Consent ========== */}
+                        <div
+                            className={`rounded-2xl border-2 p-4 sm:p-5 transition-all ${
+                                agreedToTerms
+                                    ? "border-[#7CB93D]/50 bg-[#7CB93D]/5"
+                                    : "border-slate-200 bg-slate-50/60"
+                            }`}
+                        >
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    className="mt-0.5 w-[18px] h-[18px] shrink-0 rounded border-slate-300 text-[#7CB93D] focus:ring-[#7CB93D] cursor-pointer"
+                                />
+                                <span className="text-[13px] leading-relaxed text-slate-600">
+                                    I have read and agree to the{" "}
+                                    <Link
+                                        to="/terms-and-conditions"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-[#153964] underline decoration-[#7CB93D] underline-offset-2 hover:text-[#7CB93D] transition-colors"
+                                    >
+                                        Terms &amp; Conditions
+                                    </Link>
+                                    {" "}and{" "}
+                                    <Link
+                                        to="/privacy-policy"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-[#153964] underline decoration-[#7CB93D] underline-offset-2 hover:text-[#7CB93D] transition-colors"
+                                    >
+                                        Privacy &amp; Policy
+                                    </Link>
+                                    . I confirm that the information provided is true and I have the right to
+                                    publish this listing.
+                                </span>
+                            </label>
+                        </div>
+
                         {/* ========== Submit ========== */}
                         <div className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] p-5 sm:p-7 flex flex-col sm:flex-row items-center gap-4">
                             <div className="flex-1 text-center sm:text-left">
@@ -725,15 +771,21 @@ export default function AddProperty() {
                                     Ready to publish?
                                 </p>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    Your listing will be reviewed before going live.
+                                    {agreedToTerms
+                                        ? "Your listing will be reviewed before going live."
+                                        : "Accept Terms & Conditions and Privacy Policy to continue."}
                                 </p>
                             </div>
                             <div className="flex gap-3 w-full sm:w-auto">
                                 <button
                                     type="button"
-                                    disabled={isSubmitting || isLoadingLookups}
+                                    disabled={isSubmitting || isLoadingLookups || !agreedToTerms}
                                     onClick={handleSubmit(onSubmitPipeline)}
-                                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#153964] to-[#1E4C8C] hover:from-[#0F2D52] hover:to-[#153964] text-white text-sm font-bold rounded-xl shadow-[0_8px_24px_-6px_rgba(21,57,100,0.4)] transition-all active:scale-[0.98] disabled:opacity-50"
+                                    className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98] ${
+                                        agreedToTerms
+                                            ? "bg-gradient-to-r from-[#153964] to-[#1E4C8C] hover:from-[#0F2D52] hover:to-[#153964] shadow-[0_8px_24px_-6px_rgba(21,57,100,0.4)]"
+                                            : "bg-slate-300 cursor-not-allowed shadow-none"
+                                    } disabled:opacity-70`}
                                 >
                                     {isSubmitting ? (
                                         <Loader2 size={16} className="animate-spin" />
