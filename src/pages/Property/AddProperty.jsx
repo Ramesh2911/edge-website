@@ -744,7 +744,7 @@ export default function AddProperty() {
                                         to="/terms-and-conditions"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="font-semibold text-[#153964] underline decoration-[#7CB93D] underline-offset-2 hover:text-[#7CB93D] transition-colors"
+                                        className="font-semibold text-[#153964] hover:text-[#7CB93D] transition-colors"
                                     >
                                         Terms &amp; Conditions
                                     </Link>
@@ -753,7 +753,7 @@ export default function AddProperty() {
                                         to="/privacy-policy"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="font-semibold text-[#153964] underline decoration-[#7CB93D] underline-offset-2 hover:text-[#7CB93D] transition-colors"
+                                        className="font-semibold text-[#153964] hover:text-[#7CB93D] transition-colors"
                                     >
                                         Privacy &amp; Policy
                                     </Link>
