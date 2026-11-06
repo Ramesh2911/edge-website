@@ -250,7 +250,7 @@ export default function Hero() {
 
             <button
               onClick={handleSearch}
-              className="bg-[#2563EB] hover:bg-[#1D4ED8] transition-colors text-white font-semibold text-sm rounded-xl px-8 py-3.5 shadow-card"
+              className="bg-[#7CB93D] hover:bg-[#6FA82C] transition-colors text-white font-semibold text-sm rounded-xl px-8 py-3.5 shadow-card"
             >
               Search
             </button>
