@@ -247,22 +247,34 @@ export default function PropertyGallery({
 
             {/* ================= Lightbox ================= */}
             {lightboxOpen && (
-                <div className="fixed inset-0 z-[60] bg-charcoal-deep/96 backdrop-blur-sm flex flex-col">
+                <div
+                    className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col"
+                    onClick={() => setLightboxOpen(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Photo gallery"
+                >
                     <div className="flex items-center justify-between px-4 sm:px-6 py-4 shrink-0">
                         <span className="text-cream/70 text-sm font-medium">
                             {active + 1} / {list.length}
                         </span>
                         <button
                             type="button"
-                            onClick={() => setLightboxOpen(false)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxOpen(false);
+                            }}
                             aria-label="Close gallery"
-                            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors shadow-lg"
                         >
-                            <X size={18} className="text-cream" />
+                            <X size={22} className="text-white" />
                         </button>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center relative px-4 sm:px-16">
+                    <div
+                        className="flex-1 flex items-center justify-center relative px-4 sm:px-16 min-h-0"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {list.length > 1 && (
                             <button
                                 type="button"
@@ -293,7 +305,10 @@ export default function PropertyGallery({
                     </div>
 
                     {/* Thumbnail strip */}
-                    <div className="flex gap-2 overflow-x-auto px-4 sm:px-6 py-4 shrink-0">
+                    <div
+                        className="flex gap-2 overflow-x-auto px-4 sm:px-6 py-4 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {list.map((src, i) => (
                             <button
                                 key={src + i}
