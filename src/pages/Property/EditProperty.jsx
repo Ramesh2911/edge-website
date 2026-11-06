@@ -81,6 +81,7 @@ export default function EditProperty() {
     const [removeFloorPlan, setRemoveFloorPlan] = useState(false);
     const [floorPlanFiles, setFloorPlanFiles] = useState([]);
     const [floorPlanPreviews, setFloorPlanPreviews] = useState([]);
+    const [dynamicAmenities, setDynamicAmenities] = useState([]);
 
     const {
         register,
@@ -91,13 +92,17 @@ export default function EditProperty() {
 
     useEffect(() => {
         const loadPage = async () => {
-            // 1) Categories first — reset() below can only bind category_id
-            //    once the <option> elements exist, otherwise the select stays blank.
+            // 1) Lookups first — reset() below can only bind category_id / amenities
+            //    once the <option> / checkbox elements exist.
             try {
-                const res = await propertyService.getCategories();
-                setDynamicCategories(res.data.data || []);
+                const [catRes, amenRes] = await Promise.all([
+                    propertyService.getCategories(),
+                    propertyService.getAmenities(),
+                ]);
+                setDynamicCategories(catRes.data.data || []);
+                setDynamicAmenities(amenRes.data.data || []);
             } catch {
-                toast.error("Failed to load categories.");
+                toast.error("Failed to load categories or amenities.");
             } finally {
                 setIsLoadingLookups(false);
             }
@@ -107,6 +112,12 @@ export default function EditProperty() {
                 const { data } = await propertyService.getPropertyById(id);
                 const listing = data?.data;
                 if (!listing) throw new Error("Listing not found.");
+
+                const amenityIds = Array.isArray(listing.amenity_ids)
+                    ? listing.amenity_ids.map((x) => String(x))
+                    : Array.isArray(listing.amenities)
+                      ? listing.amenities.map((a) => String(a.id ?? a.amenity_id))
+                      : [];
 
                 reset({
                     category_id: listing.category_id ? String(listing.category_id) : "",
@@ -132,6 +143,7 @@ export default function EditProperty() {
                     pincode: listing.pincode || "",
                     latitude: listing.latitude || "",
                     longitude: listing.longitude || "",
+                    amenities: amenityIds,
                 });
 
                 setExistingImages(listing.images || []);
@@ -227,6 +239,7 @@ export default function EditProperty() {
             fd.append("state", data.state);
             fd.append("country", data.country);
             fd.append("pincode", data.pincode);
+            fd.append("amenities", JSON.stringify((data.amenities || []).map((id) => parseInt(id, 10))));
             if (data.latitude) fd.append("latitude", data.latitude);
             if (data.longitude) fd.append("longitude", data.longitude);
 
@@ -504,6 +517,36 @@ export default function EditProperty() {
                                     <input type="text" {...register("longitude")} placeholder="e.g. 72.8777" className={inputCls(false)} />
                                 </Field>
                             </div>
+                        </section>
+
+                        {/* Amenities */}
+                        <section className="bg-white rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(21,57,100,0.06)] p-5 sm:p-7">
+                            <SectionHeader icon={Sparkles} title="Amenities" subtitle="Select the features this property offers" />
+                            {isLoadingLookups ? (
+                                <div className="flex items-center gap-2 text-sm text-slate-400 py-4">
+                                    <Loader2 size={16} className="animate-spin" />
+                                    Loading amenities...
+                                </div>
+                            ) : dynamicAmenities.length === 0 ? (
+                                <p className="text-sm text-slate-400 py-4">No amenities available.</p>
+                            ) : (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                                    {dynamicAmenities.map((amenity) => (
+                                        <label
+                                            key={amenity.id}
+                                            className="flex items-center gap-2.5 border-2 border-slate-200 rounded-xl px-3.5 py-2.5 cursor-pointer text-[13px] font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all has-[:checked]:border-[#7CB93D] has-[:checked]:bg-[#7CB93D]/10 has-[:checked]:text-[#153964]"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                value={amenity.id}
+                                                {...register("amenities")}
+                                                className="w-4 h-4 rounded accent-[#7CB93D]"
+                                            />
+                                            <span className="truncate">{amenity.amenity_name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
                         </section>
 
                         {/* 4. Photos + Floor Plan */}

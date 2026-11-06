@@ -179,9 +179,13 @@ export default function PropertyDetails() {
                                 : [];
                         return plans[0] ? resolveImageUrl(plans[0]) : null;
                     })(),
-                    amenities: rawProperty.amenities?.length
-                        ? rawProperty.amenities
-                        : ['Parking', 'Ownership Transferable'],
+                    amenities: (() => {
+                        const list = Array.isArray(rawProperty.amenities) ? rawProperty.amenities : [];
+                        if (!list.length) return ['Parking', 'Ownership Transferable'];
+                        return list.map((a) =>
+                            typeof a === "string" ? a : a.amenity_name || a.name || ""
+                        ).filter(Boolean);
+                    })(),
                     coordinates: { lat, lng },
                     nearby: rawProperty.nearby || [],
 
