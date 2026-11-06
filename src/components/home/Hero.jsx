@@ -81,12 +81,15 @@ export default function Hero() {
   };
 
   const handleSearch = () => {
-    if (!query.trim()) {
-      navigate("/properties");
-    } else {
-      pushRecent(query);
-      navigate(`/properties?keyword=${encodeURIComponent(query)}`);
+    const params = new URLSearchParams();
+    const q = query.trim();
+    if (q) {
+      pushRecent(q);
+      params.set("keyword", q);
     }
+    if (propType) params.set("propertyTypes", propType);
+    const qs = params.toString();
+    navigate(qs ? `/properties?${qs}` : "/properties");
     setShowRecent(false);
   };
 
@@ -230,12 +233,15 @@ export default function Hero() {
                         <button
                           key={r}
                           type="button"
-                          onClick={() => {
-                            setQuery(r);
-                            pushRecent(r);
-                            navigate(`/properties?keyword=${encodeURIComponent(r)}`);
-                            setShowRecent(false);
-                          }}
+                            onClick={() => {
+                              setQuery(r);
+                              pushRecent(r);
+                              const p = new URLSearchParams();
+                              p.set("keyword", r);
+                              if (propType) p.set("propertyTypes", propType);
+                              navigate(`/properties?${p.toString()}`);
+                              setShowRecent(false);
+                            }}
                           className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-[#EAF1FB] hover:text-[#1E4C8C] flex items-center gap-2"
                         >
                           <Search size={14} className="text-slate-400 shrink-0" />

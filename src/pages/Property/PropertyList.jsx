@@ -71,6 +71,7 @@ const toCard = (r) => ({
 // URL searchParams → filter object (source of truth = URL).
 // Aliases (city/purpose/type/search) are honoured so external nav links work.
 const filtersFromParams = (sp) => ({
+    keyword: sp.get('keyword') || sp.get('search') || '',
     location: sp.get('location') || sp.get('city') || '',
     listingType: sp.get('listingType') || sp.get('purpose') || '',
     propertyTypes: (sp.get('propertyTypes') || sp.get('type') || '')
