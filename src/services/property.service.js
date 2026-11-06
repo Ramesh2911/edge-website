@@ -33,6 +33,9 @@ const propertyService = {
     filterProperty(filters) {
         return api.get("/properties/filter", { params: filters });
     },
+    browseProperties(params) {
+        return api.get("/properties", { params });
+    },
 
     // Marketing Matrix Hooks
     getFeaturedProperties() {

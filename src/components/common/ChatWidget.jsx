@@ -221,6 +221,25 @@ export default function ChatWidget() {
           }
         }
 
+        // Token fallback — multi-word queries that miss SQL LIKE
+        if (results.length === 0) {
+          const tokens = trimmed.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+          if (tokens.length) {
+            try {
+              const listRes = await propertyService.propertyList({ limit: 50 });
+              const all = unwrap(listRes);
+              results = all.filter((p) => {
+                const text = [p.property_title, p.description, p.city, p.address, p.state, p.property_type]
+                  .map((v) => String(v || "").toLowerCase())
+                  .join(" ");
+                return tokens.every((t) => text.includes(t));
+              });
+            } catch {
+              results = [];
+            }
+          }
+        }
+
         if (results.length > 0) {
           const top = results.slice(0, 3);
           pushMessage({
