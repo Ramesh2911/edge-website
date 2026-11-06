@@ -4,7 +4,6 @@ import {
     ChevronRight,
     Heart,
     Share2,
-    Scale,
     MapPin,
     BedDouble,
     Bath,
@@ -13,7 +12,6 @@ import {
     BadgeCheck,
     Star,
     User,
-    Phone,
     Eye,
 } from "lucide-react";
 
@@ -354,32 +352,11 @@ export default function PropertyCard({
                             e.stopPropagation();
                             handleViewDetails();
                         }}
+                        aria-label="View details"
                         className="flex-1 flex items-center justify-center gap-1.5 bg-charcoal-deep hover:bg-charcoal text-cream text-sm font-semibold rounded-xl px-3 py-2.5 transition-colors"
                     >
                         <Eye size={15} />
                         View Details
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={handleContactOwner}
-                        aria-label="Contact owner"
-                        className="w-10 h-10 shrink-0 rounded-xl bg-gold-light/30 hover:bg-gold-light/50 text-gold-dark flex items-center justify-center transition-colors"
-                    >
-                        <Phone size={16} />
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={handleCompare}
-                        aria-label={isCompared ? "Remove from compare" : "Add to compare"}
-                        aria-pressed={isCompared}
-                        className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${isCompared
-                                ? "bg-gold text-white"
-                                : "bg-cream-deep hover:bg-stone/15 text-charcoal-deep"
-                            }`}
-                    >
-                        <Scale size={16} />
                     </button>
 
                     <button
