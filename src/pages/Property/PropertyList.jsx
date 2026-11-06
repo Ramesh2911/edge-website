@@ -10,8 +10,6 @@ import {
     ChevronRight,
     X,
     SearchX,
-    Building2,
-    Home as HomeIcon,
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import SEO from '../../components/Contact/SEO';
@@ -116,24 +114,6 @@ const SORT_OPTIONS = [
 ];
 
 // ============================================================
-// Skeleton
-// ============================================================
-
-function CardSkeleton() {
-    return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-charcoal/5 animate-pulse">
-            <div className="aspect-[4/3] bg-stone/15" />
-            <div className="p-5 space-y-3">
-                <div className="h-4 w-24 bg-stone/15 rounded-full" />
-                <div className="h-5 w-3/4 bg-stone/15 rounded-full" />
-                <div className="h-4 w-1/2 bg-stone/15 rounded-full" />
-                <div className="h-9 w-full bg-stone/15 rounded-xl mt-4" />
-            </div>
-        </div>
-    );
-}
-
-// ============================================================
 // Pagination
 // ============================================================
 
@@ -158,13 +138,13 @@ function Pagination({ page, totalPages, onChange }) {
     }
 
     return (
-        <div className="flex items-center justify-center gap-1.5 pt-8 flex-wrap">
+        <div className="flex items-center justify-center gap-1.5 pt-10 flex-wrap">
             <button
                 disabled={page <= 1}
                 onClick={() => onChange(page - 1)}
-                className="flex items-center gap-1 px-3.5 py-2 rounded-xl border border-charcoal/10 bg-white text-sm font-semibold text-charcoal-soft hover:border-gold hover:text-gold-dark disabled:opacity-40 disabled:hover:border-charcoal/10 disabled:hover:text-charcoal-soft transition-colors"
+                className="group flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#1E4C8C]/10 bg-white text-sm font-semibold text-[#1E4C8C] hover:border-[#7CB93D] hover:text-[#6FA82C] hover:shadow-[0_4px_16px_-4px_rgba(124,185,61,0.35)] disabled:opacity-35 disabled:hover:border-[#1E4C8C]/10 disabled:hover:text-[#1E4C8C] disabled:hover:shadow-none transition-all"
             >
-                <ChevronLeft size={15} />
+                <ChevronLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
                 Prev
             </button>
 
@@ -177,10 +157,10 @@ function Pagination({ page, totalPages, onChange }) {
                     <button
                         key={p}
                         onClick={() => onChange(p)}
-                        className={`min-w-[40px] h-10 rounded-xl text-sm font-semibold transition-all ${
+                        className={`min-w-[42px] h-11 rounded-xl text-sm font-bold transition-all ${
                             p === page
-                                ? 'bg-charcoal-deep text-cream shadow-card'
-                                : 'border border-charcoal/10 bg-white text-charcoal-soft hover:border-gold hover:text-gold-dark'
+                                ? 'bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white shadow-[0_8px_20px_-6px_rgba(21,57,100,0.45)] scale-105'
+                                : 'border border-[#1E4C8C]/10 bg-white text-[#1E4C8C]/75 hover:border-[#7CB93D] hover:text-[#6FA82C] hover:shadow-[0_4px_14px_-4px_rgba(124,185,61,0.3)]'
                         }`}
                     >
                         {p}
@@ -191,10 +171,10 @@ function Pagination({ page, totalPages, onChange }) {
             <button
                 disabled={page >= totalPages}
                 onClick={() => onChange(page + 1)}
-                className="flex items-center gap-1 px-3.5 py-2 rounded-xl border border-charcoal/10 bg-white text-sm font-semibold text-charcoal-soft hover:border-gold hover:text-gold-dark disabled:opacity-40 disabled:hover:border-charcoal/10 disabled:hover:text-charcoal-soft transition-colors"
+                className="group flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#1E4C8C]/10 bg-white text-sm font-semibold text-[#1E4C8C] hover:border-[#7CB93D] hover:text-[#6FA82C] hover:shadow-[0_4px_16px_-4px_rgba(124,185,61,0.35)] disabled:opacity-35 disabled:hover:border-[#1E4C8C]/10 disabled:hover:text-[#1E4C8C] disabled:hover:shadow-none transition-all"
             >
                 Next
-                <ChevronRight size={15} />
+                <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
         </div>
     );
@@ -404,54 +384,80 @@ export default function PropertyList() {
             />
             <Toaster position="top-right" />
 
-            <div className="min-h-screen bg-cream pb-20">
-                {/* ================= Hero banner ================= */}
-                <section className="relative overflow-hidden bg-gradient-to-br from-[#153964] via-[#1E4C8C] to-[#33425C] text-white">
-                    <div
-                        className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-[#7CB93D]/20 blur-3xl"
-                        aria-hidden
-                    />
-                    <div
-                        className="absolute -bottom-28 -left-16 w-80 h-80 rounded-full bg-white/5 blur-3xl"
-                        aria-hidden
-                    />
+            <div className="min-h-screen bg-[#F7FAFC] pb-24">
+                <style>{`
+                    @keyframes plFadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+                    .pl-fade { animation: plFadeUp 0.55s cubic-bezier(.22,1,.36,1) both; }
+                    .pl-delay-1 { animation-delay: 80ms; }
+                    .pl-delay-2 { animation-delay: 160ms; }
+                    .pl-delay-3 { animation-delay: 240ms; }
+                    @keyframes plShimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+                    .pl-skel { background: linear-gradient(90deg,#EAF1FB 25%,#F4F8FE 50%,#EAF1FB 75%); background-size: 800px 100%; animation: plShimmer 1.3s ease-in-out infinite; }
+                `}</style>
 
-                    <div className="relative max-w-7xl mx-auto px-5 lg:px-8 pt-12 pb-14 sm:pt-16 sm:pb-20 text-center">
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#9FD65F] bg-white/10 border border-white/15 backdrop-blur px-3 py-1 rounded-full">
-                            <Building2 size={12} />
+                {/* ================= Hero ================= */}
+                <section className="relative overflow-hidden bg-gradient-to-br from-[#0F2D52] via-[#153964] via-45% to-[#1E4C8C] text-white">
+                    {/* Decorative orbs */}
+                    <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-[#7CB93D]/25 blur-[100px]" aria-hidden />
+                    <div className="absolute -bottom-40 -left-24 w-[460px] h-[460px] rounded-full bg-[#33425C]/60 blur-[110px]" aria-hidden />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-white/[0.04] blur-2xl" aria-hidden />
+                    {/* Dot grid */}
+                    <div
+                        className="absolute inset-0 opacity-[0.07]"
+                        style={{
+                            backgroundImage:
+                                'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)',
+                            backgroundSize: '28px 28px',
+                        }}
+                        aria-hidden
+                    />
+                    {/* Gold hairline */}
+                    <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#7CB93D]/60 to-transparent" aria-hidden />
+
+                    <div className="relative max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-16 sm:pt-20 sm:pb-24 text-center">
+                        <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.22em] uppercase text-[#B8F07A] bg-white/[0.08] border border-white/15 backdrop-blur-md px-4 py-1.5 rounded-full pl-fade">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#7CB93D] animate-pulse" />
                             Verified Listings
+                            <span className="w-px h-3 bg-white/20" />
+                            <span className="text-white/70">{meta.total > 0 ? `${meta.total}+` : 'Live'} Properties</span>
                         </span>
-                        <h1 className="font-display text-3xl sm:text-5xl font-medium mt-4 leading-tight">
-                            Find Your Perfect Property
+
+                        <h1 className="font-display text-[2rem] sm:text-5xl lg:text-[3.4rem] font-medium mt-6 leading-[1.12] tracking-tight pl-fade pl-delay-1">
+                            Find Your{' '}
+                            <span className="relative inline-block">
+                                <span className="relative z-10 bg-gradient-to-r from-[#B8F07A] via-[#7CB93D] to-[#9FD65F] bg-clip-text text-transparent font-semibold">
+                                    Perfect Property
+                                </span>
+                            </span>
                         </h1>
-                        <p className="text-white/70 mt-3 text-sm sm:text-base max-w-xl mx-auto">
-                            Browse handpicked homes, plots and commercial spaces
-                            filtered exactly the way you like.
+                        <p className="text-white/65 mt-4 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed pl-fade pl-delay-1">
+                            Handpicked homes, plots & commercial spaces — filtered exactly
+                            the way you like, verified end to end.
                         </p>
 
                         {/* Search bar */}
                         <form
                             onSubmit={handleSearchSubmit}
-                            className="mt-8 max-w-3xl mx-auto bg-white rounded-2xl shadow-lift p-2 flex flex-col sm:flex-row gap-2"
+                            className="mt-10 max-w-3xl mx-auto bg-white/[0.07] backdrop-blur-xl border border-white/20 rounded-[20px] p-2 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.45)] flex flex-col sm:flex-row gap-2 pl-fade pl-delay-2 hover:bg-white/[0.1] transition-colors"
                         >
                             <div className="relative flex-1">
                                 <Search
-                                    size={16}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-stone"
+                                    size={17}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7CB93D]"
                                 />
                                 <input
                                     type="text"
                                     value={keywordDraft}
                                     onChange={(e) => setKeywordDraft(e.target.value)}
                                     placeholder="Search by title, locality or project…"
-                                    className="w-full bg-transparent border-none rounded-xl pl-11 pr-4 py-3 text-sm text-charcoal-deep placeholder:text-stone/70 focus:outline-none"
+                                    className="w-full bg-transparent border-none rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/45 focus:outline-none"
                                 />
                             </div>
-                            <div className="hidden sm:block w-px bg-charcoal/10 my-1.5" />
+                            <div className="hidden sm:block w-px bg-white/15 my-2" />
                             <div className="relative flex-1">
                                 <MapPin
-                                    size={16}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-stone"
+                                    size={17}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7CB93D]"
                                 />
                                 <input
                                     type="text"
@@ -460,40 +466,57 @@ export default function PropertyList() {
                                         handleFilterChange({ ...filters, location: e.target.value })
                                     }
                                     placeholder="City or locality"
-                                    className="w-full bg-transparent border-none rounded-xl pl-11 pr-4 py-3 text-sm text-charcoal-deep placeholder:text-stone/70 focus:outline-none"
+                                    className="w-full bg-transparent border-none rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/45 focus:outline-none"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="bg-[#7CB93D] hover:bg-[#6FA82C] text-white font-semibold text-sm rounded-xl px-7 py-3 transition-colors shrink-0"
+                                className="bg-gradient-to-r from-[#7CB93D] to-[#6FA82C] hover:from-[#6FA82C] hover:to-[#5F9424] text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all shadow-[0_8px_24px_-6px_rgba(124,185,61,0.55)] shrink-0 active:scale-[0.98]"
                             >
                                 Search
                             </button>
                         </form>
+
+                        {/* Trust strip */}
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-[12px] font-semibold text-white/55 pl-fade pl-delay-3">
+                            {[
+                                { icon: '✓', label: '100% Verified' },
+                                { icon: '⚡', label: 'Zero Brokerage' },
+                                { icon: '★', label: 'Premium Support' },
+                                { icon: '⌂', label: 'All Property Types' },
+                            ].map((t) => (
+                                <span key={t.label} className="flex items-center gap-1.5">
+                                    <span className="w-5 h-5 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-[#B8F07A] text-[10px]">
+                                        {t.icon}
+                                    </span>
+                                    {t.label}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 </section>
 
                 {/* ================= Body ================= */}
-                <div className="max-w-7xl mx-auto px-5 lg:px-8 -mt-6">
+                <div className="max-w-7xl mx-auto px-5 lg:px-8 -mt-7">
                     <div className="lg:grid lg:grid-cols-[300px_1fr] lg:gap-8 items-start">
                         {/* Sidebar (desktop) */}
-                        <aside className="hidden lg:block lg:sticky lg:top-24">
+                        <aside className="hidden lg:block lg:sticky lg:top-24 pl-fade pl-delay-1">
                             {filterPanel(false)}
                         </aside>
 
                         {/* Main */}
-                        <main className="pt-8 lg:pt-0 space-y-6">
+                        <main className="pt-8 lg:pt-0 space-y-5">
                             {/* Toolbar */}
-                            <div className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-charcoal/5 shadow-card px-4 sm:px-5 py-3.5">
+                            <div className="flex flex-wrap items-center justify-between gap-3 bg-white/90 backdrop-blur rounded-2xl border border-[#1E4C8C]/[0.07] shadow-[0_4px_24px_-8px_rgba(21,57,100,0.1)] px-4 sm:px-5 py-3.5 pl-fade pl-delay-1">
                                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                     <button
                                         onClick={() => setIsMobileFilterOpen(true)}
-                                        className="lg:hidden flex items-center gap-2 px-4 py-2 border border-charcoal/12 rounded-xl text-sm font-semibold text-charcoal-soft hover:border-gold transition-colors"
+                                        className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[#1E4C8C]/12 rounded-xl text-sm font-semibold text-[#1E4C8C] hover:border-[#7CB93D] hover:text-[#6FA82C] hover:shadow-[0_4px_14px_-4px_rgba(124,185,61,0.3)] transition-all"
                                     >
                                         <SlidersHorizontal className="w-4 h-4" />
                                         Filters
                                         {activeCount > 0 && (
-                                            <span className="w-5 h-5 rounded-full bg-gold text-white text-[11px] font-bold flex items-center justify-center">
+                                            <span className="w-5 h-5 rounded-full bg-[#7CB93D] text-white text-[11px] font-bold flex items-center justify-center shadow-[0_2px_8px_rgba(124,185,61,0.5)]">
                                                 {activeCount}
                                             </span>
                                         )}
@@ -501,15 +524,18 @@ export default function PropertyList() {
 
                                     <p className="text-sm text-stone">
                                         {loading ? (
-                                            'Loading…'
+                                            <span className="inline-flex items-center gap-2">
+                                                <span className="w-3.5 h-3.5 rounded-full border-2 border-[#7CB93D] border-t-transparent animate-spin" />
+                                                Loading listings…
+                                            </span>
                                         ) : (
                                             <>
                                                 Showing{' '}
-                                                <span className="font-bold text-charcoal-deep">
+                                                <span className="font-bold text-[#153964]">
                                                     {startIdx}–{endIdx}
                                                 </span>{' '}
                                                 of{' '}
-                                                <span className="font-bold text-charcoal-deep">
+                                                <span className="font-bold text-[#153964]">
                                                     {meta.total}
                                                 </span>{' '}
                                                 properties
@@ -524,7 +550,7 @@ export default function PropertyList() {
                                         <select
                                             value={filters.sort}
                                             onChange={(e) => handleSortChange(e.target.value)}
-                                            className="appearance-none bg-cream-deep/60 border border-charcoal/10 rounded-xl pl-3.5 pr-9 py-2 text-sm font-semibold text-charcoal-soft hover:border-gold focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/25 transition-all cursor-pointer"
+                                            className="appearance-none bg-[#F7FAFC] border border-[#1E4C8C]/10 rounded-xl pl-3.5 pr-9 py-2.5 text-sm font-semibold text-[#1E4C8C] hover:border-[#7CB93D] focus:outline-none focus:border-[#7CB93D] focus:ring-2 focus:ring-[#7CB93D]/25 transition-all cursor-pointer"
                                         >
                                             {SORT_OPTIONS.map((o) => (
                                                 <option key={o.value} value={o.value}>
@@ -539,14 +565,14 @@ export default function PropertyList() {
                                     </div>
 
                                     {/* View toggle */}
-                                    <div className="flex items-center gap-1 border border-charcoal/10 p-1 rounded-xl bg-cream-deep/40">
+                                    <div className="flex items-center gap-1 border border-[#1E4C8C]/10 p-1 rounded-xl bg-[#F7FAFC]">
                                         <button
                                             onClick={() => setViewMode('grid')}
                                             aria-label="Grid view"
-                                            className={`p-2 rounded-lg transition-colors ${
+                                            className={`p-2.5 rounded-lg transition-all ${
                                                 viewMode === 'grid'
-                                                    ? 'bg-white text-gold-dark shadow-sm'
-                                                    : 'text-stone hover:text-charcoal-soft'
+                                                    ? 'bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white shadow-[0_4px_12px_-4px_rgba(21,57,100,0.45)]'
+                                                    : 'text-stone hover:text-[#153964] hover:bg-white'
                                             }`}
                                         >
                                             <Grid className="w-4 h-4" />
@@ -554,10 +580,10 @@ export default function PropertyList() {
                                         <button
                                             onClick={() => setViewMode('list')}
                                             aria-label="List view"
-                                            className={`p-2 rounded-lg transition-colors ${
+                                            className={`p-2.5 rounded-lg transition-all ${
                                                 viewMode === 'list'
-                                                    ? 'bg-white text-gold-dark shadow-sm'
-                                                    : 'text-stone hover:text-charcoal-soft'
+                                                    ? 'bg-gradient-to-br from-[#153964] to-[#1E4C8C] text-white shadow-[0_4px_12px_-4px_rgba(21,57,100,0.45)]'
+                                                    : 'text-stone hover:text-[#153964] hover:bg-white'
                                             }`}
                                         >
                                             <List className="w-4 h-4" />
@@ -568,20 +594,20 @@ export default function PropertyList() {
 
                             {/* Active filter chips */}
                             {chips.length > 0 && (
-                                <div className="flex flex-wrap items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2 pl-fade">
                                     {chips.map((chip) => (
                                         <button
                                             key={chip.key}
                                             onClick={chip.onRemove}
-                                            className="group flex items-center gap-1.5 bg-white border border-charcoal/10 hover:border-clay/50 text-charcoal-soft text-[13px] font-semibold rounded-full pl-3.5 pr-2 py-1.5 transition-colors"
+                                            className="group flex items-center gap-1.5 bg-white border border-[#1E4C8C]/10 hover:border-[#A1463F]/50 hover:bg-[#A1463F]/5 text-[#1E4C8C] text-[13px] font-semibold rounded-full pl-3.5 pr-2.5 py-1.5 shadow-sm transition-all"
                                         >
                                             {chip.label}
-                                            <X size={13} className="text-stone group-hover:text-clay" />
+                                            <X size={13} className="text-stone group-hover:text-[#A1463F]" />
                                         </button>
                                     ))}
                                     <button
                                         onClick={handleReset}
-                                        className="text-[13px] font-semibold text-gold-dark hover:text-gold transition-colors underline underline-offset-2"
+                                        className="text-[13px] font-bold text-[#6FA82C] hover:text-[#153964] transition-colors"
                                     >
                                         Clear all
                                     </button>
@@ -598,24 +624,32 @@ export default function PropertyList() {
                                     }
                                 >
                                     {Array.from({ length: 6 }).map((_, i) => (
-                                        <CardSkeleton key={i} />
+                                        <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_-6px_rgba(21,57,100,0.08)] border border-[#1E4C8C]/[0.06] animate-pulse">
+                                            <div className="aspect-[4/3] pl-skel" />
+                                            <div className="p-5 space-y-3">
+                                                <div className="h-4 w-24 pl-skel rounded-full" />
+                                                <div className="h-5 w-3/4 pl-skel rounded-full" />
+                                                <div className="h-4 w-1/2 pl-skel rounded-full" />
+                                                <div className="h-9 w-full pl-skel rounded-xl mt-4" />
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             ) : properties.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center text-center py-24 bg-white rounded-2xl border border-dashed border-charcoal/15">
-                                    <span className="w-16 h-16 rounded-full bg-cream-deep flex items-center justify-center mb-5">
-                                        <SearchX size={28} className="text-stone" />
+                                <div className="flex flex-col items-center justify-center text-center py-24 bg-white rounded-3xl border border-dashed border-[#1E4C8C]/15 shadow-[0_4px_24px_-8px_rgba(21,57,100,0.06)] pl-fade">
+                                    <span className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#EAF1FB] to-[#EAF6DE] flex items-center justify-center mb-6 shadow-inner">
+                                        <SearchX size={32} className="text-[#1E4C8C]" />
                                     </span>
-                                    <p className="font-display text-xl text-charcoal-deep font-medium">
+                                    <p className="font-display text-2xl text-[#153964] font-medium">
                                         No properties match your filters
                                     </p>
-                                    <p className="text-sm text-stone mt-2 max-w-sm">
+                                    <p className="text-sm text-stone mt-2.5 max-w-md leading-relaxed">
                                         Try broadening your search or clearing some filters to
                                         see more listings.
                                     </p>
                                     <button
                                         onClick={handleReset}
-                                        className="mt-6 bg-charcoal-deep hover:bg-charcoal text-cream text-sm font-semibold rounded-xl px-6 py-3 transition-colors"
+                                        className="mt-7 bg-gradient-to-r from-[#153964] to-[#1E4C8C] hover:from-[#0F2D52] hover:to-[#153964] text-white text-sm font-bold rounded-xl px-7 py-3.5 shadow-[0_8px_24px_-6px_rgba(21,57,100,0.4)] transition-all active:scale-[0.98]"
                                     >
                                         Clear All Filters
                                     </button>
@@ -628,18 +662,24 @@ export default function PropertyList() {
                                             : 'grid grid-cols-1 gap-5 sm:gap-6'
                                     }
                                 >
-                                    {properties.map((property) => (
-                                        <PropertyCard
+                                    {properties.map((property, idx) => (
+                                        <div
                                             key={property.id}
-                                            property={property}
-                                            isWishlisted={isWishlisted(property.id)}
-                                            isCompared={compareList.includes(property.id)}
-                                            onToggleWishlist={toggleWishlist}
-                                            onToggleCompare={handleToggleCompare}
-                                            onViewDetails={handleViewDetails}
-                                            onContactOwner={handleContactOwner}
-                                            onShare={handleShare}
-                                        />
+                                            className="pl-fade"
+                                            style={{ animationDelay: `${Math.min(idx, 8) * 55}ms` }}
+                                        >
+                                            <PropertyCard
+                                                property={property}
+                                                isWishlisted={isWishlisted(property.id)}
+                                                isCompared={compareList.includes(property.id)}
+                                                onToggleWishlist={toggleWishlist}
+                                                onToggleCompare={handleToggleCompare}
+                                                onViewDetails={handleViewDetails}
+                                                onContactOwner={handleContactOwner}
+                                                onShare={handleShare}
+                                                className="h-full hover:-translate-y-1.5 hover:shadow-[0_24px_48px_-16px_rgba(21,57,100,0.22)] hover:border-[#7CB93D]/40"
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             )}
