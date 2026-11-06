@@ -13,25 +13,69 @@ import { resolveImageUrl } from "../../utils/imageUrl";
 import { formatPrice } from "../../utils/formatPrice";
 
 // ------------------------------------------------------------
-// Static intent replies (used only when no DB match is found)
+// Intent replies — matched by keyword, in order
 // ------------------------------------------------------------
 
 const INTENT_REPLIES = [
+  // Greetings — plain text, no property search
   {
-    words: ["post", "sell", "list", "rent out"],
-    text: "To list your property, please login and visit the 'Add Property' page. It's quick and easy!",
+    words: ["hi", "hello", "hey", "hii", "helo", "namaste", "good morning", "good evening", "good afternoon", "yo"],
+    text: "Hello! 👋 Welcome to EDGE MILE REALTY. How can I help you today?",
+    kind: "text",
   },
+  // Farewell
   {
-    words: ["contact", "phone", "email", "call", "support"],
-    text: "You can reach us at support@edgemilerealty.com or call us at +91-XXXXX-XXXXX",
+    words: ["bye", "goodbye", "see you", "take care", "good night", "gtg"],
+    text: "Goodbye! 👋 Have a great day. Feel free to come back anytime if you need help with properties.",
+    kind: "text",
   },
+  // Thanks
   {
-    words: ["where", "location", "address", "office"],
-    text: "We are located in India and serve properties across major cities.",
+    words: ["thank", "thanks", "thank you", "thx", "appreciate"],
+    text: "You're welcome! 😊 Is there anything else I can help you with — property search, listing, or contact details?",
+    kind: "text",
   },
+  // Identity
   {
-    words: ["help", "what can you"],
-    text: "I can help you with: searching properties, listing properties, contacting us, and general queries. What would you like to know?",
+    words: ["who are you", "what are you", "your name", "are you a bot", "are you human", "introduce"],
+    text: "I'm the EDGE MILE REALTY assistant — a property help bot. I can help you search homes, flats, villas, plots and commercial spaces, or guide you on listing and support.",
+    kind: "text",
+  },
+  // Capabilities
+  {
+    words: ["what can you", "help me", "how to use", "options", "commands", "features"],
+    text: "I can help you with:\n• Searching properties (try: \"3 BHK in Mumbai\", \"Villa\", \"Plot\")\n• Listing your property\n• Contact & support info\n• General questions about EDGE MILE REALTY\n\nWhat would you like to know?",
+    kind: "text",
+  },
+  // Post / list
+  {
+    words: ["post", "sell", "list my", "list a", "rent out", "how to list", "add property", "upload property"],
+    text: "To list your property, login and visit the 'Add Property' page. Fill in the details, upload photos, and submit — our team will review it before it goes live. It's quick and easy!",
+    kind: "text",
+  },
+  // Contact
+  {
+    words: ["contact", "phone", "email", "call", "support", "number", "whatsapp"],
+    text: "You can reach us at support@edgemilerealty.com or call us at +91-XXXXX-XXXXX. You can also use the Contact page on this site for a quick callback.",
+    kind: "text",
+  },
+  // Location / office
+  {
+    words: ["where is your office", "office address", "your location", "office location"],
+    text: "We are based in India and serve properties across major cities. For our office address, please check the Contact page.",
+    kind: "text",
+  },
+  // Price / budget questions (generic — not a property search)
+  {
+    words: ["what is your commission", "commission", "fees", "charges", "brokerage", "zero brokerage"],
+    text: "EDGE MILE REALTY offers zero-brokerage on listings for owners. For buyers, any applicable service charges are always shared transparently before you proceed.",
+    kind: "text",
+  },
+  // About company
+  {
+    words: ["about you", "about edge", "about company", "who is edge", "what is edge"],
+    text: "EDGE MILE REALTY is a premium real estate platform for verified residential and commercial properties — focused on zero-brokerage listings and a smooth buy/rent experience.",
+    kind: "text",
   },
 ];
 
@@ -39,7 +83,13 @@ const GREETING =
   "Hello! Welcome to EDGE MILE REALTY. Ask me anything about properties, or tap a category below to explore.";
 
 const FALLBACK_HELP =
-  "I'm here to help! You can ask me about properties, listing, or contact information. Meanwhile, here are some suggestions from our listings:";
+  "I'm not sure I understood that. Could you rephrase? You can also ask about properties (e.g. \"2 BHK apartment\", \"Villa in Pune\"), listing, or contact details.";
+
+// Words that mean the user is looking for a property
+const PROPERTY_WORDS =
+  /property|properties|home|homes|apartment|apartments|villa|villas|flat|flats|house|houses|plot|plots|office|shop|commercial|rent|buy|sale|bedroom|bed|bhk|kitchen|budget|price|cheap|luxury|near|location|city|area|sq|garden|parking/i;
+
+const isPropertyQuery = (text) => PROPERTY_WORDS.test(text);
 
 // ------------------------------------------------------------
 // Helpers
@@ -58,8 +108,17 @@ const unwrap = (res) => {
 };
 
 const matchesIntent = (input) => {
-  const lower = input.toLowerCase();
-  return INTENT_REPLIES.find((r) => r.words.some((w) => lower.includes(w)));
+  const lower = input.toLowerCase().trim();
+  // Greeting words like "hi" must match whole-ish tokens so "this" doesn't hit "hi"
+  return INTENT_REPLIES.find((r) =>
+    r.words.some((w) => {
+      if (w.length <= 3) {
+        // short words: token match (hi, hey, bye, thx…)
+        return new RegExp(`(^|[^a-z])${w}([^a-z]|$)`).test(lower);
+      }
+      return lower.includes(w);
+    })
+  );
 };
 
 export default function ChatWidget() {
@@ -105,57 +164,65 @@ export default function ChatWidget() {
     setMessages((prev) => [...prev, { id: Date.now() + Math.random(), ...msg }]);
 
   // ----------------------------------------------------------
-  // Core reply flow: intent → DB search → fallback + latest
+  // Core reply flow:
+  //   greeting/conversation → plain text
+  //   property query        → DB search (+ cards only if hits)
+  //   otherwise             → helpful text (no forced property dump)
   // ----------------------------------------------------------
   const respond = async (text) => {
     setTyping(true);
     try {
-      // 1) Action intents (post/list/contact/help) — no DB search needed
-      const intent = matchesIntent(text);
-      if (intent && !/property|home|apartment|villa|flat|house/i.test(text)) {
+      const trimmed = text.trim();
+
+      // 1) Conversational intents — always plain text, never property search
+      const intent = matchesIntent(trimmed);
+      const looksLikeProperty = isPropertyQuery(trimmed);
+
+      if (intent && !looksLikeProperty) {
         pushMessage({ sender: "bot", text: intent.text });
-        setTyping(false);
         return;
       }
 
-      // 2) Search the project database
-      let results = [];
-      try {
-        const res = await propertyService.searchProperty(text.trim());
-        results = unwrap(res);
-      } catch {
-        results = [];
-      }
+      // 2) Property-related query → search the database
+      if (looksLikeProperty) {
+        let results = [];
+        try {
+          const res = await propertyService.searchProperty(trimmed);
+          results = unwrap(res);
+        } catch {
+          results = [];
+        }
 
-      // Category-name fallback (e.g. "Villa") — match via category_id
-      if (results.length === 0 && categories.length > 0) {
-        const cat = categories.find(
-          (c) => c.category_name.toLowerCase() === text.trim().toLowerCase()
-        );
-        if (cat) {
-          try {
-            const listRes = await propertyService.propertyList({ limit: 50 });
-            const all = unwrap(listRes);
-            results = all.filter((p) => p.category_id === cat.id);
-          } catch {
-            results = [];
+        // Category-name fallback (e.g. "Villa") — match via category_id
+        if (results.length === 0 && categories.length > 0) {
+          const cat = categories.find(
+            (c) => c.category_name.toLowerCase() === trimmed.toLowerCase()
+          );
+          if (cat) {
+            try {
+              const listRes = await propertyService.propertyList({ limit: 50 });
+              const all = unwrap(listRes);
+              results = all.filter((p) => p.category_id === cat.id);
+            } catch {
+              results = [];
+            }
           }
         }
-      }
 
-      if (results.length > 0) {
-        const top = results.slice(0, 3);
-        pushMessage({
-          sender: "bot",
-          text: `Found ${results.length} propert${
-            results.length === 1 ? "y" : "ies"
-          } matching "${text.trim()}". Here are the top picks:`,
-          kind: "properties",
-          properties: top,
-        });
-      } else {
-        // 3) No match — static reply + latest listings from DB
-        const intentReply = matchesIntent(text)?.text;
+        if (results.length > 0) {
+          const top = results.slice(0, 3);
+          pushMessage({
+            sender: "bot",
+            text: `Found ${results.length} propert${
+              results.length === 1 ? "y" : "ies"
+            } matching "${trimmed}". Here are the top picks:`,
+            kind: "properties",
+            properties: top,
+          });
+          return;
+        }
+
+        // Property query but no hits — offer latest as a suggestion
         let latest = [];
         try {
           const res = await propertyService.getLatestProperties();
@@ -165,13 +232,24 @@ export default function ChatWidget() {
         }
         pushMessage({
           sender: "bot",
-          text: intentReply || FALLBACK_HELP,
+          text: `I couldn't find exact matches for "${trimmed}". Here are some recent listings you might like:`,
           ...(latest.length > 0 && {
             kind: "properties",
             properties: latest,
           }),
         });
+        return;
       }
+
+      // 3) Non-property question with no intent match — plain helpful text
+      //    (do NOT dump unrelated properties)
+      const followUp = intent?.text;
+      pushMessage({
+        sender: "bot",
+        text:
+          followUp ||
+          FALLBACK_HELP,
+      });
     } catch {
       pushMessage({
         sender: "bot",
